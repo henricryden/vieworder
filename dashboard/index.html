@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>View ordering with arbitrary center echoes</title>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div id="spinner" class="spinner hidden"></div>
+    
+    <div class="container">
+        <h1>View ordering with arbitrary center echoes</h1>
+        
+        <div class="control-panel">
+            <h3>Acquisition parameters</h3>
+            <div class="control-group">
+                <label for="ky-slider">k<sub>y</sub> Matrix Size: <span id="ky-value">128</span></label>
+                <input type="range" id="ky-slider" min="64" max="320" value="128" step="32" class="slider">
+            </div>
+            
+            <div class="control-group">
+                <label for="kz-slider">k<sub>z</sub> Matrix Size: <span id="kz-value">128</span></label>
+                <input type="range" id="kz-slider" min="64" max="320" value="128" step="32" class="slider">
+            </div>
+            
+            <div class="control-group">
+                <label for="ky-accel-slider">k<sub>y</sub> Acceleration: <span id="ky-accel-value">1</span></label>
+                <input type="range" id="ky-accel-slider" min="1" max="4" value="1" step="1" class="slider">
+            </div>
+            
+            <div class="control-group">
+                <label for="kz-accel-slider">k<sub>z</sub> Acceleration: <span id="kz-accel-value">1</span></label>
+                <input type="range" id="kz-accel-slider" min="1" max="4" value="1" step="1" class="slider">
+            </div>
+            
+            <div class="control-group">
+                <label for="cal-size-slider">Calibration Region: <span id="cal-size-value">32</span></label>
+                <input type="range" id="cal-size-slider" min="16" max="64" value="32" step="16" class="slider" disabled>
+            </div>
+            
+            <div class="control-group">
+                <label for="kz-pf-slider">k<sub>z</sub> Partial Fourier Factor: <span id="kz-pf-value">1.0</span></label>
+                <input type="range" id="kz-pf-slider" min="0.5" max="1.0" value="1.0" step="0.05" class="slider">
+            </div>
+
+            <div class="control-group" id="caipi-control">
+                <label>
+                    <input type="checkbox" id="caipi-checkbox" checked disabled>
+                    CAIPIRINHA
+                </label>
+            </div>
+        
+            
+            <h3>View ordering parameters</h3>
+            <div class="control-group">
+                <label for="ordering-select">Method:</label>
+                <select id="ordering-select">
+                    <option value="sequential">Sequential</option>
+                    <option value="lcpo">LCPO</option>
+                    <option value="cplo">CPLO</option>
+                    <option value="chevron">Chevron</option>
+                    <option value="croc">CROC</option>
+                </select>
+            </div>
+            
+            <div class="control-group">
+                <label for="etl-slider">ETL (Echo Train Length): <span id="etl-value">96</span></label>
+                <input type="range" id="etl-slider" min="16" max="128" value="96" step="16" class="slider">
+            </div>
+            
+            <div class="control-group">
+                <label for="center-echo-slider">Center Echo: <span id="center-echo-value">32</span></label>
+                <input type="range" id="center-echo-slider" min="1" max="96" value="32" class="slider">
+            </div>
+            
+            <div class="control-group">
+                <label for="mtf-direction-select">MTF Direction:</label>
+                <select id="mtf-direction-select">
+                    <option value="ky">k<sub>y</sub></option>
+                    <option value="kz">k<sub>z</sub></option>
+                </select>
+            </div>
+        </div>
+        
+        <div class="plots-container">
+            <div id="plot-by-shot" class="plot-wrapper"></div>
+            <div id="plot-by-echo" class="plot-wrapper"></div>
+        </div>
+        
+        <div class="info-panel">
+            <p>Total phase encodes: <span id="info-total">0</span></p>
+            <p>Number of shots: <span id="info-acceleration">1</span></p>
+        </div>
+    </div>
+
+    <script src="kspace-utils.js"></script>
+    <script src="d3-plots.js"></script>
+    <script src="app.js"></script>
+</body>
+</html>
