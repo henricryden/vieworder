@@ -46,9 +46,19 @@ const App = (() => {
      * Setup event listeners for all controls
      */
     function setupEventListeners() {
-        // ETL slider - update display while dragging
+        // ETL slider - update display while dragging and update immediately
         document.getElementById('etl-slider').addEventListener('input', (e) => {
-            document.getElementById('etl-value').textContent = e.target.value;
+            const val = parseInt(e.target.value);
+            document.getElementById('etl-value').textContent = val;
+            currentParams.etl = val;
+            // Update center echo slider max to match ETL
+            document.getElementById('center-echo-slider').max = currentParams.etl;
+            if (currentParams.centerEcho > currentParams.etl) {
+                currentParams.centerEcho = currentParams.etl;
+                document.getElementById('center-echo-slider').value = currentParams.etl;
+                document.getElementById('center-echo-value').textContent = currentParams.etl;
+            }
+            updatePlots();
         });
         
         // ETL slider - calculate on drag end
@@ -68,9 +78,12 @@ const App = (() => {
             updatePlots();
         });
         
-        // k_y slider - update display while dragging
+        // k_y slider - update display while dragging and update immediately
         document.getElementById('ky-slider').addEventListener('input', (e) => {
-            document.getElementById('ky-value').textContent = e.target.value;
+            const val = parseInt(e.target.value);
+            document.getElementById('ky-value').textContent = val;
+            currentParams.ky = val;
+            updatePlots();
         });
         
         // k_y slider - calculate on drag end
@@ -80,9 +93,12 @@ const App = (() => {
             updatePlots();
         });
         
-        // k_z slider - update display while dragging
+        // k_z slider - update display while dragging and update immediately
         document.getElementById('kz-slider').addEventListener('input', (e) => {
-            document.getElementById('kz-value').textContent = e.target.value;
+            const val = parseInt(e.target.value);
+            document.getElementById('kz-value').textContent = val;
+            currentParams.kz = val;
+            updatePlots();
         });
         
         // k_z slider - calculate on drag end
@@ -92,9 +108,12 @@ const App = (() => {
             updatePlots();
         });
         
-        // Center echo slider - update display while dragging
+        // Center echo slider - update display while dragging and update immediately
         document.getElementById('center-echo-slider').addEventListener('input', (e) => {
-            document.getElementById('center-echo-value').textContent = e.target.value;
+            const val = parseInt(e.target.value);
+            document.getElementById('center-echo-value').textContent = val;
+            currentParams.centerEcho = val;
+            updatePlots();
         });
         
         // Center echo slider - calculate on drag end
@@ -122,9 +141,15 @@ const App = (() => {
             updatePlots();
         });
         
-        // ky Acceleration slider - update display while dragging
+        // ky Acceleration slider - update display while dragging and update immediately
         document.getElementById('ky-accel-slider').addEventListener('input', (e) => {
-            document.getElementById('ky-accel-value').textContent = e.target.value;
+            const val = parseInt(e.target.value);
+            document.getElementById('ky-accel-value').textContent = val;
+            currentParams.kyAccel = val;
+            const isAccelerated = currentParams.kyAccel > 1 || currentParams.kzAccel > 1;
+            document.getElementById('cal-size-slider').disabled = !isAccelerated;
+            document.getElementById('caipi-checkbox').disabled = !isAccelerated;
+            updatePlots();
         });
         
         // ky Acceleration slider - calculate on drag end
@@ -140,9 +165,15 @@ const App = (() => {
             updatePlots();
         });
         
-        // kz Acceleration slider - update display while dragging
+        // kz Acceleration slider - update display while dragging and update immediately
         document.getElementById('kz-accel-slider').addEventListener('input', (e) => {
-            document.getElementById('kz-accel-value').textContent = e.target.value;
+            const val = parseInt(e.target.value);
+            document.getElementById('kz-accel-value').textContent = val;
+            currentParams.kzAccel = val;
+            const isAccelerated = currentParams.kyAccel > 1 || currentParams.kzAccel > 1;
+            document.getElementById('cal-size-slider').disabled = !isAccelerated;
+            document.getElementById('caipi-checkbox').disabled = !isAccelerated;
+            updatePlots();
         });
         
         // kz Acceleration slider - calculate on drag end
@@ -158,9 +189,12 @@ const App = (() => {
             updatePlots();
         });
         
-        // kz Partial Fourier slider - update display while dragging
+        // kz Partial Fourier slider - update display while dragging and update immediately
         document.getElementById('kz-pf-slider').addEventListener('input', (e) => {
-            document.getElementById('kz-pf-value').textContent = parseFloat(e.target.value).toFixed(1);
+            const val = parseFloat(e.target.value);
+            document.getElementById('kz-pf-value').textContent = val.toFixed(2).replace(/\.00$/, '.0');
+            currentParams.kzPF = val;
+            updatePlots();
         });
         
         // kz Partial Fourier slider - calculate on drag end
@@ -170,9 +204,12 @@ const App = (() => {
             updatePlots();
         });
         
-        // Calibration region size slider - update display while dragging
+        // Calibration region size slider - update display while dragging and update immediately
         document.getElementById('cal-size-slider').addEventListener('input', (e) => {
-            document.getElementById('cal-size-value').textContent = e.target.value;
+            const val = parseInt(e.target.value);
+            document.getElementById('cal-size-value').textContent = val;
+            currentParams.calibrationSize = val;
+            updatePlots();
         });
         
         // Calibration region size slider - calculate on drag end
@@ -193,9 +230,8 @@ const App = (() => {
      * Update all plots based on current parameters
      */
     function updatePlots() {
-        showSpinner();
-        
-        // Use setTimeout to ensure spinner displays before heavy computation
+        // Render immediately (spinner disabled for fast updates)
+        // Use setTimeout to yield to browser briefly for UI updates
         setTimeout(() => {
             // Generate coordinates with new parameters
             // Use separate Ry and Rz for ky and kz acceleration
@@ -226,7 +262,7 @@ const App = (() => {
             // Update info panel
             updateInfoPanel();
             
-            hideSpinner();
+            // spinner disabled
         }, 0);
     }
     
