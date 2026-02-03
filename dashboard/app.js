@@ -26,7 +26,35 @@ const App = (() => {
     function init() {
         D3Plots.init();
         setupEventListeners();
+        updateControlAvailability();
         updatePlots();
+    }
+
+    /**
+     * Enable/disable controls based on current parameters and ordering
+     */
+    function updateControlAvailability() {
+        // Center echo: disable for Sequential method
+        const centerGroup = document.getElementById('center-echo-control');
+        const centerSlider = document.getElementById('center-echo-slider');
+        if (currentParams.ordering === 'sequential') {
+            centerSlider.disabled = true;
+            if (centerGroup) centerGroup.classList.add('disabled');
+        } else {
+            centerSlider.disabled = false;
+            if (centerGroup) centerGroup.classList.remove('disabled');
+        }
+
+        // Calibration region: disabled when both ky and kz acceleration are 1
+        const calGroup = document.getElementById('cal-size-control');
+        const calSlider = document.getElementById('cal-size-slider');
+        const isAccelerated = currentParams.kyAccel > 1 || currentParams.kzAccel > 1;
+        calSlider.disabled = !isAccelerated;
+        if (!isAccelerated) {
+            if (calGroup) calGroup.classList.add('disabled');
+        } else {
+            if (calGroup) calGroup.classList.remove('disabled');
+        }
     }
     
     /**
@@ -157,6 +185,8 @@ const App = (() => {
                 currentParams.mtfDirection = 'ky';
             }
 
+            // Update control availability when ordering changes
+            updateControlAvailability();
             updatePlots();
         });
         
@@ -171,9 +201,8 @@ const App = (() => {
             const val = parseInt(e.target.value);
             document.getElementById('ky-accel-value').textContent = val;
             currentParams.kyAccel = val;
-            const isAccelerated = currentParams.kyAccel > 1 || currentParams.kzAccel > 1;
-            document.getElementById('cal-size-slider').disabled = !isAccelerated;
-            document.getElementById('caipi-checkbox').disabled = !isAccelerated;
+            // Recompute control availability (will enable/disable calibration and CAIPI)
+            updateControlAvailability();
             updatePlots();
         });
         
@@ -181,12 +210,8 @@ const App = (() => {
         document.getElementById('ky-accel-slider').addEventListener('change', (e) => {
             currentParams.kyAccel = parseInt(e.target.value);
             document.getElementById('ky-accel-value').textContent = currentParams.kyAccel;
-            
-            // Enable/disable calibration and CAIPIRINHA controls based on acceleration
-            const isAccelerated = currentParams.kyAccel > 1 || currentParams.kzAccel > 1;
-            document.getElementById('cal-size-slider').disabled = !isAccelerated;
-            document.getElementById('caipi-checkbox').disabled = !isAccelerated;
-            
+            // Update control availability centrally
+            updateControlAvailability();
             updatePlots();
         });
         
@@ -195,9 +220,8 @@ const App = (() => {
             const val = parseInt(e.target.value);
             document.getElementById('kz-accel-value').textContent = val;
             currentParams.kzAccel = val;
-            const isAccelerated = currentParams.kyAccel > 1 || currentParams.kzAccel > 1;
-            document.getElementById('cal-size-slider').disabled = !isAccelerated;
-            document.getElementById('caipi-checkbox').disabled = !isAccelerated;
+            // Recompute control availability (will enable/disable calibration and CAIPI)
+            updateControlAvailability();
             updatePlots();
         });
         
@@ -205,12 +229,8 @@ const App = (() => {
         document.getElementById('kz-accel-slider').addEventListener('change', (e) => {
             currentParams.kzAccel = parseInt(e.target.value);
             document.getElementById('kz-accel-value').textContent = currentParams.kzAccel;
-            
-            // Enable/disable calibration and CAIPIRINHA controls based on acceleration
-            const isAccelerated = currentParams.kyAccel > 1 || currentParams.kzAccel > 1;
-            document.getElementById('cal-size-slider').disabled = !isAccelerated;
-            document.getElementById('caipi-checkbox').disabled = !isAccelerated;
-            
+            // Update control availability centrally
+            updateControlAvailability();
             updatePlots();
         });
         
