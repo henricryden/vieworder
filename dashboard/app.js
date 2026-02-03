@@ -415,6 +415,32 @@ const App = (() => {
                 currentParams.centerEcho,
                 currentParams.mtfDirection
             );
+
+            // If Sequential mode, derive the center echo from the centermost coordinate
+            if (currentParams.ordering === 'sequential' && currentCoords.length > 0) {
+                // Find the coordinate with smallest radius (centermost)
+                let minIdx = 0;
+                let minR = currentCoords[0].r;
+                for (let i = 1; i < currentCoords.length; i++) {
+                    if (currentCoords[i].r < minR) {
+                        minR = currentCoords[i].r;
+                        minIdx = i;
+                    }
+                }
+                const centerCoord = currentCoords[minIdx];
+                if (centerCoord && typeof centerCoord.echo === 'number') {
+                    currentParams.centerEcho = centerCoord.echo;
+                    // Update UI (slider + displayed value)
+                    const centerSlider = document.getElementById('center-echo-slider');
+                    const centerValue = document.getElementById('center-echo-value');
+                    if (centerSlider) {
+                        centerSlider.value = currentParams.centerEcho;
+                    }
+                    if (centerValue) {
+                        centerValue.textContent = currentParams.centerEcho;
+                    }
+                }
+            }
             
             // Update plots
             D3Plots.plotByShotNumber(currentCoords);
