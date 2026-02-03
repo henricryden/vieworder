@@ -166,7 +166,7 @@ const D3Plots = (() => {
      * Create color scale for shots/echoes
      */
     function createColorScale(maxValue, useViridis = true) {
-        const interpolator = useViridis ? d3.interpolateViridis : d3.interpolateMagma;
+        const interpolator = useViridis ? d3.interpolateViridis : d3.interpolatePlasma;
         return d3.scaleSequential(interpolator)
             .domain([0, maxValue]);
     }
