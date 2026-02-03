@@ -34,9 +34,12 @@ const KSpaceUtils = (() => {
         const z_cal_low = Math.floor(center_z - cal_z / 2.0);
         const z_cal_hi = z_cal_low + cal_z;
         
-        // Partial Fourier: kzPF ranges from 0.5 (skip upper half) to 1.0 (full)
-        // nover_z is the number of lines to skip
-        const nover_z = Math.round((1.0 - kzPF) * Nz / 2.0);
+        // Partial Fourier: kzPF ranges from 0.5 (keep 50% centered) to 1.0 (full)
+        // Mapping (matching C logic): kept_fraction = 0.5 + nover_z / Nz
+        // => nover_z = (kzPF - 0.5) * Nz
+        let nover_z = Math.round((kzPF - 0.5) * Nz);
+        if (nover_z < 0) nover_z = 0;
+        if (nover_z > Math.floor(Nz / 2)) nover_z = Math.floor(Nz / 2);
         const pf_zmode = kzPF < 1.0 ? 'LATE' : 'NO';  // Default to removing high kz (LATE)
         
         // CAIPIRINHA shift (if enabled)
