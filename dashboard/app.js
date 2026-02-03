@@ -26,9 +26,82 @@ const App = (() => {
     function init() {
         D3Plots.init();
         setupEventListeners();
+        // Render slider ticks for visible controls
+        renderAllSliderTicks();
         updateControlAvailability();
         updatePlots();
     }
+
+    /**
+     * Render tick bars for a single range input based on its min/max/step
+     */
+    function renderSliderTicks(input) {
+        if (!input) return;
+        // Remove existing ticks container in the parent if present
+        const parent = input.parentNode;
+        const existing = parent.querySelector('.slider-ticks');
+        if (existing) existing.remove();
+
+        const min = parseFloat(input.min || 0);
+        const max = parseFloat(input.max || 0);
+        const step = parseFloat(input.step || 1);
+        if (isNaN(min) || isNaN(max) || isNaN(step) || max <= min) return;
+
+        const steps = Math.round((max - min) / step);
+        if (steps <= 0) return;
+
+        const ticks = document.createElement('div');
+        ticks.className = 'slider-ticks';
+
+        for (let i = 0; i <= steps; i++) {
+            const span = document.createElement('span');
+            const frac = steps > 0 ? (i / steps) : 0;
+            span.style.left = (frac * 100) + '%';
+            ticks.appendChild(span);
+        }
+
+        // Append ticks as an absolutely-positioned child of the control-group
+        parent.appendChild(ticks);
+
+        // Position the ticks container over the slider using its bounding box
+        positionTicks(ticks, input);
+    }
+
+    function renderAllSliderTicks() {
+        const sliders = document.querySelectorAll('input.slider[type="range"]');
+        sliders.forEach(s => renderSliderTicks(s));
+    }
+
+    // Position ticks container exactly over the slider element
+    function positionTicks(ticks, input) {
+        if (!ticks || !input) return;
+        const parentRect = input.parentNode.getBoundingClientRect();
+        const inputRect = input.getBoundingClientRect();
+        // Compute offsets relative to parent (which is positioned)
+        // Account for slider thumb radius so ticks align with thumb center
+        const thumbHalf = 13; // px - matches CSS thumb (20px + 3px border => ~26px total)
+        const left = inputRect.left - parentRect.left + thumbHalf;
+        const top = inputRect.top - parentRect.top + inputRect.height / 2;
+        const width = Math.max(0, inputRect.width - 2 * thumbHalf);
+        ticks.style.left = left + 'px';
+        ticks.style.width = width + 'px';
+        ticks.style.top = top + 'px';
+        // Ensure each child span is placed correctly (they were set by percent)
+        const spans = ticks.querySelectorAll('span');
+        spans.forEach((sp) => {
+            // nothing to change here; left already set as percent during creation
+        });
+    }
+
+    // Reposition ticks on window resize to stay aligned
+    window.addEventListener('resize', () => {
+        const sliders = document.querySelectorAll('input.slider[type="range"]');
+        sliders.forEach((s) => {
+            const parent = s.parentNode;
+            const ticks = parent.querySelector('.slider-ticks');
+            if (ticks) positionTicks(ticks, s);
+        });
+    });
 
     /**
      * Enable/disable controls based on current parameters and ordering
@@ -86,6 +159,22 @@ const App = (() => {
                 document.getElementById('center-echo-slider').value = currentParams.etl;
                 document.getElementById('center-echo-value').textContent = currentParams.etl;
             }
+            // Update center-echo datalist ticks
+            const centerDatalist = document.getElementById('center-echo-ticks');
+            if (centerDatalist) {
+                let opts = '';
+                for (let i = 1; i <= currentParams.etl; i++) {
+                    opts += `<option value="${i}"></option>`;
+                }
+                centerDatalist.innerHTML = opts;
+                // Re-render ticks for the center-echo slider so visuals match new ETL
+                const centerSlider = document.getElementById('center-echo-slider');
+                if (centerSlider) {
+                    renderSliderTicks(centerSlider);
+                    const ticks = centerSlider.parentNode.querySelector('.slider-ticks');
+                    if (ticks) positionTicks(ticks, centerSlider);
+                }
+            }
             updatePlots();
         });
         
@@ -102,6 +191,22 @@ const App = (() => {
                 currentParams.centerEcho = currentParams.etl;
                 document.getElementById('center-echo-slider').value = currentParams.etl;
                 document.getElementById('center-echo-value').textContent = currentParams.etl;
+            }
+            // Update center-echo datalist ticks on change as well
+            const centerDatalist = document.getElementById('center-echo-ticks');
+            if (centerDatalist) {
+                let opts = '';
+                for (let i = 1; i <= currentParams.etl; i++) {
+                    opts += `<option value="${i}"></option>`;
+                }
+                centerDatalist.innerHTML = opts;
+                // Re-render ticks for the center-echo slider so visuals match new ETL
+                const centerSlider = document.getElementById('center-echo-slider');
+                if (centerSlider) {
+                    renderSliderTicks(centerSlider);
+                    const ticks = centerSlider.parentNode.querySelector('.slider-ticks');
+                    if (ticks) positionTicks(ticks, centerSlider);
+                }
             }
             updatePlots();
         });
