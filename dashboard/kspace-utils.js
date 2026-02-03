@@ -272,16 +272,25 @@ const KSpaceUtils = (() => {
         for (let e = 1; e <= maxEcho; e++) {
             echoPointers[e] = 0;
         }
-        
-        for (let pos = 0; pos < numShots; pos++) {
-            for (let echo = 1; echo <= maxEcho; echo++) {
+        // Cycle through shots and echoes repeatedly until all coords are assigned.
+        // This handles uneven echo-group sizes and ensures no coordinate remains unassigned.
+        let remaining = 0;
+        for (let e = 1; e <= maxEcho; e++) {
+            if (echoGroups[e]) remaining += echoGroups[e].length;
+        }
+
+        let pos = 0;
+        while (remaining > 0) {
+            for (let echo = 1; echo <= maxEcho && remaining > 0; echo++) {
                 if (echoGroups[echo] && echoPointers[echo] < echoGroups[echo].length) {
                     const idx = echoGroups[echo][echoPointers[echo]];
                     coords[idx].shot = pos;
                     coords[idx].adjustedEcho = coords[idx].echo;
                     echoPointers[echo]++;
+                    remaining--;
                 }
             }
+            pos = (pos + 1) % Math.max(1, numShots);
         }
     }
     
@@ -346,18 +355,19 @@ const KSpaceUtils = (() => {
             for (let i = 0; i < numCoords; i++) {
                 const ky_dist = coords[i].ky - y0;
                 const kz_dist = coords[i].kz - z0;
-                let theta = Math.atan2(kz_dist, ky_dist);
+                // Match C implementation: theta = atan2(y_dist, z_dist)
+                let theta = Math.atan2(ky_dist, kz_dist);
                 // Convert from [-π, π] to [0, 2π]
                 if (theta < 0) theta += 2 * Math.PI;
                 coords[i].theta = theta;
             }
             
-            // Calculate ellipse radius: sqrt((ky*axisRatio)^2 + kz^2)
-            // Note: higher axisRatio compresses the ky direction, spreading out coordinates along ky
+            // Calculate chevron radius using Manhattan-like metric to match C:
+            // user1 = |y - y0| + |z - z0| * axisRatio
             for (let i = 0; i < numCoords; i++) {
                 const ky_dist = coords[i].ky - y0;
                 const kz_dist = coords[i].kz - z0;
-                coords[i].ellipDist = Math.sqrt(ky_dist * ky_dist * axisRatio * axisRatio + kz_dist * kz_dist);
+                coords[i].ellipDist = Math.abs(ky_dist) + Math.abs(kz_dist) * axisRatio;
             }
         }
         
@@ -394,10 +404,10 @@ const KSpaceUtils = (() => {
             // Sort by ellipse radius
             indices.sort((a, b) => coords[a].ellipDist - coords[b].ellipDist);
             
-            // Assign echoes - use encodesPerShot for proper grouping
+            // Assign echoes - use numShots (like C implementation) for proper grouping
             for (let i = 0; i < numCoords; i++) {
                 const idx = indices[i];
-                coords[idx].echo = ((i / encodesPerShot) | 0) + 1;
+                coords[idx].echo = ((i / numShots) | 0) + 1;
             }
             
             // Find center echo
@@ -408,11 +418,11 @@ const KSpaceUtils = (() => {
             if (curCenterEcho === centerEcho) {
                 foundCenter = true;
             } else if (curCenterEcho > centerEcho) {
-                // Center echo too high - need to decrease axis ratio (smaller stretching)
-                rightRatio = axisRatio;
-            } else {
-                // Center echo too low - need to increase axis ratio (larger stretching)
+                // Center echo too high - follow C implementation: move left bound up
                 leftRatio = axisRatio;
+            } else {
+                // Center echo too low - move right bound down
+                rightRatio = axisRatio;
             }
         }
         
@@ -427,10 +437,10 @@ const KSpaceUtils = (() => {
                 // Sort by ellipse radius
                 indices.sort((a, b) => coords[a].ellipDist - coords[b].ellipDist);
                 
-                // Assign echoes - use encodesPerShot
+                // Assign echoes - use numShots
                 for (let i = 0; i < numCoords; i++) {
                     const idx = indices[i];
-                    coords[idx].echo = ((i / encodesPerShot) | 0) + 1;
+                    coords[idx].echo = ((i / numShots) | 0) + 1;
                 }
                 
                 curCenterEcho = findCenterEcho();
@@ -449,12 +459,50 @@ const KSpaceUtils = (() => {
         
         for (let i = 0; i < numCoords; i++) {
             const idx = indices[i];
-            coords[idx].echo = ((i / encodesPerShot) | 0) + 1;
+            coords[idx].echo = ((i / numShots) | 0) + 1;
         }
         
         curCenterEcho = findCenterEcho();
         console.log(`Chevron final: axisRatio=${axisRatio.toFixed(3)}, centerEcho=${curCenterEcho}`);
-        
+        // If we couldn't find an exact center (foundCenter == false), try reversed center
+        if (!foundCenter) {
+            const reversedCenterEcho = etl + 1 - centerEcho; // 1-based reversed center
+            console.log(`Chevron: trying reversed center echo ${reversedCenterEcho}`);
+            // Binary search for reversed target
+            let leftR = 0.005;
+            let rightR = 100;
+            let axisR = axisRatio;
+            let reversedFound = false;
+            let curRevCenter = -1;
+            for (let iter = 0; iter < maxIter && !reversedFound; iter++) {
+                axisR = (leftR + rightR) / 2;
+                setChevronRadius(axisR);
+                indices.sort((a, b) => coords[a].ellipDist - coords[b].ellipDist);
+                for (let i = 0; i < numCoords; i++) {
+                    const idx = indices[i];
+                    coords[idx].echo = ((i / numShots) | 0) + 1;
+                }
+                curRevCenter = findCenterEcho();
+                console.log(`Chevron rev iter ${iter}: axisRatio=${axisR.toFixed(3)}, centerEcho=${curRevCenter}, want=${reversedCenterEcho}`);
+                if (curRevCenter === reversedCenterEcho) {
+                    reversedFound = true;
+                } else if (curRevCenter > reversedCenterEcho) {
+                    leftR = axisR;
+                } else {
+                    rightR = axisR;
+                }
+            }
+
+            if (reversedFound) {
+                // We found a reversed solution: reverse all echo assignments
+                console.log(`Chevron: reversing echo assignments for reversed center ${reversedCenterEcho}`);
+                for (let i = 0; i < numCoords; i++) {
+                    coords[i].echo = etl + 1 - coords[i].echo;
+                }
+                foundCenter = true; // behave as if we found a solution
+            }
+        }
+
         // Step 3: Sort by echo first, then theta (azimuthal angle) for radar sweep
         sortIndicesByEchoThen(indices, coords, (a, b) => coords[a].theta - coords[b].theta);
         

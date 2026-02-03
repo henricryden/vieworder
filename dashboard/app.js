@@ -269,6 +269,17 @@ const App = (() => {
             currentParams.useCaipirinha = e.target.checked;
             updatePlots();
         });
+
+        // Coverage select (rectangular or elliptical)
+        const coverageSelect = document.getElementById('coverage-select');
+        if (coverageSelect) {
+            coverageSelect.addEventListener('change', (e) => {
+                currentParams.coverage = e.target.value;
+                updatePlots();
+            });
+            // Initialize select to match currentParams
+            coverageSelect.value = currentParams.coverage || 'elliptical';
+        }
     }
     
     /**
