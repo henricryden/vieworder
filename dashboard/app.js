@@ -126,12 +126,37 @@ const App = (() => {
         // Ordering select
         document.getElementById('ordering-select').addEventListener('change', (e) => {
             currentParams.ordering = e.target.value;
-            
-            // Enable/disable MTF Direction based on ordering method
-            const mtfDirectionSelect = document.getElementById('mtf-direction-select');
-            const isSequentialOrLCPO = e.target.value === 'sequential' || e.target.value === 'lcpo';
-            mtfDirectionSelect.disabled = !isSequentialOrLCPO;
-            
+
+            // Update MTF Direction widget per ordering method
+            const mtfControl = document.getElementById('mtf-control');
+            const mtfSelect = document.getElementById('mtf-direction-select');
+
+            if (e.target.value === 'sequential' || e.target.value === 'lcpo') {
+                // Show ky/kz options
+                mtfControl.style.display = '';
+                mtfSelect.innerHTML = '<option value="ky">k<sub>y</sub></option><option value="kz">k<sub>z</sub></option>';
+                mtfSelect.disabled = false;
+                // Keep previously selected if applicable
+                if (currentParams.mtfDirection !== 'ky' && currentParams.mtfDirection !== 'kz') {
+                    currentParams.mtfDirection = 'ky';
+                    mtfSelect.value = 'ky';
+                } else {
+                    mtfSelect.value = currentParams.mtfDirection;
+                }
+            } else if (e.target.value === 'cplo') {
+                // CPLO only uses radial option 'kr'
+                mtfControl.style.display = '';
+                mtfSelect.innerHTML = '<option value="kr">k<sub>r</sub></option>';
+                mtfSelect.value = 'kr';
+                currentParams.mtfDirection = 'kr';
+                mtfSelect.disabled = false;
+            } else {
+                // Chevron and CROC: hide widget
+                mtfControl.style.display = 'none';
+                // set to default
+                currentParams.mtfDirection = 'ky';
+            }
+
             updatePlots();
         });
         
