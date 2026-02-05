@@ -206,20 +206,14 @@ const KSpaceUtils = (() => {
     // Sort indices by coordinate radius (low to high)
     function sortIndicesByRadius(indices, coords) {
         return indices.sort((a, b) => {
-            const radA = coords[a].r;
-            const radB = coords[b].r;
-            if (Math.abs(radA - radB) > 0.01) return radA - radB;
-            return coords[a].phi - coords[b].phi;
+            return coords[a].r - coords[b].r;
         });
     }
     
     // Sort indices by azimuthal angle (phi)
     function sortIndicesByPhi(indices, coords) {
         return indices.sort((a, b) => {
-            const phiA = coords[a].phi;
-            const phiB = coords[b].phi;
-            if (Math.abs(phiA - phiB) > 0.01) return phiA - phiB;
-            return coords[a].r - coords[b].r;
+            return coords[a].phi - coords[b].phi;
         });
     }
     
