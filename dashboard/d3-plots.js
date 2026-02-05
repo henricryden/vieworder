@@ -202,9 +202,9 @@ const D3Plots = (() => {
     }
     
     /**
-     * Draw colorbar on canvas (horizontal)
+     * Draw colorbar on canvas (horizontal) with position indicator
      */
-    function drawColorbar(ctx, colorScale, leftLabel, rightLabel) {
+    function drawColorbar(ctx, colorScale, leftLabel, rightLabel, selectedValue = null) {
         if (!ctx || !colorScale) return;
         
         const canvasWidth = colorbarWidth + colorbarMargin.left + colorbarMargin.right;
@@ -241,6 +241,27 @@ const D3Plots = (() => {
         ctx.strokeStyle = 'black';
         ctx.lineWidth = 1;
         ctx.strokeRect(barX, barY, barWidth, barHeight);
+        
+        // Draw position indicator (triangles) if selectedValue is provided
+        if (selectedValue !== null && selectedValue >= minVal && selectedValue <= maxVal) {
+            const t = (selectedValue - minVal) / (maxVal - minVal);
+            const indicatorX = barX + t * barWidth;
+            
+            ctx.fillStyle = 'red';
+            ctx.strokeStyle = 'darkred';
+            ctx.lineWidth = 1.5;
+            
+            // Draw triangle pointing down (▼) above the bar
+            const triangleWidth = 10;
+            indicatorY = barY - triangleWidth - 2;
+            ctx.beginPath();
+            ctx.moveTo(indicatorX, indicatorY + triangleWidth);  // apex at bottom
+            ctx.lineTo(indicatorX - triangleWidth / 2, indicatorY + triangleWidth/4);  // base left
+            ctx.lineTo(indicatorX + triangleWidth / 2, indicatorY + triangleWidth/4);  // base right
+            ctx.closePath();
+            ctx.fill();
+            ctx.stroke();
+        }
         
         // Draw labels
         ctx.fillStyle = 'black';
@@ -414,7 +435,7 @@ const D3Plots = (() => {
         shotCtx.restore();
         
         // Draw colorbar
-        drawColorbar(shotColorbarCtx, shotColorScale, 'start of scan', 'end of scan');
+        drawColorbar(shotColorbarCtx, shotColorScale, 'start of scan', 'end of scan', selectedShotIndex);
         
         console.log('Shot plot rendered:', coords.length, 'points (Canvas)');
     }
@@ -469,8 +490,8 @@ const D3Plots = (() => {
         
         echoCtx.restore();
         
-        // Draw colorbar
-        drawColorbar(echoColorbarCtx, echoColorScale, 'start of shot', 'end of shot');
+        // Draw colorbar with echo position indicator
+        drawColorbar(echoColorbarCtx, echoColorScale, 'start of shot', 'end of shot', selectedEchoIndex);
         
         console.log('Echo plot rendered:', coords.length, 'points (Canvas)');
     }
