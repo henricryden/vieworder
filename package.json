@@ -1,0 +1,14 @@
+{
+  "name": "k-space-view-ordering-dashboard",
+  "version": "1.0.0",
+  "description": "Interactive k-space phase encoding view ordering dashboard",
+  "private": true,
+  "scripts": {
+    "build": "node build.js",
+    "dev": "cd dashboard && python3 -m http.server 8000"
+  },
+  "devDependencies": {
+    "javascript-obfuscator": "^4.1.0",
+    "terser": "^5.21.0"
+  }
+}
