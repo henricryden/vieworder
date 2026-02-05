@@ -98,34 +98,69 @@ h1 {
     cursor: not-allowed;
 }
 
+/* Reset and base slider styles */
 .slider {
-    width: 100%;
-    height: 6px;
-    border-radius: 3px;
-    background: linear-gradient(to right, #667eea, #764ba2);
-    outline: none;
     -webkit-appearance: none;
     appearance: none;
+    width: 100%;
+    height: 20px;
+    background: transparent;
+    outline: none;
     cursor: pointer;
     position: relative;
-    z-index: 3; /* keep slider above tick marks */
+    z-index: 3;
+    margin: 0;
+    padding: 0;
+    border: none;
 }
 
+/* Chrome/Safari/Edge track */
+.slider::-webkit-slider-runnable-track {
+    width: 100%;
+    height: 6px;
+    background: linear-gradient(to right, #667eea, #764ba2);
+    border-radius: 3px;
+    border: none;
+}
+
+/* Chrome/Safari/Edge thumb */
 .slider::-webkit-slider-thumb {
     -webkit-appearance: none;
     appearance: none;
     width: 20px;
     height: 20px;
-    border-radius: 50%;
     background: white;
     border: 3px solid #667eea;
+    border-radius: 50%;
     cursor: pointer;
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
-    transition: all 0.3s ease;
+    margin-top: -7px; /* (20px thumb - 6px track) / 2 = 7px offset */
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+/* Firefox track */
+.slider::-moz-range-track {
+    width: 100%;
+    height: 6px;
+    background: linear-gradient(to right, #667eea, #764ba2);
+    border-radius: 3px;
+    border: none;
+}
+
+/* Firefox thumb */
+.slider::-moz-range-thumb {
+    width: 20px;
+    height: 20px;
+    background: white;
+    border: 3px solid #667eea;
+    border-radius: 50%;
+    cursor: pointer;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
 
 .slider::-webkit-slider-thumb:hover {
-    transform: scale(1.2);
+    transform: scale(1.2) translateY(-7px); /* Maintain centering while scaling */
     box-shadow: 0 4px 10px rgba(102, 126, 234, 0.4);
 }
 
@@ -137,7 +172,7 @@ h1 {
     border: 3px solid #667eea;
     cursor: pointer;
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
-    transition: all 0.3s ease;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
 
 .slider::-moz-range-thumb:hover {
