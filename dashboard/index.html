@@ -277,22 +277,34 @@
             </div>
         </div>
         
-        <div class="plots-container">
-            <div id="plot-by-shot" class="plot-wrapper"></div>
-            <div id="plot-by-echo" class="plot-wrapper"></div>
-        </div>
-
         <div class="plot-controls">
             <div class="control-group">
-                <label for="shot-select-slider">Highlight Shot: <span id="shot-select-value">1</span></label>
+                <label>
+                    <input type="checkbox" id="shot-highlight-checkbox" checked>
+                    Highlight Shot: <span id="shot-select-value">1</span>
+                </label>
                 <input type="range" id="shot-select-slider" min="1" max="1" value="1" step="1" class="slider">
             </div>
             <div class="control-group">
-                <label for="echo-select-slider">Highlight Echo: <span id="echo-select-value">1</span></label>
+                <label>
+                    <input type="checkbox" id="echo-highlight-checkbox" checked>
+                    Highlight Echo: <span id="echo-select-value">1</span>
+                </label>
                 <input type="range" id="echo-select-slider" min="1" max="1" value="1" step="1" class="slider">
             </div>
         </div>
-        
+
+        <div class="plots-container">
+            <div class="plot-column">
+                <canvas id="colorbar-shot" class="colorbar-canvas"></canvas>
+                <div id="plot-by-shot" class="plot-wrapper"></div>
+            </div>
+            <div class="plot-column">
+                <canvas id="colorbar-echo" class="colorbar-canvas"></canvas>
+                <div id="plot-by-echo" class="plot-wrapper"></div>
+            </div>
+        </div>
+
         <div class="info-panel">
             <p>Total phase encodes: <span id="info-total">0</span></p>
             <p>Number of shots: <span id="info-acceleration">1</span></p>

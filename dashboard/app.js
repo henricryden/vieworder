@@ -439,6 +439,15 @@ const App = (() => {
         // Shot/Echo selector sliders (under plots)
         const shotSelector = document.getElementById('shot-select-slider');
         const shotSelectorValue = document.getElementById('shot-select-value');
+        const shotCheckbox = document.getElementById('shot-highlight-checkbox');
+        
+        if (shotCheckbox) {
+            shotCheckbox.addEventListener('change', (e) => {
+                D3Plots.setShowShotHighlight(e.target.checked);
+                D3Plots.drawHighlights();
+            });
+        }
+        
         if (shotSelector) {
             shotSelector.addEventListener('input', (e) => {
                 const v = parseInt(e.target.value);
@@ -456,6 +465,15 @@ const App = (() => {
 
         const echoSelector = document.getElementById('echo-select-slider');
         const echoSelectorValue = document.getElementById('echo-select-value');
+        const echoCheckbox = document.getElementById('echo-highlight-checkbox');
+        
+        if (echoCheckbox) {
+            echoCheckbox.addEventListener('change', (e) => {
+                D3Plots.setShowEchoHighlight(e.target.checked);
+                D3Plots.drawHighlights();
+            });
+        }
+        
         if (echoSelector) {
             echoSelector.addEventListener('input', (e) => {
                 const v = parseInt(e.target.value);
@@ -556,25 +574,40 @@ const App = (() => {
         const shotValue = document.getElementById('shot-select-value');
         if (shotSlider) {
             shotSlider.max = Math.max(1, numShots);
+            // Set to 1/3 of shots on first update
+            if (shotSlider.value === '1' && numShots > 1) {
+                shotSlider.value = Math.max(1, Math.round(numShots / 3));
+            }
             if (parseInt(shotSlider.value) > shotSlider.max) shotSlider.value = shotSlider.max;
             if (shotValue) shotValue.textContent = shotSlider.value;
             // Rerender ticks for shot slider
             renderSliderTicks(shotSlider);
             const ticks = shotSlider.parentNode.querySelector('.slider-ticks');
             if (ticks) positionTicks(ticks, shotSlider);
+            // Update highlight
+            D3Plots.setSelectedShot(parseInt(shotSlider.value));
         }
 
         const echoSlider = document.getElementById('echo-select-slider');
         const echoValue = document.getElementById('echo-select-value');
         if (echoSlider) {
             echoSlider.max = Math.max(1, currentParams.etl);
+            // Set to center echo on first update
+            if (echoSlider.value === '1' && currentParams.centerEcho > 1) {
+                echoSlider.value = currentParams.centerEcho;
+            }
             if (parseInt(echoSlider.value) > echoSlider.max) echoSlider.value = echoSlider.max;
             if (echoValue) echoValue.textContent = echoSlider.value;
             // Rerender ticks for echo slider
             renderSliderTicks(echoSlider);
             const ticks2 = echoSlider.parentNode.querySelector('.slider-ticks');
             if (ticks2) positionTicks(ticks2, echoSlider);
+            // Update highlight
+            D3Plots.setSelectedEcho(parseInt(echoSlider.value));
         }
+        
+        // Redraw highlights with the updated selections
+        D3Plots.drawHighlights();
     }
     
     /**

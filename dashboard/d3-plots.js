@@ -13,6 +13,11 @@ const D3Plots = (() => {
     let echoXScale = null;
     let echoYScale = null;
     
+    let shotColorbarCanvas = null;
+    let echoColorbarCanvas = null;
+    let shotColorbarCtx = null;
+    let echoColorbarCtx = null;
+    
     let shotCoords = [];
     let echoCoords = [];
     let shotColorScale = null;
@@ -26,10 +31,17 @@ const D3Plots = (() => {
     const totalWidth = width + margin.left + margin.right;
     const totalHeight = height + margin.top + margin.bottom;
     
+    // Colorbar dimensions (horizontal)
+    const colorbarWidth = 400;
+    const colorbarHeight = 25;
+    const colorbarMargin = { top: 12, right: 90, bottom: 12, left: 90 };
+    
     // Tooltip element
     let tooltip = null;
     let selectedShotIndex = null; // zero-based
     let selectedEchoIndex = null; // one-based (echo values are 1..ETL)
+    let showShotHighlight = true; // controlled by checkbox
+    let showEchoHighlight = true; // controlled by checkbox
     
     /**
      * Initialize plot containers with Canvas elements
@@ -57,6 +69,22 @@ const D3Plots = (() => {
         echoCanvas.style.cursor = 'crosshair';
         echoDiv.appendChild(echoCanvas);
         echoCtx = echoCanvas.getContext('2d');
+        
+        // Create colorbar canvases
+        shotColorbarCanvas = document.getElementById('colorbar-shot');
+        echoColorbarCanvas = document.getElementById('colorbar-echo');
+        
+        if (shotColorbarCanvas) {
+            shotColorbarCanvas.width = colorbarWidth + colorbarMargin.left + colorbarMargin.right;
+            shotColorbarCanvas.height = colorbarHeight + colorbarMargin.top + colorbarMargin.bottom;
+            shotColorbarCtx = shotColorbarCanvas.getContext('2d');
+        }
+        
+        if (echoColorbarCanvas) {
+            echoColorbarCanvas.width = colorbarWidth + colorbarMargin.left + colorbarMargin.right;
+            echoColorbarCanvas.height = colorbarHeight + colorbarMargin.top + colorbarMargin.bottom;
+            echoColorbarCtx = echoColorbarCanvas.getContext('2d');
+        }
         
         // Create tooltip
         if (!tooltip) {
@@ -171,6 +199,69 @@ const D3Plots = (() => {
         const interpolator = useViridis ? d3.interpolateViridis : d3.interpolatePlasma;
         return d3.scaleSequential(interpolator)
             .domain([0, maxValue]);
+    }
+    
+    /**
+     * Draw colorbar on canvas (horizontal)
+     */
+    function drawColorbar(ctx, colorScale, leftLabel, rightLabel) {
+        if (!ctx || !colorScale) return;
+        
+        const canvasWidth = colorbarWidth + colorbarMargin.left + colorbarMargin.right;
+        const canvasHeight = colorbarHeight + colorbarMargin.top + colorbarMargin.bottom;
+        
+        // Clear canvas
+        ctx.clearRect(0, 0, canvasWidth, canvasHeight);
+        
+        // Set background (neutral gray to match main plots)
+        ctx.fillStyle = '#f3f3f3';
+        ctx.fillRect(0, 0, canvasWidth, canvasHeight);
+        
+        // Draw gradient bar (horizontal)
+        const barX = colorbarMargin.left;
+        const barY = colorbarMargin.top;
+        const barWidth = colorbarWidth;
+        const barHeight = colorbarHeight;
+        
+        // Create horizontal gradient from left (min value) to right (max value)
+        const domain = colorScale.domain();
+        const maxVal = domain[1];
+        const minVal = domain[0];
+        
+        for (let i = 0; i <= barWidth; i++) {
+            // Map pixel position to data value (left = min, right = max)
+            const t = i / barWidth;
+            const value = minVal + t * (maxVal - minVal);
+            
+            ctx.fillStyle = colorScale(value);
+            ctx.fillRect(barX + i, barY, 1, barHeight);
+        }
+        
+        // Draw border around colorbar
+        ctx.strokeStyle = 'black';
+        ctx.lineWidth = 1;
+        ctx.strokeRect(barX, barY, barWidth, barHeight);
+        
+        // Draw labels
+        ctx.fillStyle = 'black';
+        ctx.font = 'bold 11px sans-serif';
+        ctx.textAlign = 'center';
+        
+        // Left label (min value)
+        const leftLabelX = barX - 5;
+        const leftLines = leftLabel.split(' ');
+        ctx.textAlign = 'right';
+        leftLines.forEach((line, i) => {
+            ctx.fillText(line, leftLabelX, barY + barHeight / 2 + (i - leftLines.length / 2 + 0.5) * 12);
+        });
+        
+        // Right label (max value)
+        const rightLabelX = barX + barWidth + 5;
+        const rightLines = rightLabel.split(' ');
+        ctx.textAlign = 'left';
+        rightLines.forEach((line, i) => {
+            ctx.fillText(line, rightLabelX, barY + barHeight / 2 + (i - rightLines.length / 2 + 0.5) * 12);
+        });
     }
     
     /**
@@ -321,6 +412,10 @@ const D3Plots = (() => {
         }
         
         shotCtx.restore();
+        
+        // Draw colorbar
+        drawColorbar(shotColorbarCtx, shotColorScale, 'start of scan', 'end of scan');
+        
         console.log('Shot plot rendered:', coords.length, 'points (Canvas)');
     }
     
@@ -373,6 +468,10 @@ const D3Plots = (() => {
         }
         
         echoCtx.restore();
+        
+        // Draw colorbar
+        drawColorbar(echoColorbarCtx, echoColorScale, 'start of shot', 'end of shot');
+        
         console.log('Echo plot rendered:', coords.length, 'points (Canvas)');
     }
 
@@ -384,7 +483,7 @@ const D3Plots = (() => {
         if (shotCoords && shotCoords.length) plotByShotNumber(shotCoords);
         if (echoCoords && echoCoords.length) plotByEchoNumber(echoCoords);
 
-        // Draw on shot canvas (only current selections)
+        // Draw on shot canvas (only current selections and if enabled)
         if (shotCtx && shotCoords && (selectedShotIndex !== null || selectedEchoIndex !== null)) {
             shotCtx.save();
             shotCtx.translate(margin.left, margin.top);
@@ -392,13 +491,13 @@ const D3Plots = (() => {
                 const x = shotXScale(coord.ky) - blockWidth / 2;
                 const y = shotYScale(coord.kz) - blockHeight / 2;
 
-                if (selectedShotIndex !== null && coord.shot === selectedShotIndex) {
+                if (showShotHighlight && selectedShotIndex !== null && coord.shot === selectedShotIndex) {
                     shotCtx.fillStyle = 'black';
                     shotCtx.globalAlpha = 1.0;
                     shotCtx.fillRect(x, y, blockWidth, blockHeight);
                 }
 
-                if (selectedEchoIndex !== null && coord.echo === selectedEchoIndex) {
+                if (showEchoHighlight && selectedEchoIndex !== null && coord.echo === selectedEchoIndex) {
                     shotCtx.fillStyle = 'white';
                     shotCtx.globalAlpha = 1.0;
                     shotCtx.fillRect(x, y, blockWidth, blockHeight);
@@ -407,7 +506,7 @@ const D3Plots = (() => {
             shotCtx.restore();
         }
 
-        // Draw on echo canvas (only current selections)
+        // Draw on echo canvas (only current selections and if enabled)
         if (echoCtx && echoCoords && (selectedShotIndex !== null || selectedEchoIndex !== null)) {
             echoCtx.save();
             echoCtx.translate(margin.left, margin.top);
@@ -415,13 +514,13 @@ const D3Plots = (() => {
                 const x = echoXScale(coord.ky) - blockWidth / 2;
                 const y = echoYScale(coord.kz) - blockHeight / 2;
 
-                if (selectedShotIndex !== null && coord.shot === selectedShotIndex) {
+                if (showShotHighlight && selectedShotIndex !== null && coord.shot === selectedShotIndex) {
                     echoCtx.fillStyle = 'black';
                     echoCtx.globalAlpha = 1.0;
                     echoCtx.fillRect(x, y, blockWidth, blockHeight);
                 }
 
-                if (selectedEchoIndex !== null && coord.echo === selectedEchoIndex) {
+                if (showEchoHighlight && selectedEchoIndex !== null && coord.echo === selectedEchoIndex) {
                     echoCtx.fillStyle = 'white';
                     echoCtx.globalAlpha = 1.0;
                     echoCtx.fillRect(x, y, blockWidth, blockHeight);
@@ -444,12 +543,22 @@ const D3Plots = (() => {
         else selectedEchoIndex = echo;
     }
     
+    function setShowShotHighlight(enabled) {
+        showShotHighlight = enabled;
+    }
+    
+    function setShowEchoHighlight(enabled) {
+        showEchoHighlight = enabled;
+    }
+    
     return {
         init,
         plotByShotNumber,
         plotByEchoNumber,
         drawHighlights,
         setSelectedShot,
-        setSelectedEcho
+        setSelectedEcho,
+        setShowShotHighlight,
+        setShowEchoHighlight
     };
 })();
