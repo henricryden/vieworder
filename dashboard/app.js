@@ -6,11 +6,11 @@
 const App = (() => {
     let currentCoords = [];
     let currentParams = {
-        etl: 96,
+        etl: 72,
         ky: 128,
         kz: 128,
-        centerEcho: 32,
-        ordering: 'sequential',
+        centerEcho: 22,
+        ordering: 'chevron',
         kyAccel: 1,
         kzAccel: 1,
         kzPF: 1.0,
@@ -26,6 +26,26 @@ const App = (() => {
     function init() {
         D3Plots.init();
         setupEventListeners();
+        // Initialize UI controls to match currentParams
+        const orderingSelect = document.getElementById('ordering-select');
+        if (orderingSelect) orderingSelect.value = currentParams.ordering;
+
+        const etlSlider = document.getElementById('etl-slider');
+        const etlValue = document.getElementById('etl-value');
+        if (etlSlider) etlSlider.value = currentParams.etl;
+        if (etlValue) etlValue.textContent = currentParams.etl;
+
+        const centerSlider = document.getElementById('center-echo-slider');
+        const centerValue = document.getElementById('center-echo-value');
+        if (centerSlider) {
+            centerSlider.max = currentParams.etl;
+            centerSlider.value = currentParams.centerEcho;
+        }
+        if (centerValue) centerValue.textContent = currentParams.centerEcho;
+
+        const mtfSelect = document.getElementById('mtf-direction-select');
+        if (mtfSelect) mtfSelect.value = currentParams.mtfDirection;
+
         // Render slider ticks for visible controls
         renderAllSliderTicks();
         updateControlAvailability();
@@ -127,6 +147,18 @@ const App = (() => {
             if (calGroup) calGroup.classList.add('disabled');
         } else {
             if (calGroup) calGroup.classList.remove('disabled');
+        }
+
+        // CAIPIRINHA: enable when either ky or kz acceleration > 1
+        const caipiCheckbox = document.getElementById('caipi-checkbox');
+        const caipiGroup = document.getElementById('caipi-control');
+        if (caipiCheckbox) {
+            caipiCheckbox.disabled = !isAccelerated;
+            if (!isAccelerated) {
+                if (caipiGroup) caipiGroup.classList.add('disabled');
+            } else {
+                if (caipiGroup) caipiGroup.classList.remove('disabled');
+            }
         }
     }
     

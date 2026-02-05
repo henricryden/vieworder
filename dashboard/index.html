@@ -121,14 +121,14 @@
                     <option value="sequential">Sequential</option>
                     <option value="lcpo">LCPO</option>
                     <option value="cplo">CPLO</option>
-                    <option value="chevron">Chevron</option>
+                    <option value="chevron" selected>Chevron</option>
                     <option value="croc">CROC</option>
                 </select>
             </div>
             
             <div class="control-group">
-                <label for="etl-slider">ETL (Echo Train Length): <span id="etl-value">96</span></label>
-                    <input type="range" id="etl-slider" min="8" max="256" value="96" step="8" class="slider" list="etl-ticks">
+                <label for="etl-slider">ETL (Echo Train Length): <span id="etl-value">72</span></label>
+                    <input type="range" id="etl-slider" min="8" max="256" value="72" step="8" class="slider" list="etl-ticks">
             </div>
                 <datalist id="etl-ticks">
                     <option value="8"></option>
@@ -166,8 +166,8 @@
                 </datalist>
             
             <div class="control-group" id="center-echo-control">
-                <label for="center-echo-slider">Center Echo: <span id="center-echo-value">32</span></label>
-                    <input type="range" id="center-echo-slider" min="1" max="96" value="32" class="slider" list="center-echo-ticks">
+                <label for="center-echo-slider">Center Echo: <span id="center-echo-value">22</span></label>
+                    <input type="range" id="center-echo-slider" min="1" max="256" value="22" class="slider" list="center-echo-ticks">
             </div>
                 <datalist id="center-echo-ticks">
                     <option value="1"></option>
