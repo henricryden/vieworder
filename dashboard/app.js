@@ -246,6 +246,15 @@ const App = (() => {
             const val = parseInt(e.target.value);
             document.getElementById('center-echo-value').textContent = val;
             currentParams.centerEcho = val;
+            // Make echo highlight follow center echo while dragging
+            const echoSelector = document.getElementById('echo-select-slider');
+            const echoSelectorValue = document.getElementById('echo-select-value');
+            if (echoSelector) {
+                echoSelector.value = val;
+                if (echoSelectorValue) echoSelectorValue.textContent = val;
+                D3Plots.setSelectedEcho(val);
+                D3Plots.drawHighlights();
+            }
             updatePlots();
         });
         
@@ -253,6 +262,15 @@ const App = (() => {
         document.getElementById('center-echo-slider').addEventListener('change', (e) => {
             currentParams.centerEcho = parseInt(e.target.value);
             document.getElementById('center-echo-value').textContent = currentParams.centerEcho;
+            // Make echo highlight follow center echo on change as well
+            const echoSelector = document.getElementById('echo-select-slider');
+            const echoSelectorValue = document.getElementById('echo-select-value');
+            if (echoSelector) {
+                echoSelector.value = currentParams.centerEcho;
+                if (echoSelectorValue) echoSelectorValue.textContent = currentParams.centerEcho;
+                D3Plots.setSelectedEcho(currentParams.centerEcho);
+                D3Plots.drawHighlights();
+            }
             updatePlots();
         });
         
