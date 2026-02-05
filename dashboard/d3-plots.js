@@ -28,6 +28,8 @@ const D3Plots = (() => {
     
     // Tooltip element
     let tooltip = null;
+    let selectedShotIndex = null; // zero-based
+    let selectedEchoIndex = null; // one-based (echo values are 1..ETL)
     
     /**
      * Initialize plot containers with Canvas elements
@@ -178,8 +180,8 @@ const D3Plots = (() => {
         // Clear canvas
         ctx.clearRect(0, 0, totalWidth, totalHeight);
         
-        // Set background
-        ctx.fillStyle = 'white';
+        // Set background (neutral gray)
+        ctx.fillStyle = '#f3f3f3';
         ctx.fillRect(0, 0, totalWidth, totalHeight);
         
         // Draw title
@@ -373,10 +375,81 @@ const D3Plots = (() => {
         echoCtx.restore();
         console.log('Echo plot rendered:', coords.length, 'points (Canvas)');
     }
+
+    /**
+     * Draw highlight overlays on both canvases for selected shot/echo
+     */
+    function drawHighlights() {
+        // Re-render base plots to clear any previous highlight overlays
+        if (shotCoords && shotCoords.length) plotByShotNumber(shotCoords);
+        if (echoCoords && echoCoords.length) plotByEchoNumber(echoCoords);
+
+        // Draw on shot canvas (only current selections)
+        if (shotCtx && shotCoords && (selectedShotIndex !== null || selectedEchoIndex !== null)) {
+            shotCtx.save();
+            shotCtx.translate(margin.left, margin.top);
+            for (const coord of shotCoords) {
+                const x = shotXScale(coord.ky) - blockWidth / 2;
+                const y = shotYScale(coord.kz) - blockHeight / 2;
+
+                if (selectedShotIndex !== null && coord.shot === selectedShotIndex) {
+                    shotCtx.fillStyle = 'black';
+                    shotCtx.globalAlpha = 1.0;
+                    shotCtx.fillRect(x, y, blockWidth, blockHeight);
+                }
+
+                if (selectedEchoIndex !== null && coord.echo === selectedEchoIndex) {
+                    shotCtx.fillStyle = 'white';
+                    shotCtx.globalAlpha = 1.0;
+                    shotCtx.fillRect(x, y, blockWidth, blockHeight);
+                }
+            }
+            shotCtx.restore();
+        }
+
+        // Draw on echo canvas (only current selections)
+        if (echoCtx && echoCoords && (selectedShotIndex !== null || selectedEchoIndex !== null)) {
+            echoCtx.save();
+            echoCtx.translate(margin.left, margin.top);
+            for (const coord of echoCoords) {
+                const x = echoXScale(coord.ky) - blockWidth / 2;
+                const y = echoYScale(coord.kz) - blockHeight / 2;
+
+                if (selectedShotIndex !== null && coord.shot === selectedShotIndex) {
+                    echoCtx.fillStyle = 'black';
+                    echoCtx.globalAlpha = 1.0;
+                    echoCtx.fillRect(x, y, blockWidth, blockHeight);
+                }
+
+                if (selectedEchoIndex !== null && coord.echo === selectedEchoIndex) {
+                    echoCtx.fillStyle = 'white';
+                    echoCtx.globalAlpha = 1.0;
+                    echoCtx.fillRect(x, y, blockWidth, blockHeight);
+                }
+            }
+            echoCtx.restore();
+        }
+    }
+
+    function setSelectedShot(oneBasedShot) {
+        if (oneBasedShot == null) {
+            selectedShotIndex = null;
+        } else {
+            selectedShotIndex = Math.max(0, oneBasedShot - 1);
+        }
+    }
+
+    function setSelectedEcho(echo) {
+        if (echo == null) selectedEchoIndex = null;
+        else selectedEchoIndex = echo;
+    }
     
     return {
         init,
         plotByShotNumber,
-        plotByEchoNumber
+        plotByEchoNumber,
+        drawHighlights,
+        setSelectedShot,
+        setSelectedEcho
     };
 })();

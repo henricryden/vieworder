@@ -63,6 +63,7 @@ h1 {
     display: flex;
     flex-direction: column;
     gap: 8px;
+    position: relative;
 }
 
 .control-group label {
@@ -106,6 +107,8 @@ h1 {
     -webkit-appearance: none;
     appearance: none;
     cursor: pointer;
+    position: relative;
+    z-index: 3; /* keep slider above tick marks */
 }
 
 .slider::-webkit-slider-thumb {
@@ -170,6 +173,20 @@ select:focus {
     grid-template-columns: 1fr 1fr;
     gap: 30px;
     margin-bottom: 40px;
+}
+
+.plot-controls {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
+    align-items: center;
+    margin-bottom: 24px;
+}
+
+@media (max-width: 600px) {
+    .plot-controls {
+        grid-template-columns: 1fr;
+    }
 }
 
 .plot-wrapper {
@@ -303,4 +320,26 @@ select:focus {
 @keyframes spin {
     0% { transform: rotate(0deg); }
     100% { transform: rotate(360deg); }
+}
+
+/* Slider tick marks (small vertical bars under sliders) */
+.slider-ticks {
+    position: absolute;
+    left: 0; /* JS will set horizontal position and width */
+    right: auto;
+    top: 50%;
+    height: 0;
+    pointer-events: none;
+    z-index: 1; /* behind the slider */
+}
+.slider-ticks span {
+    position: absolute;
+    width: 1px;
+    height: 10px;
+    background: rgba(51,51,51,0.6);
+    top: 50%;
+    transform: translate(-50%, -50%);
+}
+.control-group.disabled .slider-ticks span {
+    background: rgba(150,150,150,0.4);
 }

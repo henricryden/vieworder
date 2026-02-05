@@ -385,6 +385,41 @@ const App = (() => {
             // Initialize select to match currentParams
             coverageSelect.value = currentParams.coverage || 'elliptical';
         }
+
+        // Shot/Echo selector sliders (under plots)
+        const shotSelector = document.getElementById('shot-select-slider');
+        const shotSelectorValue = document.getElementById('shot-select-value');
+        if (shotSelector) {
+            shotSelector.addEventListener('input', (e) => {
+                const v = parseInt(e.target.value);
+                if (shotSelectorValue) shotSelectorValue.textContent = v;
+                D3Plots.setSelectedShot(v);
+                D3Plots.drawHighlights();
+            });
+            shotSelector.addEventListener('change', (e) => {
+                const v = parseInt(e.target.value);
+                if (shotSelectorValue) shotSelectorValue.textContent = v;
+                D3Plots.setSelectedShot(v);
+                D3Plots.drawHighlights();
+            });
+        }
+
+        const echoSelector = document.getElementById('echo-select-slider');
+        const echoSelectorValue = document.getElementById('echo-select-value');
+        if (echoSelector) {
+            echoSelector.addEventListener('input', (e) => {
+                const v = parseInt(e.target.value);
+                if (echoSelectorValue) echoSelectorValue.textContent = v;
+                D3Plots.setSelectedEcho(v);
+                D3Plots.drawHighlights();
+            });
+            echoSelector.addEventListener('change', (e) => {
+                const v = parseInt(e.target.value);
+                if (echoSelectorValue) echoSelectorValue.textContent = v;
+                D3Plots.setSelectedEcho(v);
+                D3Plots.drawHighlights();
+            });
+        }
     }
     
     /**
@@ -445,6 +480,8 @@ const App = (() => {
             // Update plots
             D3Plots.plotByShotNumber(currentCoords);
             D3Plots.plotByEchoNumber(currentCoords);
+            // Redraw highlights on top according to current selection
+            D3Plots.drawHighlights();
             
             // Update info panel
             updateInfoPanel();
@@ -463,6 +500,31 @@ const App = (() => {
         
         document.getElementById('info-total').textContent = totalCoords;
         document.getElementById('info-acceleration').textContent = numShots;
+        
+        // Update shot/echo selector sliders
+        const shotSlider = document.getElementById('shot-select-slider');
+        const shotValue = document.getElementById('shot-select-value');
+        if (shotSlider) {
+            shotSlider.max = Math.max(1, numShots);
+            if (parseInt(shotSlider.value) > shotSlider.max) shotSlider.value = shotSlider.max;
+            if (shotValue) shotValue.textContent = shotSlider.value;
+            // Rerender ticks for shot slider
+            renderSliderTicks(shotSlider);
+            const ticks = shotSlider.parentNode.querySelector('.slider-ticks');
+            if (ticks) positionTicks(ticks, shotSlider);
+        }
+
+        const echoSlider = document.getElementById('echo-select-slider');
+        const echoValue = document.getElementById('echo-select-value');
+        if (echoSlider) {
+            echoSlider.max = Math.max(1, currentParams.etl);
+            if (parseInt(echoSlider.value) > echoSlider.max) echoSlider.value = echoSlider.max;
+            if (echoValue) echoValue.textContent = echoSlider.value;
+            // Rerender ticks for echo slider
+            renderSliderTicks(echoSlider);
+            const ticks2 = echoSlider.parentNode.querySelector('.slider-ticks');
+            if (ticks2) positionTicks(ticks2, echoSlider);
+        }
     }
     
     /**
