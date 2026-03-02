@@ -542,6 +542,14 @@ const App = (() => {
                 D3Plots.exportEchoSVG();
             });
         }
+        
+        // JSON export button
+        const exportJsonBtn = document.getElementById('export-json');
+        if (exportJsonBtn) {
+            exportJsonBtn.addEventListener('click', () => {
+                exportJSON();
+            });
+        }
     }
     
     /**
@@ -677,6 +685,69 @@ const App = (() => {
      */
     function getCurrentParams() {
         return {...currentParams};
+    }
+    
+    /**
+     * Export view order and metadata to JSON
+     */
+    function exportJSON() {
+        // Calculate derived metadata
+        const shots = new Set(currentCoords.map(c => c.shot));
+        const numberOfShots = shots.size;
+        const totalEncodes = currentCoords.length;
+        const encodesPerShot = totalEncodes > 0 ? Math.ceil(totalEncodes / numberOfShots) : 0;
+        
+        // Build metadata object with human-readable keys
+        const metadata = {
+            "Echo Train Length": currentParams.etl,
+            "Matrix Size ky": currentParams.ky,
+            "Matrix Size kz": currentParams.kz,
+            "Number of Shots": numberOfShots,
+            "Total Phase Encodes": totalEncodes,
+            "Encodes per Shot": encodesPerShot,
+            "ky Acceleration Factor": currentParams.kyAccel,
+            "kz Acceleration Factor": currentParams.kzAccel,
+            "kz Partial Fourier Factor": currentParams.kzPF,
+            "Calibration Region Size": currentParams.calibrationSize,
+            "CAIPIRINHA": currentParams.useCaipirinha,
+            "k-space Coverage": currentParams.coverage,
+            "View Ordering": currentParams.ordering,
+            "Center Echo": currentParams.centerEcho,
+            "MTF Direction": currentParams.mtfDirection,
+            "Shot Order": currentParams.shotOrder
+        };
+        
+        // Build encodes array: sort by (shot asc, echo asc), project relevant fields
+        const encodes = currentCoords
+            .slice()
+            .sort((a, b) => {
+                if (a.shot !== b.shot) return a.shot - b.shot;
+                return a.echo - b.echo;
+            })
+            .map(c => ({
+                shot: c.shot,
+                echo: c.echo,
+                ky: c.ky,
+                kz: c.kz
+            }));
+        
+        // Build final JSON object
+        const jsonData = {
+            metadata,
+            encodes
+        };
+        
+        // Create blob and trigger download
+        const jsonString = JSON.stringify(jsonData, null, 2);
+        const blob = new Blob([jsonString], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = 'view-order.json';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        URL.revokeObjectURL(url);
     }
     
     return {
