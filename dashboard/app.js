@@ -15,6 +15,7 @@ const App = (() => {
         kzAccel: 1,
         kzPF: 1.0,
         mtfDirection: 'ky',
+        shotOrder: 'azimuthal',
         coverage: 'elliptical',
         useCaipirinha: true,
         calibrationSize: 32
@@ -313,7 +314,9 @@ const App = (() => {
             // Update MTF Direction widget per ordering method
             const mtfControl = document.getElementById('mtf-control');
             const mtfSelect = document.getElementById('mtf-direction-select');
-
+            const shotOrderControl = document.getElementById('shot-order-control');
+            const shotOrderSelect = document.getElementById('shot-order-select');
+            
             if (e.target.value === 'sequential' || e.target.value === 'lcpo') {
                 // Show ky/kz options
                 mtfControl.style.display = '';
@@ -340,6 +343,35 @@ const App = (() => {
                 currentParams.mtfDirection = 'ky';
             }
 
+            // Show/hide shot order control based on ordering
+            
+            if (currentParams.ordering === 'cplo') {
+                shotOrderControl.style.display = 'inline-flex';
+                // Enable all options for CPLO
+                shotOrderSelect.innerHTML = `
+                    <option value="ky">k<sub>y</sub></option>
+                    <option value="kz">k<sub>z</sub></option>
+                    <option value="azimuthal">Azimuthal</option>
+                `;
+                if (!['ky', 'kz', 'azimuthal'].includes(currentParams.shotOrder)) {
+                    currentParams.shotOrder = 'azimuthal';
+                }
+                shotOrderSelect.value = currentParams.shotOrder;
+            } else if (currentParams.ordering === 'lcpo') {
+                shotOrderControl.style.display = 'inline-flex';
+                // Only ky/kz for LCPO
+                shotOrderSelect.innerHTML = `
+                    <option value="ky">k<sub>y</sub></option>
+                    <option value="kz">k<sub>z</sub></option>
+                `;
+                if (currentParams.shotOrder === 'azimuthal') {
+                    currentParams.shotOrder = 'ky';
+                }
+                shotOrderSelect.value = currentParams.shotOrder;
+            } else {
+                shotOrderControl.style.display = 'none';
+            }
+            
             // Update control availability when ordering changes
             updateControlAvailability();
             updatePlots();
@@ -348,6 +380,12 @@ const App = (() => {
         // MTF Direction select
         document.getElementById('mtf-direction-select').addEventListener('change', (e) => {
             currentParams.mtfDirection = e.target.value;
+            updatePlots();
+        });
+        
+        // Shot Order select
+        document.getElementById('shot-order-select').addEventListener('change', (e) => {
+            currentParams.shotOrder = e.target.value;
             updatePlots();
         });
         
@@ -488,6 +526,22 @@ const App = (() => {
                 D3Plots.drawHighlights();
             });
         }
+        
+        // Export buttons
+        const exportShotBtn = document.getElementById('export-shot-svg');
+        const exportEchoBtn = document.getElementById('export-echo-svg');
+        
+        if (exportShotBtn) {
+            exportShotBtn.addEventListener('click', () => {
+                D3Plots.exportShotSVG();
+            });
+        }
+        
+        if (exportEchoBtn) {
+            exportEchoBtn.addEventListener('click', () => {
+                D3Plots.exportEchoSVG();
+            });
+        }
     }
     
     /**
@@ -516,7 +570,8 @@ const App = (() => {
                 currentParams.etl,
                 currentParams.ordering,
                 currentParams.centerEcho,
-                currentParams.mtfDirection
+                currentParams.mtfDirection,
+                currentParams.shotOrder
             );
 
             // If Sequential mode, derive the center echo from the centermost coordinate

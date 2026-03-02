@@ -168,13 +168,14 @@ const KSpaceUtils = (() => {
      * @param {string} ordering - Ordering type: 'sequential', 'chevron', 'lcpo', 'cplo', 'croc'
      * @param {number} centerEcho - Center echo position (1 to etl)
      * @param {string} mtfDirection - MTF direction: 'ky' or 'kz'
+     * @param {string} shotOrderParam - Shot ordering: 'ky', 'kz', or 'azimuthal' (for CPLO/LCPO)
      * @returns {Array} Coordinates with shot and echo assignments
      */
-    function assignViewOrdering(coords, etl, ordering, centerEcho, mtfDirection = 'ky') {
+    function assignViewOrdering(coords, etl, ordering, centerEcho, mtfDirection = 'ky', shotOrderParam = null) {
         if (coords.length === 0) return coords;
         
-        // shotOrder is orthogonal to mtfDirection
-        const shotOrder = mtfDirection === 'ky' ? 'kz' : 'ky';
+        // shotOrder is orthogonal to mtfDirection (or user-specified for LCPO/CPLO)
+        const shotOrder = shotOrderParam || (mtfDirection === 'ky' ? 'kz' : 'ky');
         
         switch(ordering) {
             case 'sequential':
@@ -568,7 +569,12 @@ const KSpaceUtils = (() => {
         }
         
         // Step 4: Sort by echo, then shotOrder, and assign shots
-        sortIndicesByEchoThen(indices, coords, (a, b) => coords[a][shotOrder] - coords[b][shotOrder]);
+        if (shotOrder === 'ky' || shotOrder === 'kz') {
+            sortIndicesByEchoThen(indices, coords, (a, b) => coords[a][shotOrder] - coords[b][shotOrder]);
+        } else {
+            // Default fallback to ky if invalid
+            sortIndicesByEchoThen(indices, coords, (a, b) => coords[a].ky - coords[b].ky);
+        }
         assignShotsPerEcho(coords, indices, numShots);
     }
     
@@ -618,13 +624,27 @@ const KSpaceUtils = (() => {
             coords[idx].echo = Math.max(1, Math.min(permutation[echoPosition], encodesPerShot));
         }
         
-        // Step 4: Sort by echo, then phi, then radius for T_R spoke pattern
-        sortIndicesByEchoThen(indices, coords, (a, b) => {
-            const phiA = coords[a].phi;
-            const phiB = coords[b].phi;
-            if (Math.abs(phiA - phiB) > 0.01) return phiA - phiB;
-            return coords[a].r - coords[b].r;
-        });
+        // Step 4: Sort by echo, then by shotOrder (azimuthal/ky/kz)
+        if (shotOrder === 'azimuthal') {
+            // Sort by phi (azimuthal), then radius for T_R spoke pattern
+            sortIndicesByEchoThen(indices, coords, (a, b) => {
+                const phiA = coords[a].phi;
+                const phiB = coords[b].phi;
+                if (Math.abs(phiA - phiB) > 0.01) return phiA - phiB;
+                return coords[a].r - coords[b].r;
+            });
+        } else if (shotOrder === 'ky' || shotOrder === 'kz') {
+            // Sort by specified axis
+            sortIndicesByEchoThen(indices, coords, (a, b) => coords[a][shotOrder] - coords[b][shotOrder]);
+        } else {
+            // Default to azimuthal if invalid
+            sortIndicesByEchoThen(indices, coords, (a, b) => {
+                const phiA = coords[a].phi;
+                const phiB = coords[b].phi;
+                if (Math.abs(phiA - phiB) > 0.01) return phiA - phiB;
+                return coords[a].r - coords[b].r;
+            });
+        }
         
         // Step 5: Assign shots - each shot gets one coord from each echo
         assignShotsPerEcho(coords, indices, numShots);

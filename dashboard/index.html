@@ -268,12 +268,23 @@
                     <option value="96"></option>
                 </datalist>
             
-            <div class="control-group" id="mtf-control">
-                <label for="mtf-direction-select">MTF Direction:</label>
-                <select id="mtf-direction-select">
-                    <option value="ky">k<sub>y</sub></option>
-                    <option value="kz">k<sub>z</sub></option>
-                </select>
+            <div class="control-group" style="display: flex; gap: 20px; align-items: center;">
+                <div id="mtf-control" style="display: inline-flex; align-items: center; gap: 8px;">
+                    <label for="mtf-direction-select">MTF Direction:</label>
+                    <select id="mtf-direction-select">
+                        <option value="ky">k<sub>y</sub></option>
+                        <option value="kz">k<sub>z</sub></option>
+                    </select>
+                </div>
+                
+                <div id="shot-order-control" style="display: none; align-items: center; gap: 8px;">
+                    <label for="shot-order-select">Shot Order:</label>
+                    <select id="shot-order-select">
+                        <option value="ky">k<sub>y</sub></option>
+                        <option value="kz">k<sub>z</sub></option>
+                        <option value="azimuthal">Azimuthal</option>
+                    </select>
+                </div>
             </div>
         </div>
         
@@ -298,10 +309,12 @@
             <div class="plot-column">
                 <canvas id="colorbar-shot" class="colorbar-canvas"></canvas>
                 <div id="plot-by-shot" class="plot-wrapper"></div>
+                <button id="export-shot-svg" class="export-button">Export Shot View as SVG</button>
             </div>
             <div class="plot-column">
                 <canvas id="colorbar-echo" class="colorbar-canvas"></canvas>
                 <div id="plot-by-echo" class="plot-wrapper"></div>
+                <button id="export-echo-svg" class="export-button">Export Echo View as SVG</button>
             </div>
         </div>
 

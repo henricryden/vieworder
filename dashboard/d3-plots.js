@@ -197,6 +197,7 @@ const D3Plots = (() => {
      */
     function createColorScale(maxValue, useViridis = true) {
         const interpolator = useViridis ? d3.interpolateViridis : d3.interpolatePlasma;
+        console.log(`Creating color scale with max value: ${maxValue}, using ${useViridis ? 'viridis' : 'plasma'} palette`);
         return d3.scaleSequential(interpolator)
             .domain([0, maxValue]);
     }
@@ -428,7 +429,7 @@ const D3Plots = (() => {
             const color = shotColorScale(coord.shot || 0);
             
             shotCtx.fillStyle = color;
-            shotCtx.globalAlpha = 0.8;
+            shotCtx.globalAlpha = 1.0;
             shotCtx.fillRect(x, y, blockWidth, blockHeight);
         }
         
@@ -484,7 +485,7 @@ const D3Plots = (() => {
             const color = echoColorScale(coord.echo || 0);
             
             echoCtx.fillStyle = color;
-            echoCtx.globalAlpha = 0.8;
+            echoCtx.globalAlpha = 1.0;
             echoCtx.fillRect(x, y, blockWidth, blockHeight);
         }
         
@@ -572,6 +573,130 @@ const D3Plots = (() => {
         showEchoHighlight = enabled;
     }
     
+    /**
+     * Export shot plot as SVG
+     */
+    function exportShotSVG() {
+        if (!shotCoords || shotCoords.length === 0 || !shotColorScale) return;
+        
+        const svg = createSVGPlot(shotCoords, shotXScale, shotYScale, shotColorScale, 
+                                   'Phase Encoding Plan - Shot View', 'shot', selectedShotIndex);
+        downloadSVG(svg, 'shot-view.svg');
+    }
+    
+    /**
+     * Export echo plot as SVG
+     */
+    function exportEchoSVG() {
+        if (!echoCoords || echoCoords.length === 0 || !echoColorScale) return;
+        
+        const svg = createSVGPlot(echoCoords, echoXScale, echoYScale, echoColorScale, 
+                                   'Phase Encoding Plan - Echo View', 'echo', selectedEchoIndex);
+        downloadSVG(svg, 'echo-view.svg');
+    }
+    
+    /**
+     * Create SVG string for a plot
+     */
+    function createSVGPlot(coords, xScale, yScale, colorScale, title, plotType, selectedValue) {
+        const svgWidth = totalWidth;
+        const svgHeight = totalHeight;
+        
+        let svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${svgWidth}" height="${svgHeight}" viewBox="0 0 ${svgWidth} ${svgHeight}">`;
+        
+        // Background
+        svg += `<rect width="${svgWidth}" height="${svgHeight}" fill="#f3f3f3"/>`;
+        
+        // Title
+        svg += `<text x="${svgWidth/2}" y="25" text-anchor="middle" font-family="sans-serif" font-size="16" font-weight="bold" fill="black">${title}</text>`;
+        
+        // Main plot group with margins
+        svg += `<g transform="translate(${margin.left},${margin.top})">`;
+        
+        // Grid
+        const xTicks = xScale.ticks(10);
+        const yTicks = yScale.ticks(10);
+        
+        for (const tick of xTicks) {
+            const x = xScale(tick);
+            svg += `<line x1="${x}" y1="0" x2="${x}" y2="${height}" stroke="rgba(0,0,0,0.1)" stroke-width="0.5"/>`;
+        }
+        for (const tick of yTicks) {
+            const y = yScale(tick);
+            svg += `<line x1="0" y1="${y}" x2="${width}" y2="${y}" stroke="rgba(0,0,0,0.1)" stroke-width="0.5"/>`;
+        }
+        
+        // Data points
+        for (const coord of coords) {
+            const x = xScale(coord.ky) - blockWidth / 2;
+            const y = yScale(coord.kz) - blockHeight / 2;
+            const color = plotType === 'shot' ? colorScale(coord.shot || 0) : colorScale(coord.echo || 0);
+            svg += `<rect x="${x}" y="${y}" width="${blockWidth}" height="${blockHeight}" fill="${color}" shape-rendering="crispEdges"/>`;
+        }
+        
+        // Highlights
+        if (plotType === 'shot' && showShotHighlight && selectedShotIndex !== null) {
+            for (const coord of coords) {
+                if (coord.shot === selectedShotIndex) {
+                    const x = xScale(coord.ky) - blockWidth / 2;
+                    const y = yScale(coord.kz) - blockHeight / 2;
+                    svg += `<rect x="${x}" y="${y}" width="${blockWidth}" height="${blockHeight}" fill="black" shape-rendering="crispEdges"/>`;
+                }
+            }
+        }
+        if (showEchoHighlight && selectedValue !== null) {
+            for (const coord of coords) {
+                if (coord.echo === selectedValue) {
+                    const x = xScale(coord.ky) - blockWidth / 2;
+                    const y = yScale(coord.kz) - blockHeight / 2;
+                    svg += `<rect x="${x}" y="${y}" width="${blockWidth}" height="${blockHeight}" fill="white" shape-rendering="crispEdges"/>`;
+                }
+            }
+        }
+        
+        // Axes
+        svg += `<line x1="0" y1="${height}" x2="${width}" y2="${height}" stroke="black" stroke-width="1"/>`;
+        svg += `<line x1="0" y1="0" x2="0" y2="${height}" stroke="black" stroke-width="1"/>`;
+        
+        // X-axis ticks and labels
+        for (const tick of xTicks) {
+            const x = xScale(tick);
+            svg += `<line x1="${x}" y1="${height}" x2="${x}" y2="${height + 5}" stroke="black" stroke-width="1"/>`;
+            svg += `<text x="${x}" y="${height + 18}" text-anchor="middle" font-family="sans-serif" font-size="12" fill="black">${tick.toFixed(0)}</text>`;
+        }
+        
+        // Y-axis ticks and labels
+        for (const tick of yTicks) {
+            const y = yScale(tick);
+            svg += `<line x1="0" y1="${y}" x2="-5" y2="${y}" stroke="black" stroke-width="1"/>`;
+            svg += `<text x="-8" y="${y}" text-anchor="end" dominant-baseline="middle" font-family="sans-serif" font-size="12" fill="black">${tick.toFixed(0)}</text>`;
+        }
+        
+        // Axis labels
+        svg += `<text x="${width/2}" y="${height + 40}" text-anchor="middle" font-family="sans-serif" font-size="14" fill="black">ky</text>`;
+        svg += `<text x="-45" y="${height/2}" text-anchor="middle" transform="rotate(-90, -45, ${height/2})" font-family="sans-serif" font-size="14" fill="black">kz</text>`;
+        
+        svg += `</g>`;
+        svg += `</svg>`;
+        
+        return svg;
+    }
+    
+    /**
+     * Download SVG as file
+     */
+    function downloadSVG(svgString, filename) {
+        const blob = new Blob([svgString], { type: 'image/svg+xml' });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = filename;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        URL.revokeObjectURL(url);
+    }
+    
     return {
         init,
         plotByShotNumber,
@@ -580,6 +705,8 @@ const D3Plots = (() => {
         setSelectedShot,
         setSelectedEcho,
         setShowShotHighlight,
-        setShowEchoHighlight
+        setShowEchoHighlight,
+        exportShotSVG,
+        exportEchoSVG
     };
 })();

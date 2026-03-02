@@ -74,12 +74,15 @@ h1 {
 
 .control-group input[type="checkbox"] {
     margin-right: 8px;
+    cursor: pointer;
 }
 
 .control-group label:has(> input[type="checkbox"]) {
     display: flex;
     align-items: center;
-    font-weight: 400;
+    font-weight: 600;
+    cursor: pointer;
+    user-select: none;
 }
 
 .control-group span {
@@ -210,6 +213,53 @@ select:focus {
     margin-bottom: 40px;
 }
 
+.plot-column {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.colorbar-canvas {
+    width: 100%;
+    height: 60px;
+    border-radius: 8px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    background: #f3f3f3;
+}
+
+.plot-wrapper {
+    width: 100%;
+    border-radius: 8px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    background: #f3f3f3;
+    display: flex;
+    justify-content: center;
+}
+
+.export-button {
+    width: 100%;
+    margin-top: 10px;
+    padding: 10px 20px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border: none;
+    border-radius: 5px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+}
+
+.export-button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 10px rgba(102, 126, 234, 0.4);
+}
+
+.export-button:active {
+    transform: translateY(0);
+}
+
 .plot-controls {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
@@ -224,19 +274,7 @@ select:focus {
     }
 }
 
-.plot-wrapper {
-    border-radius: 8px;
-    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
-    overflow: hidden;
-    background: white;
-    min-height: 650px;
-}
-
-.bk-root {
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-}
-
-/* Info Panel */
+/* Responsive Design */
 .info-panel {
     background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
     color: white;
