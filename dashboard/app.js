@@ -6,10 +6,10 @@
 const App = (() => {
     let currentCoords = [];
     let currentParams = {
-        etl: 72,
-        ky: 128,
-        kz: 128,
-        centerEcho: 22,
+        etl: 144,
+        ky: 256,
+        kz: 256,
+        centerEcho: 105,
         ordering: 'chevron',
         kyAccel: 1,
         kzAccel: 1,
@@ -756,6 +756,12 @@ const App = (() => {
         getCurrentParams
     };
 })();
+
+// Expose live accessors for other modules (brain-sim.js, MPRAGE tab)
+window.AppState = {
+    get coords() { return App.getCurrentCoords(); },
+    get params()  { return App.getCurrentParams(); },
+};
 
 // Initialize when DOM is ready
 document.addEventListener('DOMContentLoaded', () => {

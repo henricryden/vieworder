@@ -5,7 +5,7 @@
   "private": true,
   "scripts": {
     "build": "node build.js",
-    "dev": "cd dashboard && python3 -m http.server 8000"
+    "dev": "python3 -m http.server 8000"
   },
   "devDependencies": {
     "javascript-obfuscator": "^4.1.0",
