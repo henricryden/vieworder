@@ -10,7 +10,9 @@
   "scripts": {
     "test": "node --test tests/*.test.js",
     "example:mprage": "node examples/mprage.js",
-    "example:mprage-variations": "node examples/mprage_variations.js"
+    "example:mprage-variations": "node examples/mprage_variations.js",
+    "serve": "python -m http.server 8000 --directory .",
+    "dashboard": "echo 'Open http://localhost:8000/dashboard/ in your browser'"
   },
   "keywords": ["MRI", "EPG", "pulse-sequence", "simulation", "NMR"],
   "author": "",
