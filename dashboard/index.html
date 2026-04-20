@@ -601,8 +601,10 @@
             const timeline = [];
             let t = 0;
             for (const op of ts.operators) {
-                if (op instanceof ADC)
-                    timeline.push({ time: t, Mz: s.Z0().real, Mxy: Complex.magnitude(s.F0()) });
+                if (op instanceof ADC) {
+                    const f0 = s.F0();
+                    timeline.push({ time: t, Mz: s.Z0().real, MxyRe: f0.real, MxyIm: f0.imag });
+                }
                 op.apply(s);
                 if (op instanceof Relaxation) t += op.tau;
             }
@@ -676,9 +678,15 @@
                 let st = null;
                 for (let i = 0; i < numSims; i++)
                     st = simulateAndTrackWithState(seq, t.T1, t.T2, st ? st.finalState : null, t.PD);
-                const Mxy = new Float32Array(etl);
-                st.timeline.forEach((pt, i) => { if (i < etl) Mxy[i] = pt.Mxy; });
-                result[t.name] = Mxy;
+                // Store complex signals: [re0, im0, re1, im1, ..., re(etl-1), im(etl-1)]
+                const MxyComplex = new Float32Array(etl * 2);
+                st.timeline.forEach((pt, i) => { 
+                    if (i < etl) { 
+                        MxyComplex[i * 2] = pt.MxyRe; 
+                        MxyComplex[i * 2 + 1] = pt.MxyIm; 
+                    }
+                });
+                result[t.name] = MxyComplex;
             }
             console.log(`[MPRAGEModule] getMPRAGESignals ETL=${etl} in ${(performance.now()-t0).toFixed(0)} ms`);
             return result;
@@ -733,7 +741,16 @@
             };
 
             const mkDatasets = (key) => TISSUES_3T.map(t => ({
-                label: t.label, data: winResults[t.name].map(pt => pt[key]),
+                label: t.label, 
+                data: winResults[t.name].map(pt => {
+                    if (key === 'Mxy') {
+                        // Compute magnitude from complex signal
+                        const re = pt.MxyRe || 0;
+                        const im = pt.MxyIm || 0;
+                        return Math.sqrt(re * re + im * im);
+                    }
+                    return pt[key];
+                }),
                 borderColor: t.color, backgroundColor: 'transparent',
                 borderWidth: 2, pointRadius: 0, tension: 0,
                 hidden: ['CSF', 'adipose', 'bonemarrow'].includes(t.name),

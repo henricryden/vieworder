@@ -335,7 +335,7 @@ const BrainSim = (() => {
      * Assemble measured k-space from view order coords, MPRAGE signals, and phantom grids.
      *
      * @param {Array}  coords      — from AppState.coords (each has .y_idx, .z_idx, .echo)
-     * @param {Object} mprageSigs  — {tissueName: Float32Array[ETL]} Mxy per echo (0-indexed)
+     * @param {Object} mprageSigs  — {tissueName: Float32Array[ETL*2]} (re, im interleaved) complex signals per echo
      * @param {Object} phantomGrid — {tissueName: Float32Array[Ny*Nz*2]} (re, im interleaved)
      * @param {number} Ny, Nz
      * @returns {[Float32Array, Float32Array]} [ksp_re, ksp_im] with DC at (iy=Ny/2, iz=Nz/2)
@@ -359,16 +359,25 @@ const BrainSim = (() => {
 
             let sRe = 0, sIm = 0;
             for (const name of tissues) {
-                const sigs = mprageSigs[name];
+                const sigsComplex = mprageSigs[name];
                 const grid = phantomGrid[name];
-                if (!sigs || !grid) continue;
+                if (!sigsComplex || !grid) continue;
 
-                const Mxy = sigs[echoIdx] || 0;
                 const PD  = PD_map[name] || 1.0;
                 const gi  = kspIdx * 2;
 
-                sRe += PD * Mxy * grid[gi];
-                sIm += PD * Mxy * grid[gi + 1];
+                // Complex signal from EPG: Mxy = MxyRe + i*MxyIm
+                const MxyRe = sigsComplex[echoIdx * 2] || 0;
+                const MxyIm = sigsComplex[echoIdx * 2 + 1] || 0;
+                
+                // Grid point: gridVal = gridRe + i*gridIm
+                const gridRe = grid[gi];
+                const gridIm = grid[gi + 1];
+
+                // Complex multiplication: PD * (MxyRe + i*MxyIm) * (gridRe + i*gridIm)
+                // = PD * [(MxyRe*gridRe - MxyIm*gridIm) + i*(MxyRe*gridIm + MxyIm*gridRe)]
+                sRe += PD * (MxyRe * gridRe - MxyIm * gridIm);
+                sIm += PD * (MxyRe * gridIm + MxyIm * gridRe);
             }
             ksp_re[kspIdx] = sRe;
             ksp_im[kspIdx] = sIm;
@@ -418,8 +427,17 @@ const BrainSim = (() => {
         const labels = Array.from({ length: etl }, (_, i) => i + 1);
 
         const datasets = TISSUE_INFO.map(t => {
-            const sigs = mprageSigs[t.name];
-            const data = sigs ? Array.from(sigs).slice(0, etl) : Array(etl).fill(0);
+            const sigsComplex = mprageSigs[t.name];
+            const data = [];
+            if (sigsComplex) {
+                for (let i = 0; i < etl; i++) {
+                    const re = sigsComplex[i * 2] || 0;
+                    const im = sigsComplex[i * 2 + 1] || 0;
+                    data.push(Math.sqrt(re * re + im * im));  // Magnitude of complex signal
+                }
+            } else {
+                data.push(...Array(etl).fill(0));
+            }
             return {
                 label: t.label,
                 data,
