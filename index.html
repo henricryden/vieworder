@@ -7,6 +7,17 @@
     <script src="https://d3js.org/d3.v7.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.js"></script>
     <link rel="stylesheet" href="style.css">
+    <script>
+        // Detect file:// protocol and warn user
+        if (location.protocol === 'file:') {
+            window.addEventListener('DOMContentLoaded', () => {
+                const banner = document.createElement('div');
+                banner.style.cssText = 'position:fixed;top:0;left:0;right:0;background:#ff6b6b;color:white;padding:12px;z-index:10000;font-weight:bold;text-align:center;';
+                banner.innerHTML = '⚠️ MPRAGE simulator requires HTTP/HTTPS (dynamic imports blocked with file:// protocol). Run: <code style="background:rgba(0,0,0,0.3);padding:2px 6px;">npm run dev</code> then visit <a href="http://localhost:8000/dashboard/" style="color:white;text-decoration:underline;">http://localhost:8000/dashboard/</a>';
+                document.body.insertBefore(banner, document.body.firstChild);
+            });
+        }
+    </script>
 </head>
 <body>
     <div id="spinner" class="spinner hidden"></div>
@@ -462,7 +473,7 @@
         let Sequence, StateMatrix, RFPulse, Relaxation, GradientShift, ADC, Spoiler, Complex;
         let _ready = false;
 
-        import('../js-epg/src/index.js')
+        import('./js-epg/src/index.js')
             .then(m => {
                 ({ Sequence, StateMatrix, RFPulse, Relaxation,
                    GradientShift, ADC, Spoiler, Complex } = m);
