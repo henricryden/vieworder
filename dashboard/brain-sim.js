@@ -555,6 +555,16 @@ const BrainSim = (() => {
                 sigs = window.RAREModule.getRARESignals(params);
                 console.log(`[BrainSim] RARE simulation in ${(performance.now() - t1).toFixed(0)} ms`, sigs);
                 if (!sigs) { setStatus('RARE signals returned null — check console.', true); return; }
+            } else if (sigSource === 'fspgr') {
+                if (!window.FSPGRModule || !window.FSPGRModule.ready) {
+                    setStatus('FSPGR module not ready — open Tab ③ first.', true);
+                    return;
+                }
+                setStatus('Simulating FSPGR…');
+                const t1 = performance.now();
+                sigs = window.FSPGRModule.getFSPGRSignals(params);
+                console.log(`[BrainSim] FSPGR simulation in ${(performance.now() - t1).toFixed(0)} ms`);
+                if (!sigs) { setStatus('FSPGR signals returned null — check console.', true); return; }
             } else {
                 if (!window.MPRAGEModule || !window.MPRAGEModule.ready) {
                     setStatus('MPRAGE module not ready — please wait.', true);
@@ -582,7 +592,7 @@ const BrainSim = (() => {
 
             // 6. Render
             renderImage(canvas, img, width, height);
-            const sourceLabel = sigSource === 'rare' ? 'RARE' : 'MPRAGE';
+            const sourceLabel = sigSource === 'rare' ? 'RARE' : sigSource === 'fspgr' ? 'FSPGR' : 'MPRAGE';
             const titleEl = document.getElementById('brain-mxy-title');
             if (titleEl) titleEl.textContent = `${sourceLabel} Mxy(echo) per tissue — used in this scan`;
             renderMxyChart(sigs, ETL, sourceLabel);

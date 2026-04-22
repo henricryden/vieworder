@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MRI k-Space &amp; MPRAGE Simulator</title>
+    <title>MRI Simulator</title>
     <script src="https://d3js.org/d3.v7.min.js"></script>
     <link rel="stylesheet" href="style.css">
 </head>
@@ -585,6 +585,73 @@
             </div>
         </div><!-- /tab-rare -->
 
+        <!-- ══ TAB: FSPGR Simulator ═══════════════════════════════════ -->
+        <div id="tab-fspgr" class="tab-panel">
+            <div class="mprage-params-grid">
+
+                <!-- Left column: Excitation -->
+                <div class="mprage-panel">
+                    <h2>Excitation</h2>
+                    <div class="mprage-etl-note">
+                        <strong id="fspgr-numexc-display">—</strong> excitations
+                        (phase encodes from Tab ①)
+                    </div>
+                    <div class="control-group">
+                        <label>Flip angle <span class="value" id="fspgr-alpha-value">15</span> °</label>
+                        <input type="range" id="fspgr-alpha" min="1" max="90" value="15" step="1">
+                    </div>
+                </div>
+
+                <!-- Right column: Timing -->
+                <div class="mprage-panel">
+                    <h2>Timing</h2>
+                    <div style="height:10px;"></div>
+                    <div class="control-group">
+                        <label>TR <span class="value" id="fspgr-tr-value">7</span> ms</label>
+                        <input type="range" id="fspgr-tr" min="3" max="50" value="7" step="0.5">
+                    </div>
+                    <div class="control-group">
+                        <label>TE <span class="value" id="fspgr-te-value">3.5</span> ms</label>
+                        <input type="range" id="fspgr-te" min="0" max="20" value="3.5" step="0.5">
+                    </div>
+                    <div style="color:#a0a0c0;font-size:0.85em;margin-top:6px;">Perfect spoiling assumed</div>
+                </div>
+
+            </div><!-- /mprage-params-grid -->
+
+            <!-- Excitations-to-show slider (shown after first simulation) -->
+            <div id="fspgr-shots-slider-row" style="display:none; margin-top:16px;">
+                <div class="control-group" style="max-width:520px;">
+                    <label>Show <span class="value" id="fspgr-show-shots-value">200</span> excitations
+                        <span style="color:#666;font-size:0.85em;">(drag to expand beyond auto-detected steady state)</span>
+                    </label>
+                    <input type="range" id="fspgr-show-shots" min="1" max="10000" value="200" step="1">
+                </div>
+            </div>
+
+            <!-- Full-scan charts — side by side -->
+            <div class="mprage-plots-row" style="margin-top:22px;">
+                <div class="mprage-plot-panel">
+                    <h3>Full Scan — Mz per excitation</h3>
+                    <div class="mprage-chart-wrapper" id="fspgr-mz-chart"></div>
+                    <div class="mprage-phase-legend">
+                        <div style="background:rgba(100,200,255,.15);border-left:3px solid #64c8ff;">
+                            <strong>FSPGR</strong> (<span id="fspgr-plot-label-mz">—</span>)
+                        </div>
+                    </div>
+                </div>
+                <div class="mprage-plot-panel">
+                    <h3>Full Scan — Mxy per excitation</h3>
+                    <div class="mprage-chart-wrapper" id="fspgr-mxy-chart"></div>
+                    <div class="mprage-phase-legend">
+                        <div style="background:rgba(100,200,255,.15);border-left:3px solid #64c8ff;">
+                            <strong>FSPGR</strong> (<span id="fspgr-plot-label-mxy">—</span>)
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div><!-- /tab-fspgr -->
+
         <!-- ══ TAB 5: Brain Scan ══════════════════════════════════════ -->
         <div id="tab-brain-scan" class="tab-panel">
             <div class="brain-layout">
@@ -667,7 +734,7 @@
                 b.classList.toggle('selected', b.textContent === seq);
             });
             // Map sequence to tab ID
-            const seqToTab = { 'RARE': 'rare', 'MPRAGE': 'mprage', 'FSPGR': 'mprage', 'bSSFP': 'mprage' };
+            const seqToTab = { 'RARE': 'rare', 'MPRAGE': 'mprage', 'FSPGR': 'fspgr', 'bSSFP': 'mprage' };
             const tabId = seqToTab[seq] || 'mprage';
             switchTab(tabId);
         }
@@ -682,14 +749,16 @@
                 phantom:      document.querySelectorAll('.tab-btn')[1],
                 mprage:       document.getElementById('tab3-btn'),
                 rare:         document.getElementById('tab3-btn'),
+                fspgr:        document.getElementById('tab3-btn'),
                 'brain-scan': document.querySelectorAll('.tab-btn')[3],
             }[id];
             if (activeButton) activeButton.classList.add('active');
 
             if (id === 'mprage') window.BrainScanSignalSource = 'mprage';
-            if (id === 'rare') window.BrainScanSignalSource = 'rare';
+            if (id === 'rare')   window.BrainScanSignalSource = 'rare';
+            if (id === 'fspgr')  window.BrainScanSignalSource = 'fspgr';
 
-            // Sync ETL display when switching to MPRAGE, RARE or Brain Scan tabs
+            // Sync ETL display when switching to sequence tabs
             if (id === 'mprage' || id === 'rare' || id === 'brain-scan') {
                 const etl = window.AppState ? window.AppState.params.etl : 72;
                 const el  = document.getElementById('mprage-etl-display');
@@ -702,6 +771,14 @@
                         window.RAREModule.refreshPlots();
                     });
                 });
+            if (id === 'fspgr') {
+                const coords = window.AppState ? window.AppState.coords : [];
+                const el     = document.getElementById('fspgr-numexc-display');
+                if (el) el.textContent = coords.length || '—';
+                // Auto-run simulation when tab is selected
+                if (window.FSPGRModule && window.FSPGRModule.runSimulation) {
+                    window.FSPGRModule.runSimulation();
+                }
             }
         }
     </script>
@@ -722,6 +799,7 @@
                 console.log('✓ EPG modules loaded');
                 setupMPRAGESliders();
                 setupRARESliders();
+                setupFSPGRSliders();
             })
             .catch(err => {
                 console.error('✗ EPG module load failed:', err);
@@ -1709,6 +1787,189 @@
             }
         }
 
+        // ── FSPGR: analytical spoiled-GRE recurrence ─────────────────────
+        // Simulates `numExcitations` consecutive RF pulses with perfect spoiling.
+        // Returns { Mxy: Float32Array, Mz: Float32Array } of length numExcitations.
+        //   Mxy[n] = Mz_pre[n] × sin(α) × exp(-TE/T2)   (signal at echo time)
+        //   Mz[n]  = Mz recovered at start of shot n+1
+        function simulateFSPGR(numExcitations, alpha_deg, TR, TE, T1, T2, PD) {
+            const Mxy = new Float32Array(numExcitations);
+            const Mz  = new Float32Array(numExcitations);
+            const E1  = Math.exp(-TR / T1);
+            const E2  = Math.exp(-TE / T2);
+            const ca  = Math.cos(alpha_deg * Math.PI / 180);
+            const sa  = Math.sin(alpha_deg * Math.PI / 180);
+            let Mzpre = PD;                         // thermal equilibrium at start
+            for (let n = 0; n < numExcitations; n++) {
+                Mxy[n]    = Mzpre * sa * E2;        // transverse signal at TE
+                const Mzpost = Mzpre * ca;          // Mz immediately after pulse
+                Mzpre     = Mzpost * E1 + PD * (1 - E1);  // recovery over TR
+                Mz[n]     = Mzpre;                  // Mz before next pulse
+            }
+            return { Mxy, Mz };
+        }
+
+        // ── Auto-detect steady state ─────────────────────────────────────
+        // Returns the shot index where Mxy has converged to within `tol` relative
+        // change for `winSize` consecutive points.
+        function detectSteadyState(arr, tol, winSize) {
+            tol     = tol     || 2e-3;
+            winSize = winSize || 5;
+            let count = 0;
+            for (let n = 1; n < arr.length; n++) {
+                const ref   = Math.abs(arr[n]) || 1e-9;
+                const delta = Math.abs(arr[n] - arr[n - 1]) / ref;
+                if (delta < tol) { if (++count >= winSize) return n - winSize + 1; }
+                else count = 0;
+            }
+            return arr.length - 1;
+        }
+
+        // ── Downsample array to at most maxPts {x,y} points ─────────────
+        function downsampleForPlot(arr, maxPts) {
+            if (arr.length <= maxPts) return arr;
+            const step = arr.length / maxPts;
+            return Array.from({ length: maxPts }, (_, i) => arr[Math.round(i * step)]);
+        }
+
+        // ── FSPGR excitation count helper ────────────────────────────────
+        function fspgrNumExcitations() {
+            const coords = window.AppState ? window.AppState.coords : [];
+            return coords.length || 512;
+        }
+
+        // ── FSPGR slider state ───────────────────────────────────────────
+        let _fspgrSsExc    = 0;  // auto-detected steady-state excitation index
+        let _fspgrShowExc  = 0;  // currently displayed excitation count
+
+        // ── Render both FSPGR charts for a given number of excitations ───
+        function renderFSPGRCharts(showExc) {
+            const TR    = parseFloat(document.getElementById('fspgr-tr').value);
+            const TE    = parseFloat(document.getElementById('fspgr-te').value);
+            const alpha = parseFloat(document.getElementById('fspgr-alpha').value);
+            const activeTissues = window.PhantomState.tissues.filter(t => t.enabled !== false);
+
+            const mzDs = [], mxyDs = [];
+            for (const t of activeTissues) {
+                const { Mxy, Mz } = simulateFSPGR(showExc, alpha, TR, TE, t.T1, t.T2, t.PD);
+                const rawMxy = Array.from({ length: showExc }, (_, i) => ({ x: i + 1, y: Mxy[i] }));
+                const rawMz  = Array.from({ length: showExc }, (_, i) => ({ x: i + 1, y: Mz[i]  }));
+                const hidden = false;
+                mxyDs.push({ label: t.label, data: downsampleForPlot(rawMxy, 2000), color: t.color, hidden });
+                mzDs.push({  label: t.label, data: downsampleForPlot(rawMz,  2000), color: t.color, hidden });
+            }
+
+            const lbl = `showing ${showExc} of ${fspgrNumExcitations()} excitations`;
+            document.getElementById('fspgr-plot-label-mz').textContent  = lbl;
+            document.getElementById('fspgr-plot-label-mxy').textContent = lbl;
+
+            D3SeqPlots.createLinePlot(document.getElementById('fspgr-mz-chart'), {
+                datasets: mzDs,
+                xType: 'linear', xMin: 1, xMax: showExc,
+                yMin: 0, yMax: 1.05,
+                xLabel: 'Excitation index', yLabel: 'Mz',
+                showLegend: true,
+            });
+            D3SeqPlots.createLinePlot(document.getElementById('fspgr-mxy-chart'), {
+                datasets: mxyDs,
+                xType: 'linear', xMin: 1, xMax: showExc,
+                yMin: 0,
+                xLabel: 'Excitation index', yLabel: 'Mxy',
+                showLegend: true,
+            });
+        }
+
+        // ── Main FSPGR simulation ────────────────────────────────────────
+        async function runFSPGRSimulation() {
+            if (!_ready) { console.warn('[FSPGR] EPG not ready'); return; }
+            const t0 = performance.now();
+
+            const numExc = fspgrNumExcitations();
+            document.getElementById('fspgr-numexc-display').textContent = numExc;
+
+            const TR    = parseFloat(document.getElementById('fspgr-tr').value);
+            const TE    = parseFloat(document.getElementById('fspgr-te').value);
+            const alpha = parseFloat(document.getElementById('fspgr-alpha').value);
+
+            // Auto-detect steady state on the first enabled tissue
+            const refT = window.PhantomState.tissues.find(t => t.enabled !== false) || { T1: 1450, T2: 100, PD: 1.0 };
+            const { Mxy: refMxy } = simulateFSPGR(numExc, alpha, TR, TE, refT.T1, refT.T2, refT.PD);
+            const ssExc  = detectSteadyState(refMxy);
+            _fspgrSsExc  = ssExc;
+
+            // Default display: ss + 20% margin + 50 excitations padding
+            const margin  = Math.max(5, Math.ceil(ssExc * 0.20)) + 50;
+            const showDef = Math.min(numExc, ssExc + margin);
+            _fspgrShowExc = showDef;
+
+            // Configure the expand slider
+            const sliderRow = document.getElementById('fspgr-shots-slider-row');
+            const slider    = document.getElementById('fspgr-show-shots');
+            const sliderVal = document.getElementById('fspgr-show-shots-value');
+            slider.min   = 1;
+            slider.max   = numExc;
+            slider.value = showDef;
+            sliderVal.textContent = showDef;
+            sliderRow.style.display = '';
+
+            renderFSPGRCharts(showDef);
+            console.log(`[FSPGR] done in ${(performance.now() - t0).toFixed(0)} ms — ss at exc ${ssExc}, showing ${showDef}/${numExc}`);
+        }
+
+        // ── getFSPGRSignals: steady-state within-shot profile (for brain scan) ──
+        // Returns { tissueName: Float32Array[ETL*2] } — last shot's ETL excitations,
+        // complex-interleaved with imaginary part = 0 (spoiled). Same format as
+        // getMPRAGESignals so assembleMeasuredKspace works unchanged (coord.echo 1..ETL).
+        function getFSPGRSignals(appParams) {
+            if (!_ready) return null;
+            const etl   = appParams.etl;
+            const TR    = parseFloat(document.getElementById('fspgr-tr').value);
+            const TE    = parseFloat(document.getElementById('fspgr-te').value);
+            const alpha = parseFloat(document.getElementById('fspgr-alpha').value);
+            // Warm up for 500 shots — guaranteed steady state for all biological tissues
+            const warmup = 500;
+            const result = {};
+            for (const t of window.PhantomState.tissues.filter(t => t.enabled !== false)) {
+                const { Mxy } = simulateFSPGR(warmup * etl, alpha, TR, TE, t.T1, t.T2, t.PD);
+                const MxyComplex = new Float32Array(etl * 2);
+                const off = (warmup - 1) * etl;
+                for (let e = 0; e < etl; e++) {
+                    MxyComplex[e * 2]     = Mxy[off + e];
+                    MxyComplex[e * 2 + 1] = 0;
+                }
+                result[t.name] = MxyComplex;
+            }
+            return result;
+        }
+
+        // ── FSPGR slider setup ───────────────────────────────────────────
+        function setupFSPGRSliders() {
+            // Update display value AND re-simulate on every slider change
+            [
+                ['fspgr-alpha', 'fspgr-alpha-value'],
+                ['fspgr-tr',    'fspgr-tr-value'],
+                ['fspgr-te',    'fspgr-te-value'],
+            ].forEach(([id, valId]) => {
+                const sl = document.getElementById(id);
+                const sp = document.getElementById(valId);
+                if (sl && sp) sl.addEventListener('input', () => {
+                    sp.textContent = sl.value;
+                    runFSPGRSimulation();
+                });
+            });
+
+            const showSlider = document.getElementById('fspgr-show-shots');
+            const showVal    = document.getElementById('fspgr-show-shots-value');
+            if (showSlider && showVal) {
+                showSlider.addEventListener('input', () => {
+                    const v = parseInt(showSlider.value);
+                    showVal.textContent = v;
+                    _fspgrShowExc = v;
+                    renderFSPGRCharts(v);
+                });
+            }
+        }
+
         // ── Expose module ────────────────────────────────────────────────
         window.MPRAGEModule = {
             get ready() { return _ready; },
@@ -1720,6 +1981,11 @@
             refreshPlots() {
                 requestRARESimulation(0);
             },
+        };
+        window.FSPGRModule = {
+            get ready() { return _ready; },
+            getFSPGRSignals,
+            runSimulation: runFSPGRSimulation,
         };
     </script>
 </body>
