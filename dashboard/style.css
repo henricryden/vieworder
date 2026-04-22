@@ -815,3 +815,153 @@ select:focus {
     margin-right: 6px;
     vertical-align: middle;
 }
+
+/* ── Phantom tab ──────────────────────────────────────────────────────── */
+.phantom-layout {
+    display: grid;
+    grid-template-columns: 220px 1fr;
+    gap: 24px;
+    align-items: start;
+}
+
+@media (max-width: 700px) {
+    .phantom-layout { grid-template-columns: 1fr; }
+}
+
+.phantom-selector-panel {
+    background: #f8f9fa;
+    border-radius: 8px;
+    padding: 22px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.phantom-selector-panel h2 {
+    color: #667eea;
+    margin-bottom: 16px;
+    font-size: 1.4em;
+    border-bottom: 2px solid #667eea;
+    padding-bottom: 8px;
+}
+
+.phantom-select {
+    width: 100%;
+    padding: 8px 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    font-size: 0.95em;
+    background: white;
+    color: #333;
+    cursor: pointer;
+    margin-top: 6px;
+}
+.phantom-select:focus { outline: none; border-color: #667eea; }
+
+.phantom-table-panel {
+    background: #f8f9fa;
+    border-radius: 8px;
+    padding: 22px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.phantom-table-panel h2 {
+    color: #667eea;
+    margin-bottom: 8px;
+    font-size: 1.4em;
+    border-bottom: 2px solid #667eea;
+    padding-bottom: 8px;
+}
+
+.phantom-table-note {
+    font-size: 0.87em;
+    color: #666;
+    margin-bottom: 14px;
+}
+
+.phantom-tissue-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.9em;
+}
+
+.phantom-tissue-table thead tr {
+    border-bottom: 2px solid #667eea;
+}
+
+.phantom-tissue-table th {
+    text-align: left;
+    padding: 6px 10px;
+    color: #667eea;
+    font-weight: 600;
+}
+
+.phantom-tissue-table th:not(:first-child) {
+    text-align: right;
+}
+
+.phantom-tissue-table td {
+    padding: 6px 10px;
+    border-bottom: 1px solid #dee2e6;
+    vertical-align: middle;
+}
+
+.phantom-tissue-table td:first-child {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    white-space: nowrap;
+}
+
+.phantom-tissue-table td:not(:first-child) {
+    text-align: right;
+}
+
+.tissue-color-swatch {
+    display: inline-block;
+    width: 13px;
+    height: 13px;
+    border-radius: 3px;
+    border: 1px solid rgba(0,0,0,0.25);
+    flex-shrink: 0;
+}
+
+.tissue-input {
+    width: 88px;
+    padding: 4px 6px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 0.9em;
+    font-family: 'Courier New', monospace;
+    text-align: right;
+    background: white;
+    color: #333;
+    transition: border-color 0.15s;
+}
+.tissue-input:focus {
+    outline: none;
+    border-color: #667eea;
+    box-shadow: 0 0 0 2px rgba(102,126,234,0.15);
+}
+
+.phantom-reset-btn {
+    margin-top: 16px;
+    padding: 9px 20px;
+    font-size: 0.92em;
+    font-weight: 600;
+    background: white;
+    color: #667eea;
+    border: 2px solid #667eea;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background 0.15s, color 0.15s;
+}
+.phantom-reset-btn:hover {
+    background: #667eea;
+    color: white;
+}
+
+/* MPRAGE tab — phantom note panel (replaces tissue table) */
+.mprage-phantom-note {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
