@@ -18,9 +18,16 @@
         <div class="tab-bar">
             <button class="tab-btn active" onclick="switchTab('view-order')">① View Order</button>
             <button class="tab-btn"        onclick="switchTab('phantom')">② Phantom</button>
-            <button class="tab-btn"        onclick="switchTab('mprage')">③ MPRAGE</button>
-            <button class="tab-btn"        onclick="switchTab('rare')">④ RARE</button>
-            <button class="tab-btn"        onclick="switchTab('brain-scan')">⑤ Brain Scan</button>
+            <div class="tab-dropdown">
+                <button class="tab-btn" id="tab3-btn" onclick="switchTab('mprage')">③ <span id="tab3-label">MPRAGE</span> &#9660;</button>
+                <div class="tab-dropdown-menu" id="tab3-menu">
+                    <button onclick="selectTab3Sequence('RARE')">RARE</button>
+                    <button onclick="selectTab3Sequence('MPRAGE')" class="selected">MPRAGE</button>
+                    <button onclick="selectTab3Sequence('FSPGR')">FSPGR</button>
+                    <button onclick="selectTab3Sequence('bSSFP')">bSSFP</button>
+                </div>
+            </div>
+            <button class="tab-btn"        onclick="switchTab('brain-scan')">④ Brain Scan</button>
         </div>
 
         <!-- ══ TAB 1: View Order ══════════════════════════════════════ -->
@@ -537,28 +544,25 @@
             </div>
         </div><!-- /tab-rare -->
 
-        <!-- ══ TAB 4: Brain Scan ══════════════════════════════════════ -->
+        <!-- ══ TAB 5: Brain Scan ══════════════════════════════════════ -->
         <div id="tab-brain-scan" class="tab-panel">
             <div class="brain-layout">
                 <div class="brain-controls">
                     <h2>Brain Scan Simulation</h2>
                     <p style="font-size:0.88em;color:#555;margin-bottom:14px;">
-                        Combines view order from Tab ① with tissue signals from the selected sequence simulator,
-                        using an analytical brain phantom from <a href="https://github.com/bretglun/SpinSight">SpinSight</a>.
-                        The phantom k-space is computed analytically from SVG polygons
-                        and cached per matrix size (Ny × Nz from Tab ①).
+                        Simulates an acquisition with view order from Tab ① and MPRAGE tissue signals from Tab ②,
+                        using an analytical brain phantom from <a href="https://github.com/bretglun/SpinSight">SpinSight</a> to reconstruct
+                        a brain image.
+                        <br><br>
+                        The reconstru
+                        <br><br>
                         FOV 200 × 200 mm, 3 T.
                     </p>
-
-                    <!-- Signal source selector -->
-                    <div class="brain-signal-source">
-                        <label>Signal source</label>
-                        <button id="brain-source-mprage" class="brain-signal-btn active-mprage"
-                                onclick="selectBrainSignalSource('mprage')">② MPRAGE</button>
-                        <button id="brain-source-rare"   class="brain-signal-btn"
-                                onclick="selectBrainSignalSource('rare')">③ RARE</button>
-                    </div>
-
+                    <p style="font-size:0.85em;color:#777;margin-bottom:10px;">
+                        Phantom k-space is computed analytically from SVG polygons<br>
+                        and cached per matrix size (Ny × Nz from Tab ①).<br>
+                        Tissues: GM, WM, CSF, adipose, and bone marrow.
+                    </p>
                     <button class="brain-sim-btn" id="brain-simulate-btn"
                             onclick="BrainSim.runScan()">▶ Simulate Brain Scan</button>
                     <div class="brain-status" id="brain-status">Ready — press Simulate to run.</div>
@@ -594,7 +598,7 @@
             </div>
 
             <div class="brain-mxy-panel" style="margin-top:20px;">
-                <h3 id="brain-mxy-title">Mxy(echo) per tissue — used in this scan</h3>
+                <h3>MPRAGE Mxy(echo) per tissue — used in this scan</h3>
                 <canvas id="brain-mxy-chart"></canvas>
             </div>
         </div><!-- /tab-brain-scan -->
@@ -611,14 +615,17 @@
 
     <!-- Tab switching -->
     <script>
-        window.BrainScanSignalSource = 'mprage';
-
-        function selectBrainSignalSource(source) {
-            window.BrainScanSignalSource = source;
-            document.getElementById('brain-source-mprage').className =
-                'brain-signal-btn' + (source === 'mprage' ? ' active-mprage' : '');
-            document.getElementById('brain-source-rare').className =
-                'brain-signal-btn' + (source === 'rare' ? ' active-rare' : '');
+        function selectTab3Sequence(seq) {
+            document.getElementById('tab3-label').textContent = seq;
+            window.tab3Sequence = seq;
+            // Update selected highlight in menu
+            document.querySelectorAll('#tab3-menu button').forEach(b => {
+                b.classList.toggle('selected', b.textContent === seq);
+            });
+            // Map sequence to tab ID
+            const seqToTab = { 'RARE': 'rare', 'MPRAGE': 'mprage', 'FSPGR': 'mprage', 'bSSFP': 'mprage' };
+            const tabId = seqToTab[seq] || 'mprage';
+            switchTab(tabId);
         }
 
         function switchTab(id) {
@@ -627,13 +634,11 @@
             document.getElementById('tab-' + id).classList.add('active');
             const idx = ['view-order', 'phantom', 'mprage', 'rare', 'brain-scan'].indexOf(id);
             if (idx >= 0) document.querySelectorAll('.tab-btn')[idx].classList.add('active');
-            // Sync ETL display when switching to MPRAGE or Brain Scan tabs
+            // Sync ETL display when switching to MPRAGE, RARE or Brain Scan tabs
             if (id === 'mprage' || id === 'rare' || id === 'brain-scan') {
                 const etl = window.AppState ? window.AppState.params.etl : 72;
-                const mpEl   = document.getElementById('mprage-etl-display');
-                if (mpEl) mpEl.textContent = etl;
-                const rareEl = document.getElementById('rare-etl-display');
-                if (rareEl) rareEl.textContent = etl;
+                const el  = document.getElementById('mprage-etl-display');
+                if (el) el.textContent = etl;
             }
         }
     </script>
@@ -643,14 +648,17 @@
         // ── Load EPG library ────────────────────────────────────────────
         let Sequence, StateMatrix, RFPulse, Relaxation, GradientShift, ADC, Spoiler, Complex;
         let _ready = false;
+        let _rareReady = false;
 
         import('../js-epg/src/index.js')
             .then(m => {
                 ({ Sequence, StateMatrix, RFPulse, Relaxation,
                    GradientShift, ADC, Spoiler, Complex } = m);
                 _ready = true;
+                _rareReady = true;
                 console.log('✓ EPG modules loaded');
                 setupMPRAGESliders();
+                setupRARESliders();
             })
             .catch(err => {
                 console.error('✗ EPG module load failed:', err);
@@ -939,27 +947,7 @@
             });
         }
 
-        // ── Expose module ────────────────────────────────────────────────
-        window.MPRAGEModule = {
-            get ready() { return _ready; },
-            getMPRAGESignals,
-        };
-    </script>
-    <!-- RARE EPG module -->
-    <script type="module">
-        let Sequence, StateMatrix, RFPulse, Relaxation, GradientShift, ADC, Spoiler, Complex;
-        let _rareReady = false;
-
-        import('../js-epg/src/index.js')
-            .then(m => {
-                ({ Sequence, StateMatrix, RFPulse, Relaxation,
-                   GradientShift, ADC, Spoiler, Complex } = m);
-                _rareReady = true;
-                console.log('✓ RARE EPG modules loaded');
-                setupRARESliders();
-            })
-            .catch(err => console.error('✗ RARE EPG module load failed:', err));
-
+        // ── RARE TISSUES ────────────────────────────────────────────────
         const RARE_TISSUES_3T = [
             { name: 'gray',       label: 'Gray matter',  T1: 1450, T2: 100,  PD: 1.0,  color: '#00ff00' },
             { name: 'white',      label: 'White matter', T1: 830,  T2: 69,   PD: 0.92, color: '#d40000' },
@@ -1290,6 +1278,11 @@
             });
         }
 
+        // ── Expose module ────────────────────────────────────────────────
+        window.MPRAGEModule = {
+            get ready() { return _ready; },
+            getMPRAGESignals,
+        };
         window.RAREModule = {
             get ready() { return _rareReady; },
             getRARESignals,
