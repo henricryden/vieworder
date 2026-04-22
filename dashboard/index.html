@@ -515,6 +515,21 @@
                     <h2>Refocusing</h2>
                     <div style="height:50px;"></div>
                     <div class="control-group">
+                        <label style="display:flex;align-items:center;gap:8px;">
+                            <input type="checkbox" id="rare-pss-enable" checked>
+                            PSS startup stabilization
+                        </label>
+                    </div>
+                    <div class="control-group">
+                        <label>PSS pulses <span class="value" id="rare-pss-count-value">3</span></label>
+                        <input type="range" id="rare-pss-count" min="0" max="8" value="3" step="1" class="slider">
+                    </div>
+                    <div class="control-group">
+                        <label>PSS start FA <span class="value" id="rare-pss-start-value">180</span> °</label>
+                        <input type="range" id="rare-pss-start" min="0" max="180" value="180" step="5" class="slider">
+                    </div>
+                    <p id="rare-pss-note" style="color:#a0a0c0;font-size:0.85em;margin:4px 0 8px;">PSS modifies the first few existing refocusing pulses, ramping them down from the PSS start FA to the train plateau.</p>
+                    <div class="control-group">
                         <label>Dummy echoes <span class="value" id="rare-dummy-echoes-value">0</span></label>
                             <input type="range" id="rare-dummy-echoes" min="0" max="40" value="0" step="1" class="slider">
                     </div>
@@ -589,7 +604,9 @@
                     <h3>Full Sequence — Mz</h3>
                     <div class="mprage-chart-wrapper tall" id="rare-full-mz-chart"></div>
                     <div class="mprage-phase-legend">
-                        <div style="background:rgba(100,200,255,.15);border-left:3px solid #64c8ff;"><strong>RARE</strong> (<span id="etlDisplayRareMz">72</span> echoes)</div>
+                        <div id="rare-legend-pss-mz" style="display:none;background:rgba(80,210,160,.15);border-left:3px solid #50d2a0;"><strong>PSS startup</strong> (<span id="rare-pss-legend-count-mz">3</span> pulses)</div>
+                        <div id="rare-legend-dummy-mz" style="display:none;background:rgba(255,180,80,.15);border-left:3px solid #ffb450;"><strong>Dummy echoes</strong> (<span id="rare-dummy-legend-count-mz">0</span>)</div>
+                        <div style="background:rgba(100,200,255,.15);border-left:3px solid #64c8ff;"><strong>RARE</strong> (<span id="etlDisplayRareMz">72</span> acquired echoes)</div>
                         <div style="background:rgba(100,255,100,.15);border-left:3px solid #64ff64;"><strong>Recovery</strong></div>
                     </div>
                 </div>
@@ -599,7 +616,9 @@
                     <h3>Full Sequence — Mxy (echo amplitudes)</h3>
                     <div class="mprage-chart-wrapper tall" id="rare-full-mxy-chart"></div>
                     <div class="mprage-phase-legend">
-                        <div style="background:rgba(100,200,255,.15);border-left:3px solid #64c8ff;"><strong>RARE</strong> (<span id="etlDisplayRareMxy">72</span> echoes)</div>
+                        <div id="rare-legend-pss-mxy" style="display:none;background:rgba(80,210,160,.15);border-left:3px solid #50d2a0;"><strong>PSS startup</strong> (<span id="rare-pss-legend-count-mxy">3</span> pulses)</div>
+                        <div id="rare-legend-dummy-mxy" style="display:none;background:rgba(255,180,80,.15);border-left:3px solid #ffb450;"><strong>Dummy echoes</strong> (<span id="rare-dummy-legend-count-mxy">0</span>)</div>
+                        <div style="background:rgba(100,200,255,.15);border-left:3px solid #64c8ff;"><strong>RARE</strong> (<span id="etlDisplayRareMxy">72</span> acquired echoes)</div>
                         <div style="background:rgba(100,255,100,.15);border-left:3px solid #64ff64;"><strong>Recovery</strong></div>
                     </div>
                 </div>
@@ -1349,18 +1368,55 @@
         }
 
         class RareEchoSampleMarker {
-            constructor(trainIndex, acquiredIndex = null) {
+            constructor(trainIndex, acquiredIndex = null, phase = 'acquired') {
                 this.trainIndex = trainIndex;
                 this.acquiredIndex = acquiredIndex;
-                this.isDummy = acquiredIndex == null;
+                this.phase = phase;
+                this.isPSS = phase === 'pss';
+                this.isDummy = phase === 'dummy';
+                this.isAcquired = phase === 'acquired';
             }
             apply() {}
+        }
+
+        function readRarePSSConfig() {
+            const scheme = document.getElementById('rare-fa-scheme')?.value;
+            const enabled = !!document.getElementById('rare-pss-enable')?.checked;
+            const count = parseInt(document.getElementById('rare-pss-count')?.value || '0', 10);
+            return {
+                enabled: scheme !== 'custom' && enabled && count > 0,
+                count: scheme !== 'custom' && enabled ? Math.max(0, count) : 0,
+                startFA: parseFloat(document.getElementById('rare-pss-start')?.value || '50'),
+            };
+        }
+
+        function buildPSSSchedule(pssConfig, plateauFA) {
+            if (!pssConfig || !pssConfig.enabled || pssConfig.count <= 0) return [];
+            const startFA = pssConfig.startFA;
+            const targetFA = Number.isFinite(plateauFA) ? plateauFA : startFA;
+            if (pssConfig.count === 1) return [Math.round(startFA * 10) / 10];
+            return linspace(startFA, targetFA, pssConfig.count).map(v => Math.round(v * 10) / 10);
+        }
+
+        function applyPSSRamp(schedule, pssConfig) {
+            if (!schedule.length || !pssConfig || !pssConfig.enabled || pssConfig.count <= 0) {
+                return { schedule: schedule.slice(), modifiedCount: 0 };
+            }
+
+            const modifiedCount = Math.min(pssConfig.count, schedule.length);
+            const plateauIndex = Math.min(modifiedCount, schedule.length - 1);
+            const plateauFA = schedule[plateauIndex];
+            const pssSchedule = buildPSSSchedule({ ...pssConfig, count: modifiedCount }, plateauFA);
+            const nextSchedule = schedule.slice();
+            for (let i = 0; i < modifiedCount; i++) nextSchedule[i] = pssSchedule[i];
+            return { schedule: nextSchedule, modifiedCount };
         }
 
         // ── RARE sequence builder (accepts per-echo FA schedule) ─────────
         function buildRARE(p) {
             const seq = new Sequence(20);
             seq.add(new RFPulse(90, 90));
+            const numPSSEchoes = p.numPSSEchoes || 0;
             const numDummyEchoes = p.numDummyEchoes || 0;
             const totalRefocusingPulses = numDummyEchoes + p.numEchoes;
             for (let i = 0; i < totalRefocusingPulses; i++) {
@@ -1370,9 +1426,12 @@
                 seq.add(new RFPulse(fa, 0));
                 seq.add(new Relaxation(p.ESP / 2, 1000, 100));
                 seq.add(new GradientShift(1));
-                const acquiredIndex = i >= numDummyEchoes ? i - numDummyEchoes + 1 : null;
-                seq.add(new RareEchoSampleMarker(i + 1, acquiredIndex));
-                if (i >= numDummyEchoes) {
+                const isPSS = i < numPSSEchoes;
+                const isDummy = i < numDummyEchoes;
+                const acquiredIndex = isDummy ? null : i - numDummyEchoes + 1;
+                const phase = isPSS ? 'pss' : isDummy ? 'dummy' : 'acquired';
+                seq.add(new RareEchoSampleMarker(i + 1, acquiredIndex, phase));
+                if (acquiredIndex != null) {
                     seq.add(new ADC(`echo_${acquiredIndex}`));
                 }
             }
@@ -1390,12 +1449,11 @@
             ];
         }
 
-        function buildRefocusingSchedule(scheme, params, etl, numDummyEchoes) {
-            if (scheme === 'custom') {
-                return computeFlipAngles(scheme, params, etl + numDummyEchoes);
-            }
-            const acquiredSchedule = computeFlipAngles(scheme, params, etl);
-            return expandWithDummyEchoes(acquiredSchedule, numDummyEchoes);
+        function buildRefocusingSchedule(scheme, params, etl, numDummyEchoes, pssConfig) {
+            const downstreamSchedule = scheme === 'custom'
+                ? computeFlipAngles(scheme, params, etl + numDummyEchoes)
+                : expandWithDummyEchoes(computeFlipAngles(scheme, params, etl), numDummyEchoes);
+            return applyPSSRamp(downstreamSchedule, pssConfig);
         }
 
         function cloneWithTissueRARE(seq, T1, T2) {
@@ -1424,6 +1482,8 @@
                         time: t,
                         trainIndex: op.trainIndex,
                         acquiredIndex: op.acquiredIndex,
+                        phase: op.phase,
+                        isPSS: op.isPSS,
                         isDummy: op.isDummy,
                         Mz: s.Z0().real,
                         MxyRe: f0.real,
@@ -1460,7 +1520,8 @@
                         time: ct,
                         Mz: s.Z0().real,
                         Mxy: Complex.magnitude(s.F0()),
-                        phase,
+                        phase: op.phase,
+                        isPSS: op.isPSS,
                         isDummy: op.isDummy,
                         trainIndex: op.trainIndex,
                         acquiredIndex: op.acquiredIndex,
@@ -1500,16 +1561,20 @@
             const TR      = parseInt(document.getElementById('rare-tr').value);
             const ESP     = parseFloat(document.getElementById('rare-esp').value);
             const numDummyEchoes = parseInt(document.getElementById('rare-dummy-echoes').value);
+            const pssConfig = readRarePSSConfig();
             const numSims = parseInt(document.getElementById('rare-numSims').value);
             const scheme  = document.getElementById('rare-fa-scheme').value;
-            const faSchedule = buildRefocusingSchedule(
+            const scheduleResult = buildRefocusingSchedule(
                 scheme,
                 readSchemeParams(etl, ESP, etl + numDummyEchoes),
                 etl,
-                numDummyEchoes
+                numDummyEchoes,
+                pssConfig
             );
+            const faSchedule = scheduleResult.schedule;
+            const numPSSEchoes = scheduleResult.modifiedCount;
 
-            const p   = { numEchoes: etl, numDummyEchoes, TR, ESP, faSchedule };
+            const p   = { numEchoes: etl, numDummyEchoes, numPSSEchoes, TR, ESP, faSchedule };
             const seq = buildRARE(p);
             const result = {};
             for (const t of window.PhantomState.tissues.filter(t => t.enabled !== false)) {
@@ -1517,10 +1582,11 @@
                 for (let i = 0; i < numSims; i++)
                     st = simulateRAREEchoTrain(seq, t.T1, t.T2, st ? st.finalState : null, t.PD);
                 const MxyComplex = new Float32Array(etl * 2);
-                st.timeline.filter(pt => !pt.isDummy).forEach((pt, i) => {
-                    if (i < etl) {
-                        MxyComplex[i * 2]     = pt.MxyRe;
-                        MxyComplex[i * 2 + 1] = pt.MxyIm;
+                st.timeline.filter(pt => pt.acquiredIndex != null).forEach((pt) => {
+                    const idx = pt.acquiredIndex - 1;
+                    if (idx >= 0 && idx < etl) {
+                        MxyComplex[idx * 2]     = pt.MxyRe;
+                        MxyComplex[idx * 2 + 1] = pt.MxyIm;
                     }
                 });
                 result[t.name] = MxyComplex;
@@ -1568,7 +1634,7 @@
         function renderRARECharts() {
             if (!_rareLastSimData) return;
             const { rareActiveTissues, echoResults, fullSel, fullRes,
-                    totalTrainEchoes, numDummyEchoes, ESP, etl, scheme,
+                    totalTrainEchoes, numStartupEchoes, numDummyEchoes, ESP, etl, scheme,
                     echoPhaseBoxes, fullPhaseBoxes, totalTime } = _rareLastSimData;
 
             const onLegendClick = (label, nowHidden) => {
@@ -1617,7 +1683,7 @@
                 const svgEl = document.querySelector('#rare-echo-mxy-chart svg');
                 if (svgEl) {
                     const controlPoints = _mxyCtrlPts.map(pt => ({
-                        echoIndex: pt.echoIndex + numDummyEchoes,
+                        echoIndex: pt.echoIndex + numStartupEchoes + numDummyEchoes,
                         mxy: pt.mxy,
                     }));
                     _mxyCtrlPtHandle = D3SeqPlots.addMxyControlPoints(svgEl, {
@@ -1627,7 +1693,7 @@
                         points: controlPoints,
                         onDragEnd: (newPts) => {
                             _mxyCtrlPts = newPts.map(pt => ({
-                                echoIndex: Math.max(1, Math.min(etl, pt.echoIndex - numDummyEchoes)),
+                                echoIndex: Math.max(1, Math.min(etl, pt.echoIndex - numStartupEchoes - numDummyEchoes)),
                                 mxy: pt.mxy,
                             }));
                             requestRARESimulation(0);
@@ -1678,29 +1744,41 @@
             const TR      = parseInt(document.getElementById('rare-tr').value);
             const ESP     = parseFloat(document.getElementById('rare-esp').value);
             const numDummyEchoes = parseInt(document.getElementById('rare-dummy-echoes').value);
+            const pssConfig = readRarePSSConfig();
             const numSims = parseInt(document.getElementById('rare-numSims').value);
             const scheme  = document.getElementById('rare-fa-scheme').value;
+            const postStartupEchoes = etl + numDummyEchoes;
+
+            // Init custom nodes if needed
+            if (scheme === 'custom' && !_customNodes) {
+                _customNodes = defaultCustomNodes(postStartupEchoes);
+            }
+
+            const schemeParams = readSchemeParams(etl, ESP, postStartupEchoes);
+            const scheduleResult = buildRefocusingSchedule(scheme, schemeParams, etl, numDummyEchoes, pssConfig);
+            const faSchedule = scheduleResult.schedule;
+            const numStartupEchoes = scheduleResult.modifiedCount;
+            const totalTrainEchoes = etl + numDummyEchoes;
 
             document.getElementById('rare-etl-display').textContent    = etl;
             document.getElementById('etlDisplayRareMz').textContent     = etl;
             document.getElementById('etlDisplayRareMxy').textContent    = etl;
+            document.getElementById('rare-pss-legend-count-mz').textContent = numStartupEchoes;
+            document.getElementById('rare-pss-legend-count-mxy').textContent = numStartupEchoes;
+            document.getElementById('rare-dummy-legend-count-mz').textContent = numDummyEchoes;
+            document.getElementById('rare-dummy-legend-count-mxy').textContent = numDummyEchoes;
+            document.getElementById('rare-legend-pss-mz').style.display = numStartupEchoes > 0 ? '' : 'none';
+            document.getElementById('rare-legend-pss-mxy').style.display = numStartupEchoes > 0 ? '' : 'none';
+            document.getElementById('rare-legend-dummy-mz').style.display = numDummyEchoes > 0 ? '' : 'none';
+            document.getElementById('rare-legend-dummy-mxy').style.display = numDummyEchoes > 0 ? '' : 'none';
 
-            const totalTrainEchoes = etl + numDummyEchoes;
             if (ESP * totalTrainEchoes >= TR) {
-                alert(`(ETL + dummy echoes) × ESP (${totalTrainEchoes * ESP} ms) must be less than TR (${TR} ms).\nReduce ETL/dummy echoes or ESP, or increase TR.`);
+                alert(`(PSS + ETL + dummy echoes) × ESP (${totalTrainEchoes * ESP} ms) must be less than TR (${TR} ms).\nReduce PSS pulses, ETL/dummy echoes or ESP, or increase TR.`);
                 return;
             }
-
-            // Init custom nodes if needed
-            if (scheme === 'custom' && !_customNodes) {
-                _customNodes = defaultCustomNodes(totalTrainEchoes);
-            }
-
-            const schemeParams = readSchemeParams(etl, ESP, totalTrainEchoes);
-            const faSchedule   = buildRefocusingSchedule(scheme, schemeParams, etl, numDummyEchoes);
             // Persist custom nodes (they were already mutated via drag; no reset needed)
 
-            const p   = { numEchoes: etl, numDummyEchoes, TR, ESP, faSchedule };
+            const p   = { numEchoes: etl, numDummyEchoes, numPSSEchoes: numStartupEchoes, TR, ESP, faSchedule };
             const seq = buildRARE(p);
 
             // ── Flip angle bar chart ──────────────────────────────────────
@@ -1713,8 +1791,11 @@
                 const faValues = [90,   ...faSchedule];
                 const faColors = [
                     'rgba(100,160,255,0.85)',
-                    ...Array(numDummyEchoes).fill('rgba(255,180,80,0.80)'),
-                    ...Array(etl).fill('rgba(160,100,255,0.80)'),
+                    ...Array.from({ length: totalTrainEchoes }, (_, i) => {
+                        if (i < numStartupEchoes) return 'rgba(80,210,160,0.82)';
+                        if (i < numDummyEchoes) return 'rgba(255,180,80,0.80)';
+                        return 'rgba(160,100,255,0.80)';
+                    }),
                 ];
                 const faPlot = D3SeqPlots.createBarPlot(document.getElementById('rare-fa-chart'), {
                     xLabels:   faLabels,
@@ -1727,16 +1808,17 @@
                 });
 
                 const svgEl = document.querySelector('#rare-fa-chart svg');
-                if (svgEl) {
+                if (svgEl && scheme === 'custom') {
                     _faCtrlPtHandle = D3SeqPlots.addFAControlPoints(svgEl, {
                         xScale: faPlot.xScale,
                         yScale: faPlot.yScale,
-                        etl: totalTrainEchoes,
+                        etl: postStartupEchoes,
+                        xOffset: 0,
                         yMin: 0,
                         yMax: 180,
-                        points: normalizeCustomNodes(_customNodes, totalTrainEchoes),
+                        points: normalizeCustomNodes(_customNodes, postStartupEchoes),
                         onDragEnd: (newPts) => {
-                            _customNodes = normalizeCustomNodes(newPts, totalTrainEchoes);
+                            _customNodes = normalizeCustomNodes(newPts, postStartupEchoes);
                             requestRARESimulation(0);
                         },
                     });
@@ -1754,9 +1836,18 @@
             }
             console.log(`[RARE] echo train sim in ${(performance.now() - t0).toFixed(0)} ms`);
 
-            const echoPhaseBoxes = numDummyEchoes > 0 ? [
-                { xStart: 0.5, xEnd: numDummyEchoes + 0.5, color: 'rgba(255,180,80,0.14)', label: 'Dummy echoes' },
-            ] : [];
+            const echoPhaseBoxes = [];
+            if (numStartupEchoes > 0) {
+                echoPhaseBoxes.push({ xStart: 0.5, xEnd: numStartupEchoes + 0.5, color: 'rgba(80,210,160,0.14)', label: 'PSS startup' });
+            }
+            if (numDummyEchoes > 0) {
+                echoPhaseBoxes.push({
+                    xStart: 0.5,
+                    xEnd: numDummyEchoes + 0.5,
+                    color: 'rgba(255,180,80,0.14)',
+                    label: 'Dummy echoes',
+                });
+            }
 
             // ── Full sequence (all enabled tissues) ───────────────────────
             const t1 = performance.now();
@@ -1771,14 +1862,18 @@
             console.log(`[RARE] full seq sim in ${(performance.now() - t1).toFixed(0)} ms`);
 
             const totalTime = fullRes[fullSel[0].name].totalTime;
-            const prepEnd   = (etl + numDummyEchoes) * ESP;
+            const pssEnd = numStartupEchoes * ESP;
+            const dummyEnd = numDummyEchoes * ESP;
+            const trainEnd = totalTrainEchoes * ESP;
             const fullPhaseBoxes = [
-                { xStart: 0,       xEnd: prepEnd,   color: 'rgba(100,200,255,0.12)', label: 'RARE' },
-                { xStart: prepEnd, xEnd: totalTime,  color: 'rgba(100,255,100,0.12)', label: 'Recovery' },
+                ...(numStartupEchoes > 0 ? [{ xStart: 0, xEnd: pssEnd, color: 'rgba(80,210,160,0.12)', label: 'PSS startup' }] : []),
+                ...(numDummyEchoes > 0 ? [{ xStart: 0, xEnd: dummyEnd, color: 'rgba(255,180,80,0.12)', label: 'Dummy echoes' }] : []),
+                { xStart: dummyEnd, xEnd: trainEnd, color: 'rgba(100,200,255,0.12)', label: 'RARE acquired' },
+                { xStart: trainEnd, xEnd: totalTime, color: 'rgba(100,255,100,0.12)', label: 'Recovery' },
             ];
 
             _rareLastSimData = { rareActiveTissues, echoResults, fullSel, fullRes,
-                                 totalTrainEchoes, numDummyEchoes, ESP, etl, scheme,
+                                 totalTrainEchoes, numStartupEchoes, numDummyEchoes, ESP, etl, scheme,
                                  echoPhaseBoxes, fullPhaseBoxes, totalTime };
             renderRARECharts();
             console.log(`[RARE] total sim in ${(performance.now() - t0).toFixed(0)} ms`);
@@ -1818,19 +1913,43 @@
         }
 
         function setupRARESliders() {
+            function syncRarePSSControls() {
+                const scheme = document.getElementById('rare-fa-scheme')?.value;
+                const pssCheckbox = document.getElementById('rare-pss-enable');
+                const pssDisabled = scheme === 'custom';
+                const enabled = !!pssCheckbox?.checked && !pssDisabled;
+                if (pssCheckbox) pssCheckbox.disabled = pssDisabled;
+                ['rare-pss-count', 'rare-pss-start'].forEach(id => {
+                    const el = document.getElementById(id);
+                    if (el) el.disabled = !enabled;
+                });
+                ['rare-pss-count-value', 'rare-pss-start-value'].forEach(id => {
+                    const el = document.getElementById(id);
+                    if (el) el.style.opacity = pssDisabled ? '0.55' : '';
+                });
+                const note = document.getElementById('rare-pss-note');
+                if (note) note.style.opacity = pssDisabled ? '0.55' : '';
+            }
+
             document.getElementById('rare-fa-scheme').addEventListener('change', function () {
                 applySchemeVisibility(this.value);
                 // Reset scheme-specific state on switch
                 if (this.value === 'custom')    _customNodes = null;
                 if (this.value === 't2optimal') _mxyCtrlPts  = null;
+                syncRarePSSControls();
+                requestRARESimulation(0);
+            });
+
+            document.getElementById('rare-pss-enable').addEventListener('change', function () {
+                syncRarePSSControls();
                 requestRARESimulation(0);
             });
 
             document.getElementById('rare-custom-add-node').addEventListener('click', function () {
                 const etl = window.AppState ? window.AppState.params.etl : 72;
                 const numDummyEchoes = parseInt(document.getElementById('rare-dummy-echoes').value);
-                const totalTrainEchoes = etl + numDummyEchoes;
-                if (!_customNodes) { _customNodes = defaultCustomNodes(totalTrainEchoes); }
+                const postStartupEchoes = etl + numDummyEchoes;
+                if (!_customNodes) { _customNodes = defaultCustomNodes(postStartupEchoes); }
                 const sorted = [..._customNodes].sort((a, b) => a.echoIndex - b.echoIndex);
                 // Find the largest gap between adjacent nodes (or edges)
                 const gaps = [];
@@ -1838,19 +1957,21 @@
                     gaps.push({ lo: 1, hi: sorted[0].echoIndex, loFA: sorted[0].fa, hiFA: sorted[0].fa });
                 for (let i = 0; i < sorted.length - 1; i++)
                     gaps.push({ lo: sorted[i].echoIndex, hi: sorted[i + 1].echoIndex, loFA: sorted[i].fa, hiFA: sorted[i + 1].fa });
-                if (sorted[sorted.length - 1].echoIndex < totalTrainEchoes)
-                    gaps.push({ lo: sorted[sorted.length - 1].echoIndex, hi: totalTrainEchoes, loFA: sorted[sorted.length - 1].fa, hiFA: sorted[sorted.length - 1].fa });
+                if (sorted[sorted.length - 1].echoIndex < postStartupEchoes)
+                    gaps.push({ lo: sorted[sorted.length - 1].echoIndex, hi: postStartupEchoes, loFA: sorted[sorted.length - 1].fa, hiFA: sorted[sorted.length - 1].fa });
                 gaps.sort((a, b) => (b.hi - b.lo) - (a.hi - a.lo));
                 const best = gaps[0];
                 const midEcho = Math.round((best.lo + best.hi) / 2);
                 const midFA   = (best.loFA + best.hiFA) / 2;
-                _customNodes = normalizeCustomNodes([..._customNodes, { echoIndex: midEcho, fa: midFA }], totalTrainEchoes);
+                _customNodes = normalizeCustomNodes([..._customNodes, { echoIndex: midEcho, fa: midFA }], postStartupEchoes);
                 requestRARESimulation(0);
             });
 
             [
                 ['rare-tr',       'rare-tr-value'],
                 ['rare-esp',      'rare-esp-value'],
+                ['rare-pss-count', 'rare-pss-count-value'],
+                ['rare-pss-start', 'rare-pss-start-value'],
                 ['rare-dummy-echoes', 'rare-dummy-echoes-value'],
                 ['rare-reffa',    'rare-reffa-value'],
                 ['rare-fa-start', 'rare-fa-start-value'],
@@ -1864,6 +1985,8 @@
                     requestRARESimulation();
                 });
             });
+
+            syncRarePSSControls();
 
             if (document.getElementById('tab-rare')?.classList.contains('active')) {
                 requestRARESimulation(0);
