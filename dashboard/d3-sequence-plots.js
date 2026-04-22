@@ -15,6 +15,7 @@
 
     const DEFAULT_MARGIN = { top: 40, right: 20, bottom: 50, left: 60 };
     const LEGEND_RIGHT   = 130; // reserved px for legend column
+    let plotClipCounter = 0;
 
     // ─── Helpers ────────────────────────────────────────────────────────────────
 
@@ -60,10 +61,15 @@
         g.select('.grid-x .domain').remove();
 
         // X axis
+        const xAxisGenerator = d3.axisBottom(xScale)
+            .tickFormat(opts.xTickFormat || null);
+        if (opts.xTickValues) xAxisGenerator.tickValues(opts.xTickValues);
+        else xAxisGenerator.ticks(opts.xTicks || 10);
+
         const xAxis = g.append('g')
             .attr('class', 'axis-x')
             .attr('transform', `translate(0,${innerH})`)
-            .call(d3.axisBottom(xScale).ticks(opts.xTicks || 10).tickFormat(opts.xTickFormat || null));
+            .call(xAxisGenerator);
         xAxis.selectAll('text').attr('fill', DARK.axisText);
         xAxis.selectAll('line, path').attr('stroke', DARK.axisText);
 
@@ -137,6 +143,15 @@
         };
 
         const { svg, g, innerW, innerH } = buildSVG(containerEl, width, height, margin);
+        const clipId = `d3-seq-clip-${++plotClipCounter}`;
+        svg.append('defs')
+            .append('clipPath')
+            .attr('id', clipId)
+            .append('rect')
+            .attr('x', 0)
+            .attr('y', 0)
+            .attr('width', innerW)
+            .attr('height', innerH);
 
         const xType = opts.xType || 'linear';
 
@@ -203,7 +218,9 @@
             }
         }
 
-        const linesGroup = g.append('g').attr('class', 'lines');
+        const linesGroup = g.append('g')
+            .attr('class', 'lines')
+            .attr('clip-path', `url(#${clipId})`);
 
         function drawLines(datasets) {
             linesGroup.selectAll('*').remove();
@@ -288,6 +305,7 @@
      *   colors,          // string | string[]
      *   yMin?, yMax?,
      *   yLabel?, xLabel?,
+    *   xTickValues?,    // subset of xLabels to show on the axis
      *   draggable?,      // bool
      *   onDragEnd?,      // callback(newValues[])
      * }}
@@ -320,6 +338,7 @@
             xLabel: opts.xLabel,
             yLabel: opts.yLabel,
             xTicks: Math.min(xLabels.length, 20),
+            xTickValues: opts.xTickValues,
             yTickFormat: v => v + '°',
         });
 

@@ -321,6 +321,42 @@ select {
 select:hover { border-color: var(--ink); }
 select:focus { outline: none; border-color: var(--red); }
 
+.rare-driven-eq-group {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.rare-driven-eq-btn {
+  padding: 10px 12px;
+  border: 1px solid var(--rule);
+  background: white;
+  color: var(--ink-mid);
+  font-family: var(--sans);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  text-align: left;
+  cursor: pointer;
+  transition: border-color 0.15s, background 0.15s, color 0.15s;
+}
+
+.rare-driven-eq-btn:hover {
+  border-color: var(--ink);
+  color: var(--ink);
+}
+
+.rare-driven-eq-btn:focus-visible {
+  outline: 2px solid var(--red);
+  outline-offset: 1px;
+}
+
+.rare-driven-eq-btn.active {
+  border-color: var(--red);
+  background: var(--accent-bg);
+  color: var(--red);
+}
+
 .plot-controls {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
@@ -598,6 +634,29 @@ select:focus { outline: none; border-color: var(--red); }
 .mprage-phase-legend div {
   padding: 5px 8px;
   color: #c0c0d0;
+}
+
+.rare-fa-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 14px;
+  margin-top: 10px;
+  font-size: 11px;
+  font-family: var(--sans);
+  color: #c0c0d0;
+}
+
+.rare-fa-legend-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+}
+
+.rare-fa-swatch {
+  width: 11px;
+  height: 11px;
+  border: 1px solid rgba(255,255,255,0.18);
+  flex: 0 0 auto;
 }
 
 .brain-summary {
@@ -1043,4 +1102,5 @@ select:focus { outline: none; border-color: var(--red); }
   .plot-controls { grid-template-columns: 1fr; }
   .brain-compare-grid { grid-template-columns: 1fr; }
   .phantom-layout { grid-template-columns: 1fr; }
+  .rare-driven-eq-group { grid-template-columns: 1fr; }
 }
