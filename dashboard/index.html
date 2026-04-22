@@ -1438,6 +1438,36 @@
             setRareDrivenEqMode(input.value || 'off', false);
         }
 
+        function computeRareMinimumTR() {
+            const etl = window.AppState ? window.AppState.params.etl : 72;
+            const esp = parseFloat(document.getElementById('rare-esp')?.value || '5');
+            const numDummyEchoes = parseInt(document.getElementById('rare-dummy-echoes')?.value || '0', 10);
+            const drivenEqMode = readRareDrivenEqMode();
+            const totalTrainEchoes = etl + numDummyEchoes;
+            const drivenEqDuration = drivenEqMode !== 'off' ? esp : 0;
+            return totalTrainEchoes * esp + drivenEqDuration;
+        }
+
+        function syncRareTRControl() {
+            const trInput = document.getElementById('rare-tr');
+            const trValue = document.getElementById('rare-tr-value');
+            if (!trInput) return 0;
+
+            const minTR = computeRareMinimumTR();
+            const prevMin = parseFloat(trInput.min || '0');
+            trInput.min = String(minTR);
+
+            if (parseFloat(trInput.value || '0') < minTR) {
+                trInput.value = String(minTR);
+            }
+            if (trValue) trValue.textContent = trInput.value;
+
+            if (prevMin !== minTR) {
+                window.App?.renderAllSliderTicks?.();
+            }
+            return minTR;
+        }
+
         function buildPSSSchedule(pssConfig, plateauFA) {
             if (!pssConfig || !pssConfig.enabled || pssConfig.count <= 0) return [];
             const startFA = pssConfig.startFA;
@@ -1769,10 +1799,15 @@
                 color: t.plotColor || t.color,
                 hidden: _rareHiddenLabels.has(t.label),
             }));
+            const fullMzValues = fullMzDs.flatMap(ds => ds.data.map(pt => pt.y).filter(v => Number.isFinite(v)));
+            const fullMzMin = fullMzValues.length ? Math.min(...fullMzValues) : -0.2;
+            const fullMzMax = fullMzValues.length ? Math.max(...fullMzValues) : 1.0;
+            const fullMzPad = Math.max(0.03, 0.05 * Math.max(0.1, fullMzMax - fullMzMin));
             D3SeqPlots.createLinePlot(document.getElementById('rare-full-mz-chart'), {
                 datasets: fullMzDs,
                 xType: 'linear', xMin: 0, xMax: totalTime,
-                yMin: -0.2,
+                yMin: Math.min(-0.2, fullMzMin - fullMzPad),
+                yMax: Math.max(0.95, fullMzMax + fullMzPad),
                 xLabel: 'Time (ms)', yLabel: 'Mz',
                 phaseBoxes: fullPhaseBoxes,
                 showLegend: true,
@@ -1802,11 +1837,12 @@
             const t0 = performance.now();
 
             const etl     = window.AppState ? window.AppState.params.etl : 72;
-            const TR      = parseInt(document.getElementById('rare-tr').value);
             const ESP     = parseFloat(document.getElementById('rare-esp').value);
             const numDummyEchoes = parseInt(document.getElementById('rare-dummy-echoes').value);
             const pssConfig = readRarePSSConfig();
             const drivenEqMode = readRareDrivenEqMode();
+            const minTR = syncRareTRControl();
+            const TR      = parseFloat(document.getElementById('rare-tr').value);
             const numSims = parseInt(document.getElementById('rare-numSims').value);
             const scheme  = document.getElementById('rare-fa-scheme').value;
             const postStartupEchoes = etl + numDummyEchoes;
@@ -1840,8 +1876,8 @@
 
             const drivenEqDuration = drivenEqMode !== 'off' ? ESP : 0;
             const totalTrainDuration = totalTrainEchoes * ESP + drivenEqDuration;
-            if (totalTrainDuration >= TR) {
-                alert(`(PSS + ETL + dummy echoes${drivenEqMode !== 'off' ? ' + driven equilibrium' : ''}) duration (${totalTrainDuration} ms) must be less than TR (${TR} ms).\nReduce PSS pulses, ETL/dummy echoes or ESP, or increase TR.`);
+            if (totalTrainDuration > TR) {
+                alert(`The minimum TR is the echo-train duration (${minTR} ms). Current TR: ${TR} ms.\nReduce ETL/dummy echoes or ESP, or increase TR.`);
                 return;
             }
             // Persist custom nodes (they were already mutated via drag; no reset needed)
@@ -2029,6 +2065,7 @@
             }
 
             setupRareDrivenEqControl();
+            syncRareTRControl();
 
             document.getElementById('rare-fa-scheme').addEventListener('change', function () {
                 applySchemeVisibility(this.value);
@@ -2080,12 +2117,14 @@
                 const sl = document.getElementById(id);
                 const sp = document.getElementById(valId);
                 if (sl && sp) sl.addEventListener('input', () => {
+                    syncRareTRControl();
                     sp.textContent = sl.value;
                     requestRARESimulation();
                 });
             });
 
             document.getElementById('rare-driven-eq')?.addEventListener('change', () => {
+                syncRareTRControl();
                 requestRARESimulation(0);
             });
 

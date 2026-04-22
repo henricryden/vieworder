@@ -146,6 +146,7 @@
         const clipId = `d3-seq-clip-${++plotClipCounter}`;
         svg.append('defs')
             .append('clipPath')
+            .attr('clipPathUnits', 'userSpaceOnUse')
             .attr('id', clipId)
             .append('rect')
             .attr('x', 0)
