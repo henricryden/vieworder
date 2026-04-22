@@ -1004,3 +1004,43 @@ select:focus {
     flex-direction: column;
     justify-content: center;
 }
+/* ── RARE FA scheme selector ─────────────────────────────────────── */
+.rare-scheme-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 8px 0 4px;
+}
+.rare-scheme-row label {
+    color: #e0e0ff;
+    font-size: 0.95em;
+    font-weight: 600;
+    white-space: nowrap;
+}
+.rare-scheme-row select {
+    background: #2a2a45;
+    color: #e0e0ff;
+    border: 1px solid #555;
+    border-radius: 6px;
+    padding: 4px 10px;
+    font-size: 0.9em;
+    cursor: pointer;
+}
+.rare-scheme-params {
+    padding: 4px 0 8px;
+}
+.rare-scheme-block {
+    padding: 4px 0;
+}
+.rare-node-btn {
+    padding: 6px 12px;
+    border: 1px solid #555;
+    border-radius: 6px;
+    background: #2a2a45;
+    color: #e0e0ff;
+    font-size: 0.9em;
+    cursor: pointer;
+}
+.rare-node-btn:hover {
+    background: #333357;
+}

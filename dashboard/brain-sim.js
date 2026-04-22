@@ -27,9 +27,6 @@ const BrainSim = (() => {
     // Pending compute promises per (Ny, Nz)
     const _pendingComputes = new Map();  // key = "${Ny}x${Nz}" → {resolve, reject, ...}
 
-    // Chart.js instance for Mxy display
-    let _mxyChart = null;
-
     // ── FFT (radix-2 Cooley-Tukey, in-place) ─────────────────────────────────
 
     function nextPoT(n) {
@@ -412,10 +409,8 @@ const BrainSim = (() => {
     }
 
     function renderMxyChart(mprageSigs, etl, sourceLabel = 'MPRAGE') {
-        const ctx = document.getElementById('brain-mxy-chart');
-        if (!ctx) return;
-
-        const labels = Array.from({ length: etl }, (_, i) => i + 1);
+        const el = document.getElementById('brain-mxy-chart');
+        if (!el) return;
 
         const datasets = window.PhantomState.tissues.filter(t => t.enabled !== false).map(t => {
             const sigsComplex = mprageSigs[t.name];
@@ -424,48 +419,21 @@ const BrainSim = (() => {
                 for (let i = 0; i < etl; i++) {
                     const re = sigsComplex[i * 2] || 0;
                     const im = sigsComplex[i * 2 + 1] || 0;
-                    data.push(Math.sqrt(re * re + im * im));  // Magnitude of complex signal
+                    data.push({ x: i + 1, y: Math.sqrt(re * re + im * im) });
                 }
             } else {
-                data.push(...Array(etl).fill(0));
+                for (let i = 0; i < etl; i++) data.push({ x: i + 1, y: 0 });
             }
-            return {
-                label: t.label,
-                data,
-                borderColor: t.color,
-                backgroundColor: 'transparent',
-                borderWidth: 2,
-                pointRadius: 0,
-                tension: 0,
-            };
+            return { label: t.label, data, color: t.color };
         });
 
-        if (_mxyChart) _mxyChart.destroy();
-        _mxyChart = new Chart(ctx, {
-            type: 'line',
-            data: { labels, datasets },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                animation: false,
-                plugins: {
-                    legend: { position: 'right', labels: { color: '#e0e0ff', font: { size: 11 } } },
-                    title:  { display: true, text: `${sourceLabel} Mxy(echo) per tissue`, color: '#e0e0ff' },
-                },
-                scales: {
-                    x: {
-                        title: { display: true, text: 'Echo index', color: '#a0a0c0' },
-                        ticks: { color: '#a0a0c0', maxTicksLimit: 16 },
-                        grid:  { color: 'rgba(255,255,255,0.05)' },
-                    },
-                    y: {
-                        min: 0,
-                        title: { display: true, text: 'Mxy', color: '#a0a0c0' },
-                        ticks: { color: '#a0a0c0', callback: v => v.toFixed(3) },
-                        grid:  { color: 'rgba(255,255,255,0.05)' },
-                    },
-                },
-            },
+        D3SeqPlots.createLinePlot(el, {
+            datasets,
+            xType: 'linear', xMin: 1, xMax: etl,
+            yMin: 0,
+            xLabel: 'Echo index', yLabel: 'Mxy',
+            title: `${sourceLabel} Mxy(echo) per tissue`,
+            showLegend: true,
         });
     }
 

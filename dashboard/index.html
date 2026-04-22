@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>MRI k-Space &amp; MPRAGE Simulator</title>
     <script src="https://d3js.org/d3.v7.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.js"></script>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -433,11 +432,11 @@
             <div class="mprage-plots-row" style="margin-top:22px;">
                 <div class="mprage-plot-panel">
                     <h3>MPRAGE window — Mz per echo</h3>
-                    <div class="mprage-chart-wrapper"><canvas id="mzChart"></canvas></div>
+                    <div class="mprage-chart-wrapper" id="mprage-mz-chart"></div>
                 </div>
                 <div class="mprage-plot-panel">
                     <h3>MPRAGE window — Mxy per echo</h3>
-                    <div class="mprage-chart-wrapper"><canvas id="mxyChart"></canvas></div>
+                    <div class="mprage-chart-wrapper" id="mprage-mxy-chart"></div>
                 </div>
             </div>
 
@@ -445,7 +444,7 @@
             <div class="mprage-plots-row full" style="margin-top:20px;">
                 <div class="mprage-plot-panel">
                     <h3>Full Sequence — Mz</h3>
-                    <div class="mprage-chart-wrapper tall"><canvas id="fullMzChart"></canvas></div>
+                    <div class="mprage-chart-wrapper tall" id="mprage-fullmz-chart"></div>
                     <div class="mprage-phase-legend">
                         <div style="background:rgba(255,100,100,.15);border-left:3px solid #ff6464;"><strong>Inversion + TI</strong></div>
                         <div style="background:rgba(100,200,255,.15);border-left:3px solid #64c8ff;"><strong>MPRAGE</strong> (<span id="etlDisplayMz">72</span> pulses)</div>
@@ -456,7 +455,7 @@
             <div class="mprage-plots-row full" style="margin-top:20px;">
                 <div class="mprage-plot-panel">
                     <h3>Full Sequence — Mxy</h3>
-                    <div class="mprage-chart-wrapper tall"><canvas id="fullMxyChart"></canvas></div>
+                    <div class="mprage-chart-wrapper tall" id="mprage-fullmxy-chart"></div>
                     <div class="mprage-phase-legend">
                         <div style="background:rgba(255,100,100,.15);border-left:3px solid #ff6464;"><strong>Inversion + TI</strong></div>
                         <div style="background:rgba(100,200,255,.15);border-left:3px solid #64c8ff;"><strong>MPRAGE</strong> (<span id="etlDisplayMxy">72</span> pulses)</div>
@@ -491,8 +490,8 @@
                     <h2>Refocusing</h2>
                     <div style="height:50px;"></div>
                     <div class="control-group">
-                        <label>Flip angle <span class="value" id="rare-reffa-value">180</span> °</label>
-                        <input type="range" id="rare-reffa" min="90" max="180" value="180" step="5">
+                        <label>Dummy echoes <span class="value" id="rare-dummy-echoes-value">0</span></label>
+                        <input type="range" id="rare-dummy-echoes" min="0" max="10" value="0" step="1">
                     </div>
                     <div class="control-group">
                         <label>Steady-state cycles <span class="value" id="rare-numSims-value">2</span></label>
@@ -504,11 +503,49 @@
                 <button class="mprage-btn-simulate" id="rare-simulate-btn" style="grid-column: 1 / -1;">▶ Simulate RARE</button>
             </div><!-- /mprage-params-grid -->
 
+            <!-- FA Scheme selector + param rows -->
+            <div class="rare-scheme-row" style="margin-top:16px;">
+                <label>Flip angle scheme</label>
+                <select id="rare-fa-scheme">
+                    <option value="constant">Constant</option>
+                    <option value="linear">Linear ramp</option>
+                    <option value="t2optimal">T2-optimal</option>
+                    <option value="custom">Custom</option>
+                </select>
+            </div>
+            <div class="rare-scheme-params">
+                <div id="rare-scheme-constant" class="rare-scheme-block">
+                    <div class="control-group">
+                        <label>Flip angle <span class="value" id="rare-reffa-value">180</span> °</label>
+                        <input type="range" id="rare-reffa" min="0" max="180" value="180" step="5">
+                    </div>
+                </div>
+                <div id="rare-scheme-linear" class="rare-scheme-block" style="display:none;">
+                    <div class="control-group">
+                        <label>Start FA <span class="value" id="rare-fa-start-value">180</span> °</label>
+                        <input type="range" id="rare-fa-start" min="0" max="180" value="180" step="5">
+                    </div>
+                    <div class="control-group">
+                        <label>End FA <span class="value" id="rare-fa-end-value">120</span> °</label>
+                        <input type="range" id="rare-fa-end" min="0" max="180" value="120" step="5">
+                    </div>
+                </div>
+                <div id="rare-scheme-t2optimal" class="rare-scheme-block" style="display:none;">
+                    <p style="color:#a0a0c0;font-size:0.9em;margin:4px 0;">Drag control points on the Mxy chart below to set the target echo train.</p>
+                </div>
+                <div id="rare-scheme-custom" class="rare-scheme-block" style="display:none;">
+                    <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;">
+                        <p style="color:#a0a0c0;font-size:0.9em;margin:4px 0;">Drag nodes on the flip angle chart. Linear fit between nodes.</p>
+                        <button id="rare-custom-add-node" class="rare-node-btn">+ Add node</button>
+                    </div>
+                </div>
+            </div>
+
             <!-- Flip angle schedule -->
             <div class="mprage-plots-row full" style="margin-top:22px;">
                 <div class="mprage-plot-panel">
                     <h3>Flip angle schedule</h3>
-                    <div class="mprage-chart-wrapper" style="height:180px;"><canvas id="rareFlipAngleChart"></canvas></div>
+                    <div class="mprage-chart-wrapper" style="height:180px;" id="rare-fa-chart"></div>
                 </div>
             </div>
 
@@ -516,11 +553,11 @@
             <div class="mprage-plots-row" style="margin-top:20px;">
                 <div class="mprage-plot-panel">
                     <h3>Echo train — Mxy per echo</h3>
-                    <div class="mprage-chart-wrapper"><canvas id="rareEchoMxyChart"></canvas></div>
+                    <div class="mprage-chart-wrapper" id="rare-echo-mxy-chart"></div>
                 </div>
                 <div class="mprage-plot-panel">
                     <h3>Echo train — Mz per echo</h3>
-                    <div class="mprage-chart-wrapper"><canvas id="rareEchoMzChart"></canvas></div>
+                    <div class="mprage-chart-wrapper" id="rare-echo-mz-chart"></div>
                 </div>
             </div>
 
@@ -528,7 +565,7 @@
             <div class="mprage-plots-row full" style="margin-top:20px;">
                 <div class="mprage-plot-panel">
                     <h3>Full Sequence — Mz</h3>
-                    <div class="mprage-chart-wrapper tall"><canvas id="rareFullMzChart"></canvas></div>
+                    <div class="mprage-chart-wrapper tall" id="rare-full-mz-chart"></div>
                     <div class="mprage-phase-legend">
                         <div style="background:rgba(100,200,255,.15);border-left:3px solid #64c8ff;"><strong>RARE</strong> (<span id="etlDisplayRareMz">72</span> echoes)</div>
                         <div style="background:rgba(100,255,100,.15);border-left:3px solid #64ff64;"><strong>Recovery</strong></div>
@@ -538,7 +575,7 @@
             <div class="mprage-plots-row full" style="margin-top:20px;">
                 <div class="mprage-plot-panel">
                     <h3>Full Sequence — Mxy (echo amplitudes)</h3>
-                    <div class="mprage-chart-wrapper tall"><canvas id="rareFullMxyChart"></canvas></div>
+                    <div class="mprage-chart-wrapper tall" id="rare-full-mxy-chart"></div>
                     <div class="mprage-phase-legend">
                         <div style="background:rgba(100,200,255,.15);border-left:3px solid #64c8ff;"><strong>RARE</strong> (<span id="etlDisplayRareMxy">72</span> echoes)</div>
                         <div style="background:rgba(100,255,100,.15);border-left:3px solid #64ff64;"><strong>Recovery</strong></div>
@@ -601,8 +638,8 @@
             </div>
 
             <div class="brain-mxy-panel" style="margin-top:20px;">
-                <h3>MPRAGE Mxy(echo) per tissue — used in this scan</h3>
-                <canvas id="brain-mxy-chart"></canvas>
+                <h3 id="brain-mxy-title">Mxy(echo) per tissue — used in this scan</h3>
+                <div id="brain-mxy-chart" style="height:260px;"></div>
             </div>
         </div><!-- /tab-brain-scan -->
 
@@ -611,6 +648,7 @@
     <!-- Static JS: view order (order matters — kspace-utils before app) -->
     <script src="kspace-utils.js"></script>
     <script src="d3-plots.js"></script>
+    <script src="d3-sequence-plots.js"></script>
     <script src="phantom-state.js"></script>
     <script src="app.js"></script>
     <script src="brain-phantom.js"></script>
@@ -618,6 +656,8 @@
 
     <!-- Tab switching -->
     <script>
+        window.BrainScanSignalSource = window.BrainScanSignalSource || 'mprage';
+
         function selectTab3Sequence(seq) {
             document.getElementById('tab3-label').textContent = seq;
             window.tab3Sequence = seq;
@@ -635,8 +675,19 @@
             document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
             document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
             document.getElementById('tab-' + id).classList.add('active');
-            const idx = ['view-order', 'phantom', 'mprage', 'rare', 'brain-scan'].indexOf(id);
-            if (idx >= 0) document.querySelectorAll('.tab-btn')[idx].classList.add('active');
+
+            const activeButton = {
+                'view-order': document.querySelectorAll('.tab-btn')[0],
+                phantom:      document.querySelectorAll('.tab-btn')[1],
+                mprage:       document.getElementById('tab3-btn'),
+                rare:         document.getElementById('tab3-btn'),
+                'brain-scan': document.querySelectorAll('.tab-btn')[3],
+            }[id];
+            if (activeButton) activeButton.classList.add('active');
+
+            if (id === 'mprage') window.BrainScanSignalSource = 'mprage';
+            if (id === 'rare') window.BrainScanSignalSource = 'rare';
+
             // Sync ETL display when switching to MPRAGE, RARE or Brain Scan tabs
             if (id === 'mprage' || id === 'rare' || id === 'brain-scan') {
                 const etl = window.AppState ? window.AppState.params.etl : 72;
@@ -798,7 +849,6 @@
         }
 
         // ── Tab 2 "Simulate" button ─────────────────────────────────────
-        let mzChart = null, mxyChart = null, fullMzChart = null, fullMxyChart = null;
 
         async function runMPRAGESimulation() {
             if (!_ready) { console.warn('[MPRAGE] EPG not ready'); return; }
@@ -833,45 +883,35 @@
             }
             console.log(`[MPRAGE] window sim in ${(performance.now()-t0).toFixed(0)} ms`);
 
-            const labels = Array.from({ length: etl }, (_, i) => String(i + 1));
-            const dark = {
-                responsive: true, maintainAspectRatio: false, animation: false,
-                interaction: { mode: 'index', intersect: false },
-                plugins: { legend: { position: 'right', labels: { color: '#e0e0ff', font: { size: 10 } } } },
-                scales: {
-                    x: { ticks: { color: '#a0a0c0', maxTicksLimit: 12 },
-                         grid: { color: 'rgba(255,255,255,0.05)' },
-                         title: { display: true, text: 'Echo index', color: '#e0e0ff' } },
-                    y: { ticks: { color: '#a0a0c0' }, grid: { color: 'rgba(255,255,255,0.05)' } },
-                },
-            };
+            const echoLabels = Array.from({ length: etl }, (_, i) => String(i + 1));
 
             const mkDatasets = (key) => activeTissues.map(t => ({
                 label: t.label, 
-                data: winResults[t.name].map(pt => {
+                data: winResults[t.name].map((pt, i) => {
                     if (key === 'Mxy') {
-                        // Compute magnitude from complex signal
-                        const re = pt.MxyRe || 0;
-                        const im = pt.MxyIm || 0;
-                        return Math.sqrt(re * re + im * im);
+                        const re = pt.MxyRe || 0, im = pt.MxyIm || 0;
+                        return { x: i + 1, y: Math.sqrt(re * re + im * im) };
                     }
-                    return pt[key];
+                    return { x: i + 1, y: pt[key] };
                 }),
-                borderColor: t.color, backgroundColor: 'transparent',
-                borderWidth: 2, pointRadius: 0, tension: 0,
+                color: t.color,
                 hidden: ['CSF', 'adipose', 'bonemarrow'].includes(t.name),
             }));
 
-            if (mzChart)  mzChart.destroy();
-            mzChart = new Chart(document.getElementById('mzChart'), {
-                type: 'line', data: { labels, datasets: mkDatasets('Mz') },
-                options: { ...dark, scales: { ...dark.scales, y: { ...dark.scales.y, min: -1.2, max: 1.2 } } },
+            D3SeqPlots.createLinePlot(document.getElementById('mprage-mz-chart'), {
+                datasets: mkDatasets('Mz'),
+                xType: 'linear', xMin: 1, xMax: etl,
+                yMin: -1.2, yMax: 1.2,
+                xLabel: 'Echo index', yLabel: 'Mz',
+                showLegend: true,
             });
 
-            if (mxyChart) mxyChart.destroy();
-            mxyChart = new Chart(document.getElementById('mxyChart'), {
-                type: 'line', data: { labels, datasets: mkDatasets('Mxy') },
-                options: { ...dark, scales: { ...dark.scales, y: { ...dark.scales.y, min: 0 } } },
+            D3SeqPlots.createLinePlot(document.getElementById('mprage-mxy-chart'), {
+                datasets: mkDatasets('Mxy'),
+                xType: 'linear', xMin: 1, xMax: etl,
+                yMin: 0,
+                xLabel: 'Echo index', yLabel: 'Mxy',
+                showLegend: true,
             });
 
             // Full-sequence charts (first 3 enabled tissues for readability)
@@ -890,50 +930,34 @@
             const totalTime  = ref.totalTime;
             const phaseStart = ref.phaseStart;
 
-            const phaseBoxPlugin = {
-                id: 'phaseBoxes',
-                afterDatasetsDraw(ch) {
-                    const { ctx, scales: { x, y }, chartArea } = ch;
-                    [
-                        { color: 'rgba(255,100,100,0.12)', s: 0,                    e: phaseStart.prep },
-                        { color: 'rgba(100,200,255,0.12)', s: phaseStart.prep,      e: phaseStart.recovery },
-                        { color: 'rgba(100,255,100,0.12)', s: phaseStart.recovery,  e: totalTime },
-                    ].forEach(({ color, s, e }) => {
-                        ctx.fillStyle = color;
-                        ctx.fillRect(x.getPixelForValue(s), chartArea.top,
-                                     x.getPixelForValue(e) - x.getPixelForValue(s),
-                                     chartArea.bottom - chartArea.top);
-                    });
-                },
-            };
+            const phaseBoxes = [
+                { xStart: 0,                   xEnd: phaseStart.prep,      color: 'rgba(255,100,100,0.12)', label: 'Inversion' },
+                { xStart: phaseStart.prep,     xEnd: phaseStart.recovery,  color: 'rgba(100,200,255,0.12)', label: 'MPRAGE' },
+                { xStart: phaseStart.recovery, xEnd: totalTime,            color: 'rgba(100,255,100,0.12)', label: 'Recovery' },
+            ];
 
             const fullDs = (key) => fullSel.map(t => ({
                 label: t.label,
-                data: fullRes[t.name].timeline.map(p => ({ x: p.time, y: p[key] })),
-                borderColor: t.color, backgroundColor: 'transparent',
-                borderWidth: 1.5, pointRadius: 0, tension: 0,
+                data: fullRes[t.name].timeline.map(pt => ({ x: pt.time, y: pt[key] })),
+                color: t.color,
             }));
-            const fullOpts = (title, yMin) => ({
-                ...dark,
-                scales: {
-                    x: { type: 'linear', min: 0, max: totalTime,
-                         ticks: { color: '#a0a0c0' }, grid: { color: 'rgba(255,255,255,0.05)' },
-                         title: { display: true, text: 'Time (ms)', color: '#e0e0ff' } },
-                    y: { min: yMin, ticks: { color: '#a0a0c0' }, grid: { color: 'rgba(255,255,255,0.05)' },
-                         title: { display: true, text: title, color: '#e0e0ff' } },
-                },
+
+            D3SeqPlots.createLinePlot(document.getElementById('mprage-fullmz-chart'), {
+                datasets: fullDs('Mz'),
+                xType: 'linear', xMin: 0, xMax: totalTime,
+                yMin: -1.2,
+                xLabel: 'Time (ms)', yLabel: 'Mz',
+                phaseBoxes,
+                showLegend: true,
             });
 
-            if (fullMzChart)  fullMzChart.destroy();
-            fullMzChart = new Chart(document.getElementById('fullMzChart'), {
-                type: 'line', data: { datasets: fullDs('Mz') },
-                options: fullOpts('Mz', -1.2), plugins: [phaseBoxPlugin],
-            });
-
-            if (fullMxyChart) fullMxyChart.destroy();
-            fullMxyChart = new Chart(document.getElementById('fullMxyChart'), {
-                type: 'line', data: { datasets: fullDs('Mxy') },
-                options: fullOpts('Mxy', 0), plugins: [phaseBoxPlugin],
+            D3SeqPlots.createLinePlot(document.getElementById('mprage-fullmxy-chart'), {
+                datasets: fullDs('Mxy'),
+                xType: 'linear', xMin: 0, xMax: totalTime,
+                yMin: 0,
+                xLabel: 'Time (ms)', yLabel: 'Mxy',
+                phaseBoxes,
+                showLegend: true,
             });
 
             btn.disabled = false;
@@ -951,22 +975,238 @@
             });
         }
 
-        // RARE sequence: excitation → ETL × [dephase + ESP/2 + refocus + ESP/2 + rephase + ADC] → recovery + spoil
+        // ── RARE TISSUES ────────────────────────────────────────────────
+        const RARE_TISSUES_3T = [
+            { name: 'gray',       label: 'Gray matter',  T1: 1450, T2: 100,  PD: 1.0,  color: '#00ff00' },
+            { name: 'white',      label: 'White matter', T1: 830,  T2: 69,   PD: 0.92, color: '#d40000' },
+            { name: 'CSF',        label: 'CSF',          T1: 4160, T2: 2100, PD: 1.0,  color: '#00ffff' },
+            { name: 'adipose',    label: 'Adipose',      T1: 370,  T2: 130,  PD: 1.0,  color: '#ffe680' },
+            { name: 'bonemarrow', label: 'Bone marrow',  T1: 898,  T2: 34,   PD: 1.0,  color: '#ffff44' },
+        ];
+
+        // ── FA scheme definitions ────────────────────────────────────────
+        const FA_SCHEMES = {
+            constant:  { label: 'Constant',     mxyCtrlPts: false, faCtrlPts: false },
+            linear:    { label: 'Linear ramp',  mxyCtrlPts: false, faCtrlPts: false },
+            t2optimal: { label: 'T2-optimal',   mxyCtrlPts: true,  faCtrlPts: false },
+            custom:    { label: 'Custom',       mxyCtrlPts: false, faCtrlPts: true  },
+        };
+
+        // ── computeFlipAngles ────────────────────────────────────────────
+        function linspace(a, b, n) {
+            if (n <= 1) return [a];
+            return Array.from({ length: n }, (_, i) => a + (b - a) * i / (n - 1));
+        }
+
+        function cubicSplineInterp(points, n) {
+            // Simple monotone cubic interpolation of control points → n evenly-spaced values
+            // points: [{echoIndex (1-based), mxy}], sorted
+            const sorted = [...points].sort((a, b) => a.echoIndex - b.echoIndex);
+            const xs = sorted.map(p => p.echoIndex - 1); // 0-based
+            const ys = sorted.map(p => p.mxy);
+            const result = [];
+            for (let i = 0; i < n; i++) {
+                const t = i;
+                if (t <= xs[0]) { result.push(ys[0]); continue; }
+                if (t >= xs[xs.length - 1]) { result.push(ys[ys.length - 1]); continue; }
+                let k = 0;
+                while (k < xs.length - 2 && xs[k + 1] < t) k++;
+                const x0 = xs[k], x1 = xs[k + 1], y0 = ys[k], y1 = ys[k + 1];
+                const u = (t - x0) / (x1 - x0);
+                // Hermite basis with monotone tangents (Fritsch-Carlson)
+                const d = (y1 - y0) / (x1 - x0);
+                const m0 = k > 0              ? (y1 - ys[k - 1]) / (x1 - xs[k - 1]) : d;
+                const m1 = k < xs.length - 2 ? (ys[k + 2] - y0) / (xs[k + 2] - x0) : d;
+                // Clamp to monotone
+                const slope0 = Math.sign(d) === Math.sign(m0) ? m0 : 0;
+                const slope1 = Math.sign(d) === Math.sign(m1) ? m1 : 0;
+                const h = x1 - x0;
+                result.push(
+                    (2*u*u*u - 3*u*u + 1) * y0 +
+                    (u*u*u - 2*u*u + u) * h * slope0 +
+                    (-2*u*u*u + 3*u*u) * y1 +
+                    (u*u*u - u*u) * h * slope1
+                );
+            }
+            return result;
+        }
+
+        function simulate1Echo(stateClone, alpha_deg, ESP) {
+            // Apply RF → dephase → relax ESP/2 → rephase → relax ESP/2 (simplified)
+            // Returns magnitude of F0
+            new RFPulse(alpha_deg, 0).apply(stateClone);
+            new GradientShift(1).apply(stateClone);
+            new Relaxation(ESP / 2, 1000, 100).apply(stateClone);
+            new GradientShift(1).apply(stateClone);
+            return Complex.magnitude(stateClone.F0());
+        }
+
+        function computeT2OptimalFA(mxyControlPoints, etl, T1, T2, ESP) {
+            const mxyTargets = cubicSplineInterp(mxyControlPoints, etl);
+            const s = new StateMatrix(20);
+            // Excitation
+            new RFPulse(90, 90).apply(s);
+            const faSchedule = [];
+
+            function cloneState(src_s) {
+                const clone = new StateMatrix(src_s.nState());
+                const src = src_s.states();
+                const dst = clone.states();
+                for (let k = 0; k < src.length; k++) {
+                    dst[k] = [
+                        { real: src[k][0].real, imag: src[k][0].imag },
+                        { real: src[k][1].real, imag: src[k][1].imag },
+                        { real: src[k][2].real, imag: src[k][2].imag },
+                    ];
+                }
+                return clone;
+            }
+
+            for (let n = 0; n < etl; n++) {
+                // Apply pre-echo dephase (matching buildRARE: GradientShift → Relax(ESP/2) → RF)
+                new GradientShift(1).apply(s);
+                new Relaxation(ESP / 2, T1, T2).apply(s);
+
+                const target = Math.max(0.01, Math.min(1.05, mxyTargets[n]));
+                // Bisection: state is now pre-RF; simulate1Echo applies RF → GradSh → Relax → GradSh
+                let lo = 0, hi = 180, alpha = 90;
+                for (let iter = 0; iter < 25; iter++) {
+                    alpha = (lo + hi) / 2;
+                    const mag = simulate1Echo(cloneState(s), alpha, ESP);
+                    if (mag < target) hi = alpha;
+                    else              lo = alpha;
+                    if (hi - lo < 0.5) break;
+                }
+                faSchedule.push(Math.round(alpha * 2) / 2); // round to 0.5°
+                // Advance real state from pre-RF to post-ADC position:
+                // RF(alpha) → GradientShift(1) → Relax(ESP/2) → GradientShift(1)
+                new RFPulse(alpha, 0).apply(s);
+                new Relaxation(ESP / 2, T1, T2).apply(s);
+                new GradientShift(1).apply(s);
+            }
+            return faSchedule;
+        }
+
+        function defaultCustomNodes(trainLength) {
+            return [
+                { echoIndex: 1,                        fa: 180 },
+                { echoIndex: Math.max(1, Math.round(trainLength / 3)),     fa: 160 },
+                { echoIndex: Math.max(1, Math.round(2 * trainLength / 3)), fa: 140 },
+                { echoIndex: trainLength,              fa: 120 },
+            ];
+        }
+
+        function normalizeCustomNodes(nodes, trainLength) {
+            const byEcho = new Map();
+            for (const node of nodes || []) {
+                const echoIndex = Math.max(1, Math.min(trainLength, Math.round(node.echoIndex)));
+                const fa = Math.max(0, Math.min(180, node.fa));
+                byEcho.set(echoIndex, { echoIndex, fa });
+            }
+            return [...byEcho.values()].sort((a, b) => a.echoIndex - b.echoIndex);
+        }
+
+        function linearInterpFA(nodes, trainLength) {
+            const sorted = normalizeCustomNodes(nodes, trainLength);
+            if (!sorted.length) return Array(trainLength).fill(180);
+
+            const faSchedule = [];
+            for (let echo = 1; echo <= trainLength; echo++) {
+                if (echo <= sorted[0].echoIndex) {
+                    faSchedule.push(sorted[0].fa);
+                    continue;
+                }
+                if (echo >= sorted[sorted.length - 1].echoIndex) {
+                    faSchedule.push(sorted[sorted.length - 1].fa);
+                    continue;
+                }
+
+                let left = sorted[0];
+                let right = sorted[sorted.length - 1];
+                for (let i = 0; i < sorted.length - 1; i++) {
+                    if (echo >= sorted[i].echoIndex && echo <= sorted[i + 1].echoIndex) {
+                        left = sorted[i];
+                        right = sorted[i + 1];
+                        break;
+                    }
+                }
+
+                const span = right.echoIndex - left.echoIndex || 1;
+                const t = (echo - left.echoIndex) / span;
+                faSchedule.push(left.fa + (right.fa - left.fa) * t);
+            }
+            return faSchedule.map(v => Math.round(v * 10) / 10);
+        }
+
+        function computeFlipAngles(scheme, params, etl) {
+            switch (scheme) {
+                case 'constant':
+                    return Array(etl).fill(params.refFA);
+                case 'linear': {
+                    return linspace(params.faStart, params.faEnd, etl).map(v => Math.round(v * 10) / 10);
+                }
+                case 't2optimal': {
+                    const T1  = window.PhantomState?.tissues.find(t => t.name === 'gray')?.T1 || 1450;
+                    const T2  = window.PhantomState?.tissues.find(t => t.name === 'gray')?.T2 || 100;
+                    return computeT2OptimalFA(params.mxyControlPoints, etl, T1, T2, params.ESP);
+                }
+                case 'custom':
+                    return params.faNodes && params.faNodes.length
+                        ? linearInterpFA(params.faNodes, etl)
+                        : Array(etl).fill(180);
+                default:
+                    return Array(etl).fill(180);
+            }
+        }
+
+        class RareEchoSampleMarker {
+            constructor(trainIndex, acquiredIndex = null) {
+                this.trainIndex = trainIndex;
+                this.acquiredIndex = acquiredIndex;
+                this.isDummy = acquiredIndex == null;
+            }
+            apply() {}
+        }
+
+        // ── RARE sequence builder (accepts per-echo FA schedule) ─────────
         function buildRARE(p) {
             const seq = new Sequence(20);
             seq.add(new RFPulse(90, 90));
-            for (let i = 0; i < p.numEchoes; i++) {
+            const numDummyEchoes = p.numDummyEchoes || 0;
+            const totalRefocusingPulses = numDummyEchoes + p.numEchoes;
+            for (let i = 0; i < totalRefocusingPulses; i++) {
                 seq.add(new GradientShift(1));
                 seq.add(new Relaxation(p.ESP / 2, 1000, 100));
-                seq.add(new RFPulse(p.refFA, 0));
+                const fa = Array.isArray(p.faSchedule) ? p.faSchedule[i] : p.refFA;
+                seq.add(new RFPulse(fa, 0));
                 seq.add(new Relaxation(p.ESP / 2, 1000, 100));
                 seq.add(new GradientShift(1));
-                seq.add(new ADC(`echo_${i + 1}`));
+                const acquiredIndex = i >= numDummyEchoes ? i - numDummyEchoes + 1 : null;
+                seq.add(new RareEchoSampleMarker(i + 1, acquiredIndex));
+                if (i >= numDummyEchoes) {
+                    seq.add(new ADC(`echo_${acquiredIndex}`));
+                }
             }
-            const recovery = Math.max(0, p.TR - p.numEchoes * p.ESP);
+            const recovery = Math.max(0, p.TR - totalRefocusingPulses * p.ESP);
             if (recovery > 0) seq.add(new Relaxation(recovery, 1000, 100));
             seq.add(new Spoiler());
             return seq;
+        }
+
+        function expandWithDummyEchoes(acquiredSchedule, numDummyEchoes) {
+            if (!acquiredSchedule.length) return [];
+            return [
+                ...Array(numDummyEchoes).fill(acquiredSchedule[0]),
+                ...acquiredSchedule,
+            ];
+        }
+
+        function buildRefocusingSchedule(scheme, params, etl, numDummyEchoes) {
+            if (scheme === 'custom') {
+                return computeFlipAngles(scheme, params, etl + numDummyEchoes);
+            }
+            const acquiredSchedule = computeFlipAngles(scheme, params, etl);
+            return expandWithDummyEchoes(acquiredSchedule, numDummyEchoes);
         }
 
         function cloneWithTissueRARE(seq, T1, T2) {
@@ -989,9 +1229,21 @@
             const timeline = [];
             let t = 0;
             for (const op of ts.operators) {
-                if (op instanceof ADC) {
+                if (op instanceof RareEchoSampleMarker) {
                     const f0 = s.F0();
-                    timeline.push({ time: t, Mz: s.Z0().real, MxyRe: f0.real, MxyIm: f0.imag });
+                    timeline.push({
+                        time: t,
+                        trainIndex: op.trainIndex,
+                        acquiredIndex: op.acquiredIndex,
+                        isDummy: op.isDummy,
+                        Mz: s.Z0().real,
+                        MxyRe: f0.real,
+                        MxyIm: f0.imag,
+                    });
+                }
+                if (op instanceof ADC) {
+                    // ADCs are still used for acquired-only consumers elsewhere, but plotting
+                    // samples come from RareEchoSampleMarker so dummy echoes can be shown too.
                 }
                 op.apply(s);
                 if (op instanceof Relaxation) t += op.tau;
@@ -1014,11 +1266,22 @@
             let phase = 'prep';
 
             for (const op of ts.operators) {
+                if (op instanceof RareEchoSampleMarker) {
+                    timeline.push({
+                        time: ct,
+                        Mz: s.Z0().real,
+                        Mxy: Complex.magnitude(s.F0()),
+                        phase,
+                        isDummy: op.isDummy,
+                        trainIndex: op.trainIndex,
+                        acquiredIndex: op.acquiredIndex,
+                    });
+                }
                 if (op instanceof ADC) {
-                    timeline.push({ time: ct, Mz: s.Z0().real, Mxy: Complex.magnitude(s.F0()), phase });
+                    // Keep ADCs in the sequence for acquisition semantics, but full-train plotting
+                    // is driven by RareEchoSampleMarker so dummy echoes are visible.
                 }
                 if (op instanceof Relaxation && op.tau > 100) {
-                    // Recovery period — sample continuously
                     const t0  = ct;
                     const Mz0 = s.Z0().real;
                     phase = 'recovery';
@@ -1047,10 +1310,17 @@
             const etl     = appParams.etl;
             const TR      = parseInt(document.getElementById('rare-tr').value);
             const ESP     = parseFloat(document.getElementById('rare-esp').value);
-            const refFA   = parseFloat(document.getElementById('rare-reffa').value);
+            const numDummyEchoes = parseInt(document.getElementById('rare-dummy-echoes').value);
             const numSims = parseInt(document.getElementById('rare-numSims').value);
+            const scheme  = document.getElementById('rare-fa-scheme').value;
+            const faSchedule = buildRefocusingSchedule(
+                scheme,
+                readSchemeParams(etl, ESP, etl + numDummyEchoes),
+                etl,
+                numDummyEchoes
+            );
 
-            const p   = { numEchoes: etl, TR, ESP, refFA };
+            const p   = { numEchoes: etl, numDummyEchoes, TR, ESP, faSchedule };
             const seq = buildRARE(p);
             const result = {};
             for (const t of window.PhantomState.tissues.filter(t => t.enabled !== false)) {
@@ -1058,7 +1328,7 @@
                 for (let i = 0; i < numSims; i++)
                     st = simulateRAREEchoTrain(seq, t.T1, t.T2, st ? st.finalState : null, t.PD);
                 const MxyComplex = new Float32Array(etl * 2);
-                st.timeline.forEach((pt, i) => {
+                st.timeline.filter(pt => !pt.isDummy).forEach((pt, i) => {
                     if (i < etl) {
                         MxyComplex[i * 2]     = pt.MxyRe;
                         MxyComplex[i * 2 + 1] = pt.MxyIm;
@@ -1066,15 +1336,42 @@
                 });
                 result[t.name] = MxyComplex;
             }
-            const gray0 = result.gray ? result.gray[0] : 'N/A';
-            console.log(`[RAREModule] getRARESignals done, gray echo[0]=${gray0}`);
             return result;
         }
 
-        let rareFlipAngleChart = null;
-        let rareEchoMxyChart = null, rareEchoMzChart = null;
-        let rareFullMzChart  = null, rareFullMxyChart  = null;
+        // ── State for T2-optimal control points & custom FA ──────────────
+        let _mxyCtrlPts = null;   // [{echoIndex, mxy}] — set when t2optimal active
+        let _customNodes = null;  // [{echoIndex, fa}] — set when custom active
+        let _mxyCtrlPtHandle = null; // { update, remove }
+        let _faCtrlPtHandle = null;  // { update, remove }
 
+        function defaultCtrlPts(etl) {
+            const n = 5;
+            return Array.from({ length: n }, (_, i) => ({
+                echoIndex: Math.round(1 + i * (etl - 1) / (n - 1)),
+                mxy: 1.0 - i * 0.1,
+            }));
+        }
+
+        function readSchemeParams(etl, ESP, trainLength = etl) {
+            const scheme = document.getElementById('rare-fa-scheme').value;
+            const params = { ESP };
+            if (scheme === 'constant') {
+                params.refFA = parseFloat(document.getElementById('rare-reffa').value);
+            } else if (scheme === 'linear') {
+                params.faStart = parseFloat(document.getElementById('rare-fa-start').value);
+                params.faEnd   = parseFloat(document.getElementById('rare-fa-end').value);
+            } else if (scheme === 't2optimal') {
+                if (!_mxyCtrlPts) _mxyCtrlPts = defaultCtrlPts(etl);
+                params.mxyControlPoints = _mxyCtrlPts;
+            } else if (scheme === 'custom') {
+                if (!_customNodes) _customNodes = defaultCustomNodes(trainLength);
+                params.faNodes = normalizeCustomNodes(_customNodes, trainLength);
+            }
+            return params;
+        }
+
+        // ── Main simulation ──────────────────────────────────────────────
         async function runRARESimulation() {
             if (!_rareReady) { console.warn('[RARE] EPG not ready'); return; }
             const btn = document.getElementById('rare-simulate-btn');
@@ -1084,59 +1381,77 @@
             const etl     = window.AppState ? window.AppState.params.etl : 72;
             const TR      = parseInt(document.getElementById('rare-tr').value);
             const ESP     = parseFloat(document.getElementById('rare-esp').value);
-            const refFA   = parseFloat(document.getElementById('rare-reffa').value);
+            const numDummyEchoes = parseInt(document.getElementById('rare-dummy-echoes').value);
             const numSims = parseInt(document.getElementById('rare-numSims').value);
+            const scheme  = document.getElementById('rare-fa-scheme').value;
 
             document.getElementById('rare-etl-display').textContent    = etl;
             document.getElementById('etlDisplayRareMz').textContent     = etl;
             document.getElementById('etlDisplayRareMxy').textContent    = etl;
 
-            if (ESP * etl >= TR) {
-                alert(`ETL × ESP (${etl * ESP} ms) must be less than TR (${TR} ms).\nReduce ETL or ESP, or increase TR.`);
+            const totalTrainEchoes = etl + numDummyEchoes;
+            if (ESP * totalTrainEchoes >= TR) {
+                alert(`(ETL + dummy echoes) × ESP (${totalTrainEchoes * ESP} ms) must be less than TR (${TR} ms).\nReduce ETL/dummy echoes or ESP, or increase TR.`);
                 btn.disabled = false;
                 return;
             }
 
-            const p   = { numEchoes: etl, TR, ESP, refFA };
-            const seq = buildRARE(p);
-
-            // Flip angle chart
-            {
-                const faLabels = ['EX', ...Array.from({ length: etl }, (_, i) => String(i + 1))];
-                const faData   = [90,   ...Array(etl).fill(refFA)];
-                const faColors = [
-                    'rgba(100,160,255,0.85)',
-                    ...Array(etl).fill('rgba(160,100,255,0.80)'),
-                ];
-                if (rareFlipAngleChart) rareFlipAngleChart.destroy();
-                rareFlipAngleChart = new Chart(document.getElementById('rareFlipAngleChart'), {
-                    type: 'bar',
-                    data: { labels: faLabels, datasets: [{ data: faData, backgroundColor: faColors, borderWidth: 0 }] },
-                    options: {
-                        responsive: true, maintainAspectRatio: false, animation: false,
-                        plugins: {
-                            legend: { display: false },
-                            tooltip: {
-                                callbacks: {
-                                    title: (items) => items[0].label === 'EX' ? 'Excitation' : `Refocusing echo ${items[0].label}`,
-                                    label: (item)  => `${item.raw}°`,
-                                },
-                            },
-                        },
-                        scales: {
-                            x: { ticks: { color: '#a0a0c0', maxTicksLimit: 20 },
-                                 grid:  { color: 'rgba(255,255,255,0.05)' },
-                                 title: { display: true, text: 'Pulse index', color: '#e0e0ff' } },
-                            y: { min: 0, max: 190,
-                                 ticks: { color: '#a0a0c0', callback: v => v + '°' },
-                                 grid:  { color: 'rgba(255,255,255,0.05)' },
-                                 title: { display: true, text: 'Flip angle (°)', color: '#e0e0ff' } },
-                        },
-                        barPercentage: 0.8, categoryPercentage: 0.9,
-                    },
-                });
+            // Init custom nodes if needed
+            if (scheme === 'custom' && !_customNodes) {
+                _customNodes = defaultCustomNodes(totalTrainEchoes);
             }
 
+            const schemeParams = readSchemeParams(etl, ESP, totalTrainEchoes);
+            const faSchedule   = buildRefocusingSchedule(scheme, schemeParams, etl, numDummyEchoes);
+            // Persist custom nodes (they were already mutated via drag; no reset needed)
+
+            const p   = { numEchoes: etl, numDummyEchoes, TR, ESP, faSchedule };
+            const seq = buildRARE(p);
+
+            // ── Flip angle bar chart ──────────────────────────────────────
+            {
+                const faLabels = [
+                    'EX',
+                    ...Array.from({ length: numDummyEchoes }, (_, i) => `D${i + 1}`),
+                    ...Array.from({ length: etl }, (_, i) => String(i + 1)),
+                ];
+                const faValues = [90,   ...faSchedule];
+                const faColors = [
+                    'rgba(100,160,255,0.85)',
+                    ...Array(numDummyEchoes).fill('rgba(255,180,80,0.80)'),
+                    ...Array(etl).fill('rgba(160,100,255,0.80)'),
+                ];
+                const faPlot = D3SeqPlots.createBarPlot(document.getElementById('rare-fa-chart'), {
+                    xLabels:   faLabels,
+                    values:    faValues,
+                    colors:    faColors,
+                    yMin: 0, yMax: 190,
+                    xLabel: 'Pulse index',
+                    yLabel: 'Flip angle (°)',
+                    draggable: false,
+                });
+
+                if (_faCtrlPtHandle) { _faCtrlPtHandle.remove(); _faCtrlPtHandle = null; }
+                if (scheme === 'custom') {
+                    const svgEl = document.querySelector('#rare-fa-chart svg');
+                    if (svgEl) {
+                        _faCtrlPtHandle = D3SeqPlots.addFAControlPoints(svgEl, {
+                            xScale: faPlot.xScale,
+                            yScale: faPlot.yScale,
+                            etl: totalTrainEchoes,
+                            yMin: 0,
+                            yMax: 180,
+                            points: normalizeCustomNodes(_customNodes, totalTrainEchoes),
+                            onDragEnd: (newPts) => {
+                                _customNodes = normalizeCustomNodes(newPts, totalTrainEchoes);
+                                runRARESimulation();
+                            },
+                        });
+                    }
+                }
+            }
+
+            // ── Echo train for all 5 tissues ─────────────────────────────
             // Echo train for enabled tissues only
             const rareActiveTissues = window.PhantomState.tissues.filter(t => t.enabled !== false);
             const echoResults = {};
@@ -1148,46 +1463,68 @@
             }
             console.log(`[RARE] echo train sim in ${(performance.now() - t0).toFixed(0)} ms`);
 
-            const labels = Array.from({ length: etl }, (_, i) => String(i + 1));
-            const dark = {
-                responsive: true, maintainAspectRatio: false, animation: false,
-                interaction: { mode: 'index', intersect: false },
-                plugins: { legend: { position: 'right', labels: { color: '#e0e0ff', font: { size: 10 } } } },
-                scales: {
-                    x: { ticks: { color: '#a0a0c0', maxTicksLimit: 12 },
-                         grid: { color: 'rgba(255,255,255,0.05)' },
-                         title: { display: true, text: 'Echo index', color: '#e0e0ff' } },
-                    y: { ticks: { color: '#a0a0c0' }, grid: { color: 'rgba(255,255,255,0.05)' } },
-                },
-            };
-
-            const mkDatasets = (key) => rareActiveTissues.map(t => ({
+            const mkLineDs = (key) => rareActiveTissues.map(t => ({
                 label: t.label,
-                data: echoResults[t.name].map(pt => {
+                data: echoResults[t.name].map((pt) => {
                     if (key === 'Mxy') {
                         const re = pt.MxyRe || 0, im = pt.MxyIm || 0;
-                        return Math.sqrt(re * re + im * im);
+                        return { x: pt.trainIndex, y: Math.sqrt(re * re + im * im) };
                     }
-                    return pt[key];
+                    return { x: pt.trainIndex, y: pt[key] };
                 }),
-                borderColor: t.color, backgroundColor: 'transparent',
-                borderWidth: 2, pointRadius: 0, tension: 0,
+                color: t.color,
                 hidden: ['CSF', 'adipose', 'bonemarrow'].includes(t.name),
             }));
 
-            if (rareEchoMxyChart) rareEchoMxyChart.destroy();
-            rareEchoMxyChart = new Chart(document.getElementById('rareEchoMxyChart'), {
-                type: 'line', data: { labels, datasets: mkDatasets('Mxy') },
-                options: { ...dark, scales: { ...dark.scales, y: { ...dark.scales.y, min: 0 } } },
+            const echoPhaseBoxes = numDummyEchoes > 0 ? [
+                { xStart: 0.5, xEnd: numDummyEchoes + 0.5, color: 'rgba(255,180,80,0.14)', label: 'Dummy echoes' },
+            ] : [];
+
+            const mxyPlot = D3SeqPlots.createLinePlot(document.getElementById('rare-echo-mxy-chart'), {
+                datasets: mkLineDs('Mxy'),
+                xType: 'linear', xMin: 1, xMax: totalTrainEchoes,
+                yMin: 0,
+                xLabel: 'Echo index', yLabel: 'Mxy',
+                phaseBoxes: echoPhaseBoxes,
+                showLegend: true,
             });
 
-            if (rareEchoMzChart) rareEchoMzChart.destroy();
-            rareEchoMzChart = new Chart(document.getElementById('rareEchoMzChart'), {
-                type: 'line', data: { labels, datasets: mkDatasets('Mz') },
-                options: { ...dark, scales: { ...dark.scales, y: { ...dark.scales.y, min: -0.1, max: 1.2 } } },
+            D3SeqPlots.createLinePlot(document.getElementById('rare-echo-mz-chart'), {
+                datasets: mkLineDs('Mz'),
+                xType: 'linear', xMin: 1, xMax: totalTrainEchoes,
+                yMin: -0.1, yMax: 1.2,
+                xLabel: 'Echo index', yLabel: 'Mz',
+                phaseBoxes: echoPhaseBoxes,
+                showLegend: true,
             });
 
-            // Full sequence for first 3 enabled tissues
+            // ── T2-optimal control points overlay ─────────────────────────
+            if (_mxyCtrlPtHandle) { _mxyCtrlPtHandle.remove(); _mxyCtrlPtHandle = null; }
+            if (scheme === 't2optimal') {
+                if (!_mxyCtrlPts) _mxyCtrlPts = defaultCtrlPts(etl);
+                const svgEl = document.querySelector('#rare-echo-mxy-chart svg');
+                if (svgEl) {
+                    const controlPoints = _mxyCtrlPts.map(pt => ({
+                        echoIndex: pt.echoIndex + numDummyEchoes,
+                        mxy: pt.mxy,
+                    }));
+                    _mxyCtrlPtHandle = D3SeqPlots.addMxyControlPoints(svgEl, {
+                        xScale: mxyPlot.xScale,
+                        yScale: mxyPlot.yScale,
+                        etl: totalTrainEchoes,
+                        points: controlPoints,
+                        onDragEnd: (newPts) => {
+                            _mxyCtrlPts = newPts.map(pt => ({
+                                echoIndex: Math.max(1, Math.min(etl, pt.echoIndex - numDummyEchoes)),
+                                mxy: pt.mxy,
+                            }));
+                            runRARESimulation();
+                        },
+                    });
+                }
+            }
+
+            // ── Full sequence ─────────────────────────────────────────────
             const t1 = performance.now();
             const fullSel = rareActiveTissues.slice(0, 3);
             const fullRes = {};
@@ -1200,73 +1537,95 @@
             console.log(`[RARE] full seq sim in ${(performance.now() - t1).toFixed(0)} ms`);
 
             const totalTime = fullRes[fullSel[0].name].totalTime;
-            const prepEnd   = etl * ESP;
+            const prepEnd   = (etl + numDummyEchoes) * ESP;
 
-            const phaseBoxPlugin = {
-                id: 'rarePhaseBoxes',
-                afterDatasetsDraw(ch) {
-                    const { ctx, scales: { x, y }, chartArea } = ch;
-                    [
-                        { color: 'rgba(100,200,255,0.12)', s: 0,       e: prepEnd    },
-                        { color: 'rgba(100,255,100,0.12)', s: prepEnd,  e: totalTime  },
-                    ].forEach(({ color, s, e }) => {
-                        ctx.fillStyle = color;
-                        ctx.fillRect(
-                            x.getPixelForValue(s), chartArea.top,
-                            x.getPixelForValue(e) - x.getPixelForValue(s),
-                            chartArea.bottom - chartArea.top
-                        );
-                    });
-                },
-            };
-
-            const fullOpts = (yMin) => ({
-                ...dark,
-                scales: {
-                    x: { type: 'linear', min: 0, max: totalTime,
-                         ticks: { color: '#a0a0c0' }, grid: { color: 'rgba(255,255,255,0.05)' },
-                         title: { display: true, text: 'Time (ms)', color: '#e0e0ff' } },
-                    y: { min: yMin, ticks: { color: '#a0a0c0' }, grid: { color: 'rgba(255,255,255,0.05)' } },
-                },
-            });
+            const phaseBoxes = [
+                { xStart: 0,       xEnd: prepEnd,   color: 'rgba(100,200,255,0.12)', label: 'RARE' },
+                { xStart: prepEnd, xEnd: totalTime,  color: 'rgba(100,255,100,0.12)', label: 'Recovery' },
+            ];
 
             const fullMzDs = fullSel.map(t => ({
                 label: t.label,
-                data: fullRes[t.name].timeline.map(p => ({ x: p.time, y: p.Mz })),
-                borderColor: t.color, backgroundColor: 'transparent',
-                borderWidth: 1.5, pointRadius: 0, tension: 0,
+                data: fullRes[t.name].timeline.map(pt => ({ x: pt.time, y: pt.Mz })),
+                color: t.color,
             }));
+            D3SeqPlots.createLinePlot(document.getElementById('rare-full-mz-chart'), {
+                datasets: fullMzDs,
+                xType: 'linear', xMin: 0, xMax: totalTime,
+                yMin: -0.2,
+                xLabel: 'Time (ms)', yLabel: 'Mz',
+                phaseBoxes,
+                showLegend: true,
+            });
 
             const fullMxyDs = fullSel.map(t => ({
                 label: t.label,
-                data: fullRes[t.name].timeline.filter(p => p.Mxy > 0).map(p => ({ x: p.time, y: p.Mxy })),
-                borderColor: t.color, backgroundColor: t.color,
-                borderWidth: 0, pointRadius: 3, tension: 0,
+                data: fullRes[t.name].timeline.filter(pt => pt.Mxy > 0).map(pt => ({ x: pt.time, y: pt.Mxy })),
+                color: t.color,
+                dots: true,
             }));
-
-            if (rareFullMzChart) rareFullMzChart.destroy();
-            rareFullMzChart = new Chart(document.getElementById('rareFullMzChart'), {
-                type: 'line', data: { datasets: fullMzDs },
-                options: fullOpts(-0.2), plugins: [phaseBoxPlugin],
-            });
-
-            if (rareFullMxyChart) rareFullMxyChart.destroy();
-            rareFullMxyChart = new Chart(document.getElementById('rareFullMxyChart'), {
-                type: 'scatter', data: { datasets: fullMxyDs },
-                options: fullOpts(0), plugins: [phaseBoxPlugin],
+            D3SeqPlots.createLinePlot(document.getElementById('rare-full-mxy-chart'), {
+                datasets: fullMxyDs,
+                xType: 'linear', xMin: 0, xMax: totalTime,
+                yMin: 0,
+                xLabel: 'Time (ms)', yLabel: 'Mxy',
+                phaseBoxes,
+                showLegend: true,
             });
 
             btn.disabled = false;
             console.log(`[RARE] total sim in ${(performance.now() - t0).toFixed(0)} ms`);
         }
 
+        // ── Scheme dropdown handler ───────────────────────────────────────
+        function applySchemeVisibility(scheme) {
+            ['constant', 'linear', 't2optimal', 'custom'].forEach(s => {
+                const el = document.getElementById(`rare-scheme-${s}`);
+                if (el) el.style.display = (s === scheme) ? '' : 'none';
+            });
+        }
+
         function setupRARESliders() {
             document.getElementById('rare-simulate-btn').addEventListener('click', runRARESimulation);
+
+            document.getElementById('rare-fa-scheme').addEventListener('change', function () {
+                applySchemeVisibility(this.value);
+                // Reset scheme-specific state on switch
+                if (this.value === 'custom')    _customNodes = null;
+                if (this.value === 't2optimal') _mxyCtrlPts  = null;
+                runRARESimulation();
+            });
+
+            document.getElementById('rare-custom-add-node').addEventListener('click', function () {
+                const etl = window.AppState ? window.AppState.params.etl : 72;
+                const numDummyEchoes = parseInt(document.getElementById('rare-dummy-echoes').value);
+                const totalTrainEchoes = etl + numDummyEchoes;
+                if (!_customNodes) { _customNodes = defaultCustomNodes(totalTrainEchoes); }
+                const sorted = [..._customNodes].sort((a, b) => a.echoIndex - b.echoIndex);
+                // Find the largest gap between adjacent nodes (or edges)
+                const gaps = [];
+                if (sorted[0].echoIndex > 1)
+                    gaps.push({ lo: 1, hi: sorted[0].echoIndex, loFA: sorted[0].fa, hiFA: sorted[0].fa });
+                for (let i = 0; i < sorted.length - 1; i++)
+                    gaps.push({ lo: sorted[i].echoIndex, hi: sorted[i + 1].echoIndex, loFA: sorted[i].fa, hiFA: sorted[i + 1].fa });
+                if (sorted[sorted.length - 1].echoIndex < totalTrainEchoes)
+                    gaps.push({ lo: sorted[sorted.length - 1].echoIndex, hi: totalTrainEchoes, loFA: sorted[sorted.length - 1].fa, hiFA: sorted[sorted.length - 1].fa });
+                gaps.sort((a, b) => (b.hi - b.lo) - (a.hi - a.lo));
+                const best = gaps[0];
+                const midEcho = Math.round((best.lo + best.hi) / 2);
+                const midFA   = (best.loFA + best.hiFA) / 2;
+                _customNodes = normalizeCustomNodes([..._customNodes, { echoIndex: midEcho, fa: midFA }], totalTrainEchoes);
+                runRARESimulation();
+            });
+
             [
-                ['rare-tr',      'rare-tr-value'],
-                ['rare-esp',     'rare-esp-value'],
-                ['rare-reffa',   'rare-reffa-value'],
-                ['rare-numSims', 'rare-numSims-value'],
+                ['rare-tr',       'rare-tr-value'],
+                ['rare-esp',      'rare-esp-value'],
+                ['rare-dummy-echoes', 'rare-dummy-echoes-value'],
+                ['rare-reffa',    'rare-reffa-value'],
+                ['rare-fa-start', 'rare-fa-start-value'],
+                ['rare-fa-end',   'rare-fa-end-value'],
+                ['rare-numSims',  'rare-numSims-value'],
             ].forEach(([id, valId]) => {
                 const sl = document.getElementById(id);
                 const sp = document.getElementById(valId);
