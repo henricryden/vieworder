@@ -1,0 +1,3 @@
+[submodule "phantoms/MedicalImagingVectorPhantoms"]
+	path = phantoms/MedicalImagingVectorPhantoms
+	url = https://github.com/bretglun/MedicalImagingVectorPhantoms.git

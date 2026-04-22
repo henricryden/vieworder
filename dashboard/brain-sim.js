@@ -13,7 +13,7 @@
 /* global BrainPhantom, Chart */
 
 const BrainSim = (() => {
-    const SVG_URL = '../phantoms/brain.svg';
+    const SVG_URL = '../phantoms/MedicalImagingVectorPhantoms/2D_axial_brain.svg';
 
     // Multi-worker pool for parallelized phantom computation
     let _workers = [];          // Array of Worker instances
@@ -333,9 +333,9 @@ const BrainSim = (() => {
         const ksp_re = new Float32Array(Ny * Nz);
         const ksp_im = new Float32Array(Ny * Nz);
 
-        const tissues = window.PhantomState.tissues.map(t => t.name);
+        const tissues = window.PhantomState.tissues.filter(t => t.enabled !== false).map(t => t.name);
         const PD_map  = Object.fromEntries(
-            window.PhantomState.tissues.map(t => [t.name, t.PD])
+            window.PhantomState.tissues.filter(t => t.enabled !== false).map(t => [t.name, t.PD])
         );
 
         for (const coord of coords) {
@@ -412,7 +412,7 @@ const BrainSim = (() => {
         const el = document.getElementById('brain-mxy-chart');
         if (!el) return;
 
-        const datasets = window.PhantomState.tissues.map(t => {
+        const datasets = window.PhantomState.tissues.filter(t => t.enabled !== false).map(t => {
             const sigsComplex = mprageSigs[t.name];
             const data = [];
             if (sigsComplex) {

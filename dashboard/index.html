@@ -358,6 +358,9 @@
                             <option value="brain">Brain (3 T)</option>
                         </select>
                     </div>
+                    <div class="phantom-preview">
+                        <img src="../phantoms/MedicalImagingVectorPhantoms/2D_axial_brain.svg" id="phantom-svg-img" alt="Phantom preview">
+                    </div>
                 </div>
 
                 <div class="phantom-table-panel">
@@ -827,7 +830,7 @@
             };
             const seq = buildMPRAGE(p);
             const result = {};
-            for (const t of window.PhantomState.tissues) {
+            for (const t of window.PhantomState.tissues.filter(t => t.enabled !== false)) {
                 let st = null;
                 for (let i = 0; i < numSims; i++)
                     st = simulateAndTrackWithState(seq, t.T1, t.T2, st ? st.finalState : null, t.PD);
@@ -869,9 +872,10 @@
             };
             const seq = buildMPRAGE(p);
 
-            // Window charts (all 5 tissues)
+            // Window charts (enabled tissues only)
+            const activeTissues = window.PhantomState.tissues.filter(t => t.enabled !== false);
             const winResults = {};
-            for (const t of window.PhantomState.tissues) {
+            for (const t of activeTissues) {
                 let st = null;
                 for (let i = 0; i < numSims; i++)
                     st = simulateAndTrackWithState(seq, t.T1, t.T2, st ? st.finalState : null, t.PD);
@@ -881,8 +885,8 @@
 
             const echoLabels = Array.from({ length: etl }, (_, i) => String(i + 1));
 
-            const mkDatasets = (key) => window.PhantomState.tissues.map(t => ({
-                label: t.label,
+            const mkDatasets = (key) => activeTissues.map(t => ({
+                label: t.label, 
                 data: winResults[t.name].map((pt, i) => {
                     if (key === 'Mxy') {
                         const re = pt.MxyRe || 0, im = pt.MxyIm || 0;
@@ -910,9 +914,9 @@
                 showLegend: true,
             });
 
-            // Full-sequence charts (first 3 tissues for readability)
+            // Full-sequence charts (first 3 enabled tissues for readability)
             const t1 = performance.now();
-            const fullSel = window.PhantomState.tissues.slice(0, 3);
+            const fullSel = activeTissues.slice(0, 3);
             const fullRes = {};
             for (const t of fullSel) {
                 let st = null;
@@ -1319,7 +1323,7 @@
             const p   = { numEchoes: etl, numDummyEchoes, TR, ESP, faSchedule };
             const seq = buildRARE(p);
             const result = {};
-            for (const t of RARE_TISSUES_3T) {
+            for (const t of window.PhantomState.tissues.filter(t => t.enabled !== false)) {
                 let st = null;
                 for (let i = 0; i < numSims; i++)
                     st = simulateRAREEchoTrain(seq, t.T1, t.T2, st ? st.finalState : null, t.PD);
@@ -1448,8 +1452,10 @@
             }
 
             // ── Echo train for all 5 tissues ─────────────────────────────
+            // Echo train for enabled tissues only
+            const rareActiveTissues = window.PhantomState.tissues.filter(t => t.enabled !== false);
             const echoResults = {};
-            for (const t of RARE_TISSUES_3T) {
+            for (const t of rareActiveTissues) {
                 let st = null;
                 for (let i = 0; i < numSims; i++)
                     st = simulateRAREEchoTrain(seq, t.T1, t.T2, st ? st.finalState : null, t.PD);
@@ -1457,7 +1463,7 @@
             }
             console.log(`[RARE] echo train sim in ${(performance.now() - t0).toFixed(0)} ms`);
 
-            const mkLineDs = (key) => RARE_TISSUES_3T.map(t => ({
+            const mkLineDs = (key) => rareActiveTissues.map(t => ({
                 label: t.label,
                 data: echoResults[t.name].map((pt) => {
                     if (key === 'Mxy') {
@@ -1520,7 +1526,7 @@
 
             // ── Full sequence ─────────────────────────────────────────────
             const t1 = performance.now();
-            const fullSel = RARE_TISSUES_3T.slice(0, 3);
+            const fullSel = rareActiveTissues.slice(0, 3);
             const fullRes = {};
             for (const t of fullSel) {
                 let st = null;

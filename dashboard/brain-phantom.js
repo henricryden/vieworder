@@ -4,9 +4,8 @@
  * Implements the 2D polygon Fourier transform formula (Green's theorem / Gach 2008).
  * Designed to run in a Web Worker (no DOM dependencies beyond DOMParser for SVG parsing).
  *
- * Tissues included (3T, from SpinSight constants.py):
- *   gray, white, CSF, adipose, bonemarrow
- * Excluded for speed: muscle (#008000), cortical (#808000)
+ * Tissues included (3T, from MedicalImagingVectorPhantoms/2D_axial_brain.toml):
+ *   gray, white, CSF, adipose, bonemarrow, muscle, cortical, blood
  */
 
 /* global self */
@@ -16,13 +15,16 @@ const BrainPhantom = (() => {
     const FOV_Z = 200;  // phantom FOV in kz direction [mm] — increased to reduce aliasing
 
     // Tissue fill hex → display name and 3T relaxation parameters
+    // Colors from phantoms/MedicalImagingVectorPhantoms/2D_axial_brain.toml
     const TISSUE_MAP = {
-        '#00ff00': { name: 'gray',       T1: 1450, T2: 100,   PD: 1.0,  color: '#00ff00' },
-        '#d40000': { name: 'white',      T1: 750,  T2: 69,    PD: 0.92,  color: '#d40000' },
-        '#00ffff': { name: 'CSF',        T1: 4400, T2: 2100,  PD: 1.0,  color: '#00ffff' },
-        '#ffe680': { name: 'adipose',    T1: 370,  T2: 130,   PD: 1.0,  color: '#ffe680' },
-        '#ffff44': { name: 'bonemarrow', T1: 898,  T2: 34,    PD: 1.0,  color: '#ffff44' },
-        // excluded: '#008000' muscle, '#808000' cortical, '#ffeeee' blood
+        '#625e42': { name: 'gray',       T1: 1450, T2: 100,  PD: 1.0,  color: '#625e42' },
+        '#a09c7f': { name: 'white',      T1: 830,  T2: 69,   PD: 0.92, color: '#a09c7f' },
+        '#c6c5b2': { name: 'CSF',        T1: 4160, T2: 2100, PD: 1.0,  color: '#c6c5b2' },
+        '#b6985f': { name: 'adipose',    T1: 370,  T2: 130,  PD: 1.0,  color: '#b6985f' },
+        '#a78f23': { name: 'bonemarrow', T1: 898,  T2: 34,   PD: 1.0,  color: '#a78f23' },
+        '#500f05': { name: 'muscle',     T1: 1400, T2: 50,   PD: 1.0,  color: '#500f05' },
+        '#504010': { name: 'cortical',   T1: 900,  T2: 0.5,  PD: 0.2,  color: '#504010' },
+        '#990000': { name: 'blood',      T1: 1650, T2: 150,  PD: 1.0,  color: '#990000' },
     };
 
     // Precomputed per-tissue edge arrays: Float64Array of [Ly, Lz, rcy, rcz] quads
@@ -210,6 +212,22 @@ const BrainPhantom = (() => {
         const doc = parser.parseFromString(svgText, 'image/svg+xml');
         const paths = doc.querySelectorAll('path');
 
+        // Compute center offset from viewBox so phantom is centered at (0,0).
+        // For old SVGs centered at origin the offset is 0; for new SVGs with
+        // top-left origin (viewBox "minX minY width height") this shifts to center.
+        let offsetY = 0, offsetZ = 0;
+        const svgEl = doc.querySelector('svg');
+        if (svgEl) {
+            const vb = svgEl.getAttribute('viewBox');
+            if (vb) {
+                const parts = vb.trim().split(/[\s,]+/);
+                if (parts.length === 4) {
+                    offsetY = parseFloat(parts[0]) + parseFloat(parts[2]) / 2;
+                    offsetZ = parseFloat(parts[1]) + parseFloat(parts[3]) / 2;
+                }
+            }
+        }
+
         const tissueMap = getTissueMap();
         const tissuePolygons = {};
         for (const info of Object.values(tissueMap)) {
@@ -241,10 +259,14 @@ const BrainPhantom = (() => {
                 for (let j = 0; j < N; j++) {
                     const p1 = verts[j];
                     const p2 = verts[(j + 1) % N];
-                    quads.push(p2[0] - p1[0]);             // Ly
-                    quads.push(p2[1] - p1[1]);             // Lz
-                    quads.push((p1[0] + p2[0]) * 0.5);    // rcy
-                    quads.push((p1[1] + p2[1]) * 0.5);    // rcz
+                    const p1y = p1[0] - offsetY;
+                    const p1z = p1[1] - offsetZ;
+                    const p2y = p2[0] - offsetY;
+                    const p2z = p2[1] - offsetZ;
+                    quads.push(p2y - p1y);             // Ly
+                    quads.push(p2z - p1z);             // Lz
+                    quads.push((p1y + p2y) * 0.5);    // rcy
+                    quads.push((p1z + p2z) * 0.5);    // rcz
                 }
             }
             result[name] = new Float64Array(quads);
