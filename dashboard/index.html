@@ -419,6 +419,10 @@
                         <input type="range" id="te" min="0" max="10" value="3.5" step="0.5">
                     </div>
                     <div class="control-group">
+                        <label>Dummy echoes <span class="value" id="mprage-dummyValue">0</span></label>
+                            <input type="range" id="mprage-dummy" min="0" max="40" value="0" step="1">
+                    </div>
+                    <div class="control-group">
                         <label>Steady-state cycles <span class="value" id="numSimsValue">4</span></label>
                         <input type="range" id="numSims" min="1" max="5" value="4" step="1">
                     </div>
@@ -491,7 +495,7 @@
                     <div style="height:50px;"></div>
                     <div class="control-group">
                         <label>Dummy echoes <span class="value" id="rare-dummy-echoes-value">0</span></label>
-                        <input type="range" id="rare-dummy-echoes" min="0" max="10" value="0" step="1">
+                            <input type="range" id="rare-dummy-echoes" min="0" max="40" value="0" step="1">
                     </div>
                     <div class="control-group">
                         <label>Steady-state cycles <span class="value" id="rare-numSims-value">2</span></label>
@@ -719,15 +723,28 @@
             });
 
         // ── MPRAGE sequence builder ─────────────────────────────────────
+        class MPRAGEPulseSampleMarker {
+            constructor(trainIndex, acquiredIndex = null) {
+                this.trainIndex = trainIndex;
+                this.acquiredIndex = acquiredIndex;
+                this.isDummy = acquiredIndex == null;
+            }
+            apply() {}
+        }
+
         function buildMPRAGE(p) {
             const seq = new Sequence(20);
             const TE  = p.TE || (p.innerTR / 2);
+            const numDummyPulses = p.numDummyPulses || 0;
+            const totalReadoutPulses = numDummyPulses + p.numPulses;
             seq.add(new RFPulse(180, 0));
             seq.add(new Relaxation(p.TI, 1000, 100));
-            for (let i = 0; i < p.numPulses; i++) {
+            for (let i = 0; i < totalReadoutPulses; i++) {
                 seq.add(new RFPulse(p.flipAngle, 90));
                 seq.add(new Relaxation(TE, 1000, 100));
-                seq.add(new ADC(`p${i + 1}`));
+                const acquiredIndex = i >= numDummyPulses ? i - numDummyPulses + 1 : null;
+                seq.add(new MPRAGEPulseSampleMarker(i + 1, acquiredIndex));
+                if (i >= numDummyPulses) seq.add(new ADC(`p${acquiredIndex}`));
                 const rem = p.innerTR - TE;
                 if (rem > 0) seq.add(new Relaxation(rem, 1000, 100));
                 if (p.perfectSpoilingEnable) seq.add(new Spoiler());
@@ -757,9 +774,20 @@
             const timeline = [];
             let t = 0;
             for (const op of ts.operators) {
-                if (op instanceof ADC) {
+                if (op instanceof MPRAGEPulseSampleMarker) {
                     const f0 = s.F0();
-                    timeline.push({ time: t, Mz: s.Z0().real, MxyRe: f0.real, MxyIm: f0.imag });
+                    timeline.push({
+                        time: t,
+                        pulseIndex: op.trainIndex,
+                        acquiredIndex: op.acquiredIndex,
+                        isDummy: op.isDummy,
+                        Mz: s.Z0().real,
+                        MxyRe: f0.real,
+                        MxyIm: f0.imag,
+                    });
+                }
+                if (op instanceof ADC) {
+                    // ADCs remain in the sequence for acquired-only consumers.
                 }
                 op.apply(s);
                 if (op instanceof Relaxation) t += op.tau;
@@ -788,6 +816,17 @@
                 } else if (op instanceof RFPulse && op.alpha_deg < 90 && !inPrep) {
                     phase = 'prep'; phaseStart.prep = ct; inPrep = true;
                 }
+                if (op instanceof MPRAGEPulseSampleMarker) {
+                    timeline.push({
+                        time: ct,
+                        Mz: s.Z0().real,
+                        Mxy: Complex.magnitude(s.F0()),
+                        phase,
+                        pulseIndex: op.trainIndex,
+                        acquiredIndex: op.acquiredIndex,
+                        isDummy: op.isDummy,
+                    });
+                }
                 if (op instanceof Relaxation && op.tau > 100) {
                     const t0 = ct;
                     for (let rt = t0; rt <= t0 + op.tau; rt += 1) {
@@ -805,8 +844,6 @@
                         ct += op.tau;
                         if (op.tau > 500 && inPrep) { phase = 'recovery'; phaseStart.recovery = ct - op.tau; inPrep = false; }
                     }
-                    if (op instanceof ADC)
-                        timeline.push({ time: ct, Mz: s.Z0().real, Mxy: Complex.magnitude(s.F0()), phase });
                 }
             }
             return { timeline, phaseStart, totalTime: ct, finalState: s };
@@ -816,6 +853,7 @@
         function getMPRAGESignals(appParams) {
             if (!_ready) return null;
             const etl     = appParams.etl;
+            const numDummyPulses = parseInt(document.getElementById('mprage-dummy').value);
             const numSims = parseInt(document.getElementById('numSims').value);
             const t0      = performance.now();
 
@@ -824,6 +862,7 @@
                 flipAngle:             parseFloat(document.getElementById('alpha').value),
                 innerTR:               parseFloat(document.getElementById('tr').value),
                 TE:                    parseFloat(document.getElementById('te').value),
+                numDummyPulses,
                 numPulses:             etl,
                 recovery:              parseInt(document.getElementById('recovery').value),
                 perfectSpoilingEnable: true,
@@ -836,7 +875,7 @@
                     st = simulateAndTrackWithState(seq, t.T1, t.T2, st ? st.finalState : null, t.PD);
                 // Store complex signals: [re0, im0, re1, im1, ..., re(etl-1), im(etl-1)]
                 const MxyComplex = new Float32Array(etl * 2);
-                st.timeline.forEach((pt, i) => { 
+                st.timeline.filter(pt => !pt.isDummy).forEach((pt, i) => {
                     if (i < etl) { 
                         MxyComplex[i * 2] = pt.MxyRe; 
                         MxyComplex[i * 2 + 1] = pt.MxyIm; 
@@ -857,6 +896,8 @@
             const t0 = performance.now();
 
             const etl     = window.AppState ? window.AppState.params.etl : 72;
+            const numDummyPulses = parseInt(document.getElementById('mprage-dummy').value);
+            const totalTrainPulses = etl + numDummyPulses;
             const numSims = parseInt(document.getElementById('numSims').value);
             document.getElementById('etlDisplayMz').textContent  = etl;
             document.getElementById('etlDisplayMxy').textContent = etl;
@@ -866,6 +907,7 @@
                 flipAngle:             parseFloat(document.getElementById('alpha').value),
                 innerTR:               parseFloat(document.getElementById('tr').value),
                 TE:                    parseFloat(document.getElementById('te').value),
+                numDummyPulses,
                 numPulses:             etl,
                 recovery:              parseInt(document.getElementById('recovery').value),
                 perfectSpoilingEnable: true,
@@ -883,34 +925,38 @@
             }
             console.log(`[MPRAGE] window sim in ${(performance.now()-t0).toFixed(0)} ms`);
 
-            const echoLabels = Array.from({ length: etl }, (_, i) => String(i + 1));
-
             const mkDatasets = (key) => activeTissues.map(t => ({
                 label: t.label, 
-                data: winResults[t.name].map((pt, i) => {
+                data: winResults[t.name].map((pt) => {
                     if (key === 'Mxy') {
                         const re = pt.MxyRe || 0, im = pt.MxyIm || 0;
-                        return { x: i + 1, y: Math.sqrt(re * re + im * im) };
+                        return { x: pt.pulseIndex, y: Math.sqrt(re * re + im * im) };
                     }
-                    return { x: i + 1, y: pt[key] };
+                    return { x: pt.pulseIndex, y: pt[key] };
                 }),
                 color: t.color,
                 hidden: ['CSF', 'adipose', 'bonemarrow'].includes(t.name),
             }));
 
+            const readoutPhaseBoxes = numDummyPulses > 0 ? [
+                { xStart: 0.5, xEnd: numDummyPulses + 0.5, color: 'rgba(255,180,80,0.14)', label: 'Dummy echoes' },
+            ] : [];
+
             D3SeqPlots.createLinePlot(document.getElementById('mprage-mz-chart'), {
                 datasets: mkDatasets('Mz'),
-                xType: 'linear', xMin: 1, xMax: etl,
+                xType: 'linear', xMin: 1, xMax: totalTrainPulses,
                 yMin: -1.2, yMax: 1.2,
                 xLabel: 'Echo index', yLabel: 'Mz',
+                phaseBoxes: readoutPhaseBoxes,
                 showLegend: true,
             });
 
             D3SeqPlots.createLinePlot(document.getElementById('mprage-mxy-chart'), {
                 datasets: mkDatasets('Mxy'),
-                xType: 'linear', xMin: 1, xMax: etl,
+                xType: 'linear', xMin: 1, xMax: totalTrainPulses,
                 yMin: 0,
                 xLabel: 'Echo index', yLabel: 'Mxy',
+                phaseBoxes: readoutPhaseBoxes,
                 showLegend: true,
             });
 
@@ -928,12 +974,11 @@
 
             const ref        = fullRes[fullSel[0].name];
             const totalTime  = ref.totalTime;
-            const phaseStart = ref.phaseStart;
-
             const phaseBoxes = [
-                { xStart: 0,                   xEnd: phaseStart.prep,      color: 'rgba(255,100,100,0.12)', label: 'Inversion' },
-                { xStart: phaseStart.prep,     xEnd: phaseStart.recovery,  color: 'rgba(100,200,255,0.12)', label: 'MPRAGE' },
-                { xStart: phaseStart.recovery, xEnd: totalTime,            color: 'rgba(100,255,100,0.12)', label: 'Recovery' },
+                { xStart: 0, xEnd: p.TI, color: 'rgba(255,100,100,0.12)', label: 'Inversion + TI' },
+                ...(numDummyPulses > 0 ? [{ xStart: p.TI, xEnd: p.TI + numDummyPulses * p.innerTR, color: 'rgba(255,180,80,0.14)', label: 'Dummy echoes' }] : []),
+                { xStart: p.TI + numDummyPulses * p.innerTR, xEnd: p.TI + totalTrainPulses * p.innerTR, color: 'rgba(100,200,255,0.12)', label: 'MPRAGE' },
+                { xStart: p.TI + totalTrainPulses * p.innerTR, xEnd: totalTime, color: 'rgba(100,255,100,0.12)', label: 'Recovery' },
             ];
 
             const fullDs = (key) => fullSel.map(t => ({
@@ -968,7 +1013,7 @@
         function setupMPRAGESliders() {
             document.getElementById('mprage-simulate-btn')
                     .addEventListener('click', runMPRAGESimulation);
-            ['ti','recovery','alpha','tr','te','numSims'].forEach(id => {
+            ['ti','recovery','alpha','tr','te','mprage-dummy','numSims'].forEach(id => {
                 const sl = document.getElementById(id);
                 const sp = document.getElementById(id + 'Value');
                 if (sl && sp) sl.addEventListener('input', () => { sp.textContent = sl.value; });
