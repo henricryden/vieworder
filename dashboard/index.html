@@ -484,8 +484,8 @@
                         <input type="range" id="rare-tr" min="1000" max="8000" value="3000" step="500">
                     </div>
                     <div class="control-group">
-                        <label>Echo spacing (ESP) <span class="value" id="rare-esp-value">10</span> ms</label>
-                        <input type="range" id="rare-esp" min="5" max="30" value="10" step="1">
+                            <label>Echo spacing (ESP) <span class="value" id="rare-esp-value">5</span> ms</label>
+                            <input type="range" id="rare-esp" min="1" max="15" value="5" step="1">
                     </div>
                 </div>
 
@@ -502,9 +502,6 @@
                         <input type="range" id="rare-numSims" min="1" max="5" value="2" step="1">
                     </div>
                 </div>
-
-                <!-- Simulate button spans both columns -->
-                <button class="mprage-btn-simulate" id="rare-simulate-btn" style="grid-column: 1 / -1;">▶ Simulate RARE</button>
             </div><!-- /mprage-params-grid -->
 
             <!-- FA Scheme selector + param rows -->
@@ -697,6 +694,14 @@
                 const etl = window.AppState ? window.AppState.params.etl : 72;
                 const el  = document.getElementById('mprage-etl-display');
                 if (el) el.textContent = etl;
+            }
+
+            if (id === 'rare' && window.RAREModule?.refreshPlots) {
+                requestAnimationFrame(() => {
+                    requestAnimationFrame(() => {
+                        window.RAREModule.refreshPlots();
+                    });
+                });
             }
         }
     </script>
@@ -1417,10 +1422,12 @@
         }
 
         // ── Main simulation ──────────────────────────────────────────────
+        let _rareSimTimer = null;
+        let _rareSimRunning = false;
+        let _rareSimQueued = false;
+
         async function runRARESimulation() {
             if (!_rareReady) { console.warn('[RARE] EPG not ready'); return; }
-            const btn = document.getElementById('rare-simulate-btn');
-            btn.disabled = true;
             const t0 = performance.now();
 
             const etl     = window.AppState ? window.AppState.params.etl : 72;
@@ -1437,7 +1444,6 @@
             const totalTrainEchoes = etl + numDummyEchoes;
             if (ESP * totalTrainEchoes >= TR) {
                 alert(`(ETL + dummy echoes) × ESP (${totalTrainEchoes * ESP} ms) must be less than TR (${TR} ms).\nReduce ETL/dummy echoes or ESP, or increase TR.`);
-                btn.disabled = false;
                 return;
             }
 
@@ -1476,23 +1482,20 @@
                     draggable: false,
                 });
 
-                if (_faCtrlPtHandle) { _faCtrlPtHandle.remove(); _faCtrlPtHandle = null; }
-                if (scheme === 'custom') {
-                    const svgEl = document.querySelector('#rare-fa-chart svg');
-                    if (svgEl) {
-                        _faCtrlPtHandle = D3SeqPlots.addFAControlPoints(svgEl, {
-                            xScale: faPlot.xScale,
-                            yScale: faPlot.yScale,
-                            etl: totalTrainEchoes,
-                            yMin: 0,
-                            yMax: 180,
-                            points: normalizeCustomNodes(_customNodes, totalTrainEchoes),
-                            onDragEnd: (newPts) => {
-                                _customNodes = normalizeCustomNodes(newPts, totalTrainEchoes);
-                                runRARESimulation();
-                            },
-                        });
-                    }
+                const svgEl = document.querySelector('#rare-fa-chart svg');
+                if (svgEl) {
+                    _faCtrlPtHandle = D3SeqPlots.addFAControlPoints(svgEl, {
+                        xScale: faPlot.xScale,
+                        yScale: faPlot.yScale,
+                        etl: totalTrainEchoes,
+                        yMin: 0,
+                        yMax: 180,
+                        points: normalizeCustomNodes(_customNodes, totalTrainEchoes),
+                        onDragEnd: (newPts) => {
+                            _customNodes = normalizeCustomNodes(newPts, totalTrainEchoes);
+                            requestRARESimulation(0);
+                        },
+                    });
                 }
             }
 
@@ -1563,7 +1566,7 @@
                                 echoIndex: Math.max(1, Math.min(etl, pt.echoIndex - numDummyEchoes)),
                                 mxy: pt.mxy,
                             }));
-                            runRARESimulation();
+                            requestRARESimulation(0);
                         },
                     });
                 }
@@ -1617,9 +1620,32 @@
                 phaseBoxes,
                 showLegend: true,
             });
-
-            btn.disabled = false;
             console.log(`[RARE] total sim in ${(performance.now() - t0).toFixed(0)} ms`);
+        }
+
+        function requestRARESimulation(delay = 80) {
+            if (_rareSimTimer) clearTimeout(_rareSimTimer);
+            _rareSimTimer = setTimeout(() => {
+                _rareSimTimer = null;
+                queueRARESimulation();
+            }, delay);
+        }
+
+        async function queueRARESimulation() {
+            if (_rareSimRunning) {
+                _rareSimQueued = true;
+                return;
+            }
+            _rareSimRunning = true;
+            try {
+                await runRARESimulation();
+            } finally {
+                _rareSimRunning = false;
+                if (_rareSimQueued) {
+                    _rareSimQueued = false;
+                    queueRARESimulation();
+                }
+            }
         }
 
         // ── Scheme dropdown handler ───────────────────────────────────────
@@ -1631,14 +1657,12 @@
         }
 
         function setupRARESliders() {
-            document.getElementById('rare-simulate-btn').addEventListener('click', runRARESimulation);
-
             document.getElementById('rare-fa-scheme').addEventListener('change', function () {
                 applySchemeVisibility(this.value);
                 // Reset scheme-specific state on switch
                 if (this.value === 'custom')    _customNodes = null;
                 if (this.value === 't2optimal') _mxyCtrlPts  = null;
-                runRARESimulation();
+                requestRARESimulation(0);
             });
 
             document.getElementById('rare-custom-add-node').addEventListener('click', function () {
@@ -1660,7 +1684,7 @@
                 const midEcho = Math.round((best.lo + best.hi) / 2);
                 const midFA   = (best.loFA + best.hiFA) / 2;
                 _customNodes = normalizeCustomNodes([..._customNodes, { echoIndex: midEcho, fa: midFA }], totalTrainEchoes);
-                runRARESimulation();
+                requestRARESimulation(0);
             });
 
             [
@@ -1674,8 +1698,15 @@
             ].forEach(([id, valId]) => {
                 const sl = document.getElementById(id);
                 const sp = document.getElementById(valId);
-                if (sl && sp) sl.addEventListener('input', () => { sp.textContent = sl.value; });
+                if (sl && sp) sl.addEventListener('input', () => {
+                    sp.textContent = sl.value;
+                    requestRARESimulation();
+                });
             });
+
+            if (document.getElementById('tab-rare')?.classList.contains('active')) {
+                requestRARESimulation(0);
+            }
         }
 
         // ── Expose module ────────────────────────────────────────────────
@@ -1686,6 +1717,9 @@
         window.RAREModule = {
             get ready() { return _rareReady; },
             getRARESignals,
+            refreshPlots() {
+                requestRARESimulation(0);
+            },
         };
     </script>
 </body>
