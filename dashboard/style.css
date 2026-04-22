@@ -765,7 +765,7 @@ select:focus { outline: none; border-color: var(--red); }
   border: 1px solid #2a2a3a;
   margin-top: 20px;
   position: relative;
-  height: 280px;
+  min-height: 280px;
 }
 
 .brain-mxy-panel h3 {
