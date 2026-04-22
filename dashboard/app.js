@@ -90,7 +90,10 @@ const App = (() => {
 
     function renderAllSliderTicks() {
         const sliders = document.querySelectorAll('input.slider[type="range"]');
-        sliders.forEach(s => renderSliderTicks(s));
+        sliders.forEach((slider) => {
+            if (slider.getClientRects().length === 0 || slider.offsetWidth === 0) return;
+            renderSliderTicks(slider);
+        });
     }
 
     // Position ticks container exactly over the slider element
@@ -752,10 +755,13 @@ const App = (() => {
     
     return {
         init,
+        renderAllSliderTicks,
         getCurrentCoords,
         getCurrentParams
     };
 })();
+
+window.App = App;
 
 // Expose live accessors for other modules (brain-sim.js, MPRAGE tab)
 window.AppState = {

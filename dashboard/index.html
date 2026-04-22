@@ -765,6 +765,12 @@
             document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
             document.getElementById('tab-' + id).classList.add('active');
 
+            if (window.App?.renderAllSliderTicks) {
+                requestAnimationFrame(() => {
+                    window.App.renderAllSliderTicks();
+                });
+            }
+
             const activeButton = {
                 'view-order': document.querySelectorAll('.tab-btn')[0],
                 phantom:      document.querySelectorAll('.tab-btn')[1],
