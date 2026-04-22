@@ -19,8 +19,8 @@
             <button class="tab-btn active" onclick="switchTab('view-order')">① View Order</button>
             <button class="tab-btn"        onclick="switchTab('phantom')">② Phantom</button>
             <button class="tab-btn"        onclick="switchTab('mprage')">③ MPRAGE</button>
-            <button class="tab-btn"        onclick="switchTab('rare')">③ RARE</button>
-            <button class="tab-btn"        onclick="switchTab('brain-scan')">④ Brain Scan</button>
+            <button class="tab-btn"        onclick="switchTab('rare')">④ RARE</button>
+            <button class="tab-btn"        onclick="switchTab('brain-scan')">⑤ Brain Scan</button>
         </div>
 
         <!-- ══ TAB 1: View Order ══════════════════════════════════════ -->
@@ -456,13 +456,13 @@
             </div>
         </div><!-- /tab-mprage -->
 
-        <!-- ══ TAB 3: RARE Simulator ══════════════════════════════════ -->
+        <!-- ══ TAB 4: RARE Simulator ══════════════════════════════════ -->
         <div id="tab-rare" class="tab-panel">
             <div class="mprage-params-grid">
 
-                <!-- Sequence parameters -->
+                <!-- Left column: Timing -->
                 <div class="mprage-panel">
-                    <h2>Sequence Parameters</h2>
+                    <h2>Timing</h2>
                     <div class="mprage-etl-note">
                         ETL = <strong id="rare-etl-display">72</strong> echoes (set in Tab ①)
                     </div>
@@ -474,35 +474,24 @@
                         <label>Echo spacing (ESP) <span class="value" id="rare-esp-value">10</span> ms</label>
                         <input type="range" id="rare-esp" min="5" max="30" value="10" step="1">
                     </div>
+                </div>
+
+                <!-- Right column: Refocusing -->
+                <div class="mprage-panel">
+                    <h2>Refocusing</h2>
+                    <div style="height:50px;"></div>
                     <div class="control-group">
-                        <label>Refocusing flip angle <span class="value" id="rare-reffa-value">180</span> °</label>
+                        <label>Flip angle <span class="value" id="rare-reffa-value">180</span> °</label>
                         <input type="range" id="rare-reffa" min="90" max="180" value="180" step="5">
                     </div>
                     <div class="control-group">
                         <label>Steady-state cycles <span class="value" id="rare-numSims-value">2</span></label>
                         <input type="range" id="rare-numSims" min="1" max="5" value="2" step="1">
                     </div>
-                    <button class="mprage-btn-simulate" id="rare-simulate-btn">▶ Simulate RARE</button>
                 </div>
 
-                <!-- Tissue table (read-only) -->
-                <div class="mprage-panel">
-                    <h2>Tissue Parameters (3 T)</h2>
-                    <p style="font-size:0.88em;color:#666;margin-bottom:12px;">
-                        Fixed literature values. All 5 tissues simulated.
-                    </p>
-                    <table style="width:100%;font-size:0.87em;border-collapse:collapse;">
-                        <thead>
-                            <tr style="border-bottom:2px solid #667eea;">
-                                <th style="text-align:left;padding:4px 6px;color:#667eea;">Tissue</th>
-                                <th style="text-align:right;padding:4px 6px;color:#667eea;">T1</th>
-                                <th style="text-align:right;padding:4px 6px;color:#667eea;">T2</th>
-                                <th style="text-align:right;padding:4px 6px;color:#667eea;">PD</th>
-                            </tr>
-                        </thead>
-                        <tbody id="rare-tissue-table-body"></tbody>
-                    </table>
-                </div>
+                <!-- Simulate button spans both columns -->
+                <button class="mprage-btn-simulate" id="rare-simulate-btn" style="grid-column: 1 / -1;">▶ Simulate RARE</button>
             </div><!-- /mprage-params-grid -->
 
             <!-- Flip angle schedule -->
@@ -639,7 +628,7 @@
             const idx = ['view-order', 'phantom', 'mprage', 'rare', 'brain-scan'].indexOf(id);
             if (idx >= 0) document.querySelectorAll('.tab-btn')[idx].classList.add('active');
             // Sync ETL display when switching to MPRAGE or Brain Scan tabs
-            if (id === 'mprage' || id === 'brain-scan') {
+            if (id === 'mprage' || id === 'rare' || id === 'brain-scan') {
                 const etl = window.AppState ? window.AppState.params.etl : 72;
                 const mpEl   = document.getElementById('mprage-etl-display');
                 if (mpEl) mpEl.textContent = etl;
@@ -967,7 +956,6 @@
                    GradientShift, ADC, Spoiler, Complex } = m);
                 _rareReady = true;
                 console.log('✓ RARE EPG modules loaded');
-                populateRARETissueTable();
                 setupRARESliders();
             })
             .catch(err => console.error('✗ RARE EPG module load failed:', err));
@@ -979,22 +967,6 @@
             { name: 'adipose',    label: 'Adipose',      T1: 370,  T2: 130,  PD: 1.0,  color: '#ffe680' },
             { name: 'bonemarrow', label: 'Bone marrow',  T1: 898,  T2: 34,   PD: 1.0,  color: '#ffff44' },
         ];
-
-        function populateRARETissueTable() {
-            const tbody = document.getElementById('rare-tissue-table-body');
-            if (!tbody) return;
-            tbody.innerHTML = RARE_TISSUES_3T.map(t => `
-                <tr style="border-bottom:1px solid #dee2e6;">
-                    <td style="padding:5px 6px;display:flex;align-items:center;gap:7px;">
-                        <span style="display:inline-block;width:11px;height:11px;border-radius:2px;
-                                     background:${t.color};border:1px solid #aaa;flex-shrink:0;"></span>
-                        ${t.label}
-                    </td>
-                    <td style="text-align:right;padding:5px 6px;font-family:monospace;">${t.T1} ms</td>
-                    <td style="text-align:right;padding:5px 6px;font-family:monospace;">${t.T2} ms</td>
-                    <td style="text-align:right;padding:5px 6px;font-family:monospace;">${t.PD.toFixed(2)}</td>
-                </tr>`).join('');
-        }
 
         // RARE sequence: excitation → ETL × [dephase + ESP/2 + refocus + ESP/2 + rephase + ADC] → recovery + spoil
         function buildRARE(p) {
