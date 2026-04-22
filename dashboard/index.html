@@ -675,36 +675,39 @@
 
         <!-- ══ TAB 5: Brain Scan ══════════════════════════════════════ -->
         <div id="tab-brain-scan" class="tab-panel">
-            <div class="brain-layout">
-                <div class="brain-controls">
-                    <h2>Brain Scan Simulation</h2>
-                    <p style="font-size:0.88em;color:#555;margin-bottom:14px;">
-                        Simulates an acquisition with view order from Tab ① and MPRAGE tissue signals from Tab ②,
-                        using an analytical brain phantom from <a href="https://github.com/bretglun/SpinSight">SpinSight</a> to reconstruct
-                        a brain image.
-                        <br><br>
-                        The reconstru
-                        <br><br>
-                        FOV 200 × 200 mm, 3 T.
-                    </p>
-                    <p style="font-size:0.85em;color:#777;margin-bottom:10px;">
-                        Phantom k-space is computed analytically from SVG polygons<br>
-                        and cached per matrix size (Ny × Nz from Tab ①).<br>
-                        Tissues: GM, WM, CSF, adipose, and bone marrow.
-                    </p>
-                        <button class="brain-sim-btn" id="brain-simulate-btn">▶ Simulate Brain Scan</button>
-                    <div class="brain-status" id="brain-status">Ready — press Simulate to run.</div>
-                    <div class="brain-progress-container" id="brain-progress-container" style="display:none;">
-                        <div class="brain-progress-bar" id="brain-progress-bar"></div>
-                        <span id="brain-progress-label">Computing phantom…</span>
-                    </div>
-                </div><!-- /brain-controls -->
 
+            <!-- Summary bar — full width -->
+            <div class="brain-summary">
+                <div class="brain-summary-title">Brain Scan Simulation</div>
+                <div class="brain-summary-stats" id="brain-summary-stats">FOV 200 × 200 mm &nbsp;·&nbsp; matrix —</div>
+                <div class="brain-summary-actions">
+                    <button class="brain-sim-btn" id="brain-simulate-btn"
+                            onclick="BrainSim.runScan()">▶ Simulate</button>
+                    <button class="brain-save-btn" id="brain-save-btn"
+                            onclick="BrainSim.saveReference()"
+                            style="margin-left:8px;" disabled>⊞ Save reference</button>
+                </div>
+                <div class="brain-status" id="brain-status">Ready — press Simulate to run.</div>
+                <div class="brain-progress-container" id="brain-progress-container" style="display:none;">
+                    <div class="brain-progress-bar" id="brain-progress-bar"></div>
+                    <span id="brain-progress-label">Computing phantom…</span>
+                </div>
+            </div>
+
+            <!-- Image + k-space row -->
+            <div class="brain-layout">
                 <div class="brain-image-panel">
                     <h3>Reconstructed magnitude image</h3>
                     <canvas id="brain-image-canvas" width="256" height="256"></canvas>
                         <button class="brain-save-btn" id="brain-save-btn"
                             style="margin-top:8px;" disabled>⊞ Save as reference</button>
+                </div>
+                <div class="brain-image-panel brain-mtf-panel">
+                    <h3>log |k-space|</h3>
+                    <canvas id="brain-kspace-canvas" width="256" height="256"></canvas>
+                    <button class="brain-save-btn" id="brain-ksp-toggle"
+                            onclick="BrainSim.toggleKspMode()"
+                            style="margin-top:8px;">Signal</button>
                 </div>
             </div><!-- /brain-layout -->
 
@@ -788,6 +791,13 @@
                 const etl = window.AppState ? window.AppState.params.etl : 72;
                 const el  = document.getElementById('mprage-etl-display');
                 if (el) el.textContent = etl;
+            }
+
+            if (id === 'brain-scan') {
+                const params = window.AppState ? window.AppState.params : {};
+                const summaryStats = document.getElementById('brain-summary-stats');
+                if (summaryStats && params.ky)
+                    summaryStats.textContent = `FOV 200 × 200 mm · matrix ${params.ky}×${params.kz} · ETL ${params.etl}`;
             }
 
             if (id === 'rare' && window.RAREModule?.refreshPlots) {

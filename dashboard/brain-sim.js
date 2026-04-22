@@ -414,6 +414,103 @@ const BrainSim = (() => {
         el.className = 'brain-status' + (isError ? ' brain-status-error' : '');
     }
 
+    function _computeLogMag(re, im, Ny, Nz) {
+        const N = Ny * Nz;
+        const logMag = new Float32Array(N);
+        let maxLog = -Infinity;
+        for (let i = 0; i < N; i++) {
+            const mag = Math.sqrt(re[i] * re[i] + im[i] * im[i]);
+            logMag[i] = Math.log1p(mag);
+            if (logMag[i] > maxLog) maxLog = logMag[i];
+        }
+        return { logMag, maxLog };
+    }
+
+    function computeMtfKspace(coords, sigs, Ny, Nz) {
+        const N = Ny * Nz;
+        const weights = new Float32Array(N);
+        const zeroIm  = new Float32Array(N);
+        const tissues = window.PhantomState.tissues.filter(t => t.enabled !== false).map(t => t.name);
+        for (const coord of coords) {
+            const { y_idx, z_idx, echo } = coord;
+            if (typeof echo !== 'number' || echo < 1) continue;
+            const echoIdx = echo - 1;
+            let sumMag = 0, cnt = 0;
+            for (const name of tissues) {
+                const s = sigs[name];
+                if (!s) continue;
+                const re = s[echoIdx * 2] || 0, im = s[echoIdx * 2 + 1] || 0;
+                sumMag += Math.sqrt(re * re + im * im);
+                cnt++;
+            }
+            weights[z_idx * Ny + y_idx] = cnt > 0 ? sumMag / cnt : 0;
+        }
+        return _computeLogMag(weights, zeroIm, Ny, Nz);
+    }
+
+    function interpolateCividis(t) {
+        // Cividis colormap: perceptually uniform, colorblind-friendly
+        // t: 0..1 → [r, g, b]
+        const colors = [
+            [0, 32, 77],      // t=0.0 dark blue
+            [0, 68, 124],     // t=0.25
+            [61, 110, 144],   // t=0.5 teal
+            [163, 136, 96],   // t=0.75
+            [255, 233, 55]    // t=1.0 yellow
+        ];
+        const segments = colors.length - 1;
+        const seg = Math.max(0, Math.min(segments, t * segments));
+        const i0 = Math.floor(seg);
+        const i1 = Math.min(i0 + 1, segments);
+        const frac = seg - i0;
+        const c0 = colors[i0], c1 = colors[i1];
+        return [
+            Math.round(c0[0] + (c1[0] - c0[0]) * frac),
+            Math.round(c0[1] + (c1[1] - c0[1]) * frac),
+            Math.round(c0[2] + (c1[2] - c0[2]) * frac)
+        ];
+    }
+
+    function _drawKspCanvas({ logMag, maxLog }, Ny, Nz, useColormap = false) {
+        const canvas = document.getElementById('brain-kspace-canvas');
+        if (!canvas) return;
+        canvas.width  = Ny;
+        canvas.height = Nz;
+        const ctx = canvas.getContext('2d');
+        const imageData = ctx.createImageData(Ny, Nz);
+        const d = imageData.data;
+        const N = Ny * Nz;
+        const scale = maxLog > 0 ? 1 / maxLog : 1;
+        for (let i = 0; i < N; i++) {
+            const t = Math.min(1, logMag[i] * scale);  // 0..1
+            let r, g, b;
+            if (useColormap) {
+                [r, g, b] = interpolateCividis(t);
+            } else {
+                const v = Math.round(t * 255);
+                r = g = b = v;
+            }
+            d[i*4] = r; d[i*4+1] = g; d[i*4+2] = b; d[i*4+3] = 255;
+        }
+        ctx.putImageData(imageData, 0, 0);
+    }
+
+    function renderKspaceFromState() {
+        if (!_kspMagSignal) return;
+        const data = _kspMode === 'mtf' ? _kspMagMtf : _kspMagSignal;
+        const useColormap = _kspMode === 'mtf';
+        _drawKspCanvas(data, _kspNy, _kspNz, useColormap);
+        const h3 = document.querySelector('.brain-mtf-panel h3');
+        if (h3) h3.textContent = _kspMode === 'mtf' ? 'log |acquisition weight|' : 'log |k-space|';
+    }
+
+    function renderKspaceCanvas(ksp_re, ksp_im, sigs, coords, Ny, Nz) {
+        _kspNy = Ny; _kspNz = Nz;
+        _kspMagSignal = _computeLogMag(ksp_re, ksp_im, Ny, Nz);
+        _kspMagMtf    = computeMtfKspace(coords, sigs, Ny, Nz);
+        renderKspaceFromState();
+    }
+
     function renderImage(canvas, img, width, height) {
         const t0 = performance.now();
         canvas.width  = width;
@@ -473,6 +570,12 @@ const BrainSim = (() => {
     let _reference = null;
     // Current magnitude image from the last run
     let _currentImg = null, _currentWidth = 0, _currentHeight = 0;
+
+    // ── K-space display state ─────────────────────────────────────────────────
+    let _kspMode     = 'signal';  // 'signal' | 'mtf'
+    let _kspMagSignal = null;     // { logMag: Float32Array, maxLog }
+    let _kspMagMtf    = null;     // { logMag: Float32Array, maxLog }
+    let _kspNy = 0, _kspNz = 0;
 
     /**
      * Render the per-pixel absolute difference between two magnitude Float32Arrays
@@ -622,8 +725,9 @@ const BrainSim = (() => {
             setStatus('Reconstructing image…');
             const { img, width, height } = ifft2centered(ksp_re, ksp_im, Ny, Nz);
 
-            // 6. Render
+            // 6. Render image + k-space
             renderImage(canvas, img, width, height);
+            renderKspaceCanvas(ksp_re, ksp_im, sigs, coords, Ny, Nz);
             const sourceLabel = sigSource === 'rare' ? 'RARE' : sigSource === 'fspgr' ? 'FSPGR' : 'MPRAGE';
             const titleEl = document.getElementById('brain-mxy-title');
             if (titleEl) titleEl.textContent = `${sourceLabel} Mxy(echo) per tissue — used in this scan`;
@@ -649,6 +753,8 @@ const BrainSim = (() => {
 
             const msg = `Done in ${(performance.now() - tTotal).toFixed(0)} ms (${Ny}×${Nz})`;
             setStatus(msg);
+            const summaryStats = document.getElementById('brain-summary-stats');
+            if (summaryStats) summaryStats.textContent = `FOV 200 × 200 mm · matrix ${Ny}×${Nz} · ETL ${ETL} · ${sourceLabel}`;
             console.log(`[BrainSim] Total scan pipeline: ${msg}`);
 
         } catch (err) {
@@ -658,6 +764,13 @@ const BrainSim = (() => {
             _scanInFlight = false;
             if (simBtn) simBtn.disabled = false;
         }
+    }
+
+    function toggleKspMode() {
+        _kspMode = _kspMode === 'signal' ? 'mtf' : 'signal';
+        const btn = document.getElementById('brain-ksp-toggle');
+        if (btn) btn.textContent = _kspMode === 'mtf' ? 'MTF' : 'Signal';
+        renderKspaceFromState();
     }
 
     // ── Phantom change: invalidate grid cache + reinit workers ────────────
@@ -672,7 +785,7 @@ const BrainSim = (() => {
         // SVG text is still cached; workers will re-receive edge data on next ensureSVGParsed()
     });
 
-    return { runScan, renderMxyChart, saveReference };
+    return { runScan, renderMxyChart, saveReference, toggleKspMode };
 })();
 
 window.BrainSim = BrainSim;

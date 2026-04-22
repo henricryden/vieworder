@@ -583,26 +583,55 @@ select:focus { outline: none; border-color: var(--red); }
   color: #c0c0d0;
 }
 
-.brain-layout {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 24px;
-  align-items: start;
-}
-
-.brain-controls {
+.brain-summary {
   background: var(--bg-panel);
   border: 1px solid var(--rule);
   border-top: 3px solid var(--ink);
-  padding: 22px;
+  padding: 16px 22px;
+  margin-bottom: 20px;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px 24px;
 }
 
-.brain-controls h2 {
+.brain-summary-title {
   font-family: var(--serif);
-  font-size: 16px;
+  font-size: 15px;
+  font-weight: 700;
   color: var(--ink);
-  border-bottom-color: var(--rule);
-  margin-bottom: 16px;
+  flex: 0 0 auto;
+}
+
+.brain-summary-stats {
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--ink-mid);
+  flex: 1 1 auto;
+}
+
+.brain-summary-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex: 0 0 auto;
+}
+
+.brain-summary .brain-status {
+  flex: 0 0 100%;
+  margin-top: 4px;
+}
+
+.brain-summary .brain-progress-container {
+  flex: 0 0 100%;
+  margin-top: 4px;
+}
+
+.brain-layout {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  align-items: start;
 }
 
 .brain-sim-btn {
@@ -689,7 +718,6 @@ select:focus { outline: none; border-color: var(--red); }
   border: 1px solid #2a2a3a;
   background: #0a0a14;
   width: 100%;
-  max-width: 320px;
   aspect-ratio: 1/1;
   image-rendering: pixelated;
 }
