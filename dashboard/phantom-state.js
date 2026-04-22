@@ -12,11 +12,11 @@
             label: 'Brain',
             scanLabel: 'Brain Scan',
             tissues: [
-                { name: 'gray',       label: 'Gray matter',  T1: 1450, T2: 100,  PD: 1.0,  color: '#00ff00' },
-                { name: 'white',      label: 'White matter', T1: 830,  T2: 69,   PD: 0.92, color: '#d40000' },
-                { name: 'CSF',        label: 'CSF',          T1: 4160, T2: 2100, PD: 1.0,  color: '#00ffff' },
-                { name: 'adipose',    label: 'Adipose',      T1: 370,  T2: 130,  PD: 1.0,  color: '#ffe680' },
-                { name: 'bonemarrow', label: 'Bone marrow',  T1: 898,  T2: 34,   PD: 1.0,  color: '#ffff44' },
+                { name: 'gray',       label: 'Gray matter',  T1: 1450, T2: 100,  PD: 1.0,  color: '#00ff00', enabled: true },
+                { name: 'white',      label: 'White matter', T1: 830,  T2: 69,   PD: 0.92, color: '#d40000', enabled: true },
+                { name: 'CSF',        label: 'CSF',          T1: 4160, T2: 2100, PD: 1.0,  color: '#00ffff', enabled: true },
+                { name: 'adipose',    label: 'Adipose',      T1: 370,  T2: 130,  PD: 1.0,  color: '#ffe680', enabled: true },
+                { name: 'bonemarrow', label: 'Bone marrow',  T1: 898,  T2: 34,   PD: 1.0,  color: '#ffff44', enabled: true },
             ],
         },
     };
@@ -55,6 +55,7 @@
             const row = document.createElement('tr');
             row.innerHTML = `
                 <td>
+                    <input type="checkbox" class="tissue-enable-cb" data-tissue="${i}" ${t.enabled !== false ? 'checked' : ''} title="Include in simulation">
                     <span class="tissue-color-swatch" style="background:${t.color};"></span>
                     ${t.label}
                 </td>
@@ -76,6 +77,15 @@
                 if (!isNaN(val)) {
                     window.PhantomState.tissues[i][field] = val;
                 }
+            });
+        });
+
+        // Enable/disable checkboxes
+        tbody.querySelectorAll('.tissue-enable-cb').forEach(cb => {
+            cb.addEventListener('change', () => {
+                const i = parseInt(cb.dataset.tissue, 10);
+                window.PhantomState.tissues[i].enabled = cb.checked;
+                window.dispatchEvent(new CustomEvent('phantomChanged', { detail: { enabledChanged: true } }));
             });
         });
     }

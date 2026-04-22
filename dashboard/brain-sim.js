@@ -336,9 +336,9 @@ const BrainSim = (() => {
         const ksp_re = new Float32Array(Ny * Nz);
         const ksp_im = new Float32Array(Ny * Nz);
 
-        const tissues = window.PhantomState.tissues.map(t => t.name);
+        const tissues = window.PhantomState.tissues.filter(t => t.enabled !== false).map(t => t.name);
         const PD_map  = Object.fromEntries(
-            window.PhantomState.tissues.map(t => [t.name, t.PD])
+            window.PhantomState.tissues.filter(t => t.enabled !== false).map(t => [t.name, t.PD])
         );
 
         for (const coord of coords) {
@@ -417,7 +417,7 @@ const BrainSim = (() => {
 
         const labels = Array.from({ length: etl }, (_, i) => i + 1);
 
-        const datasets = window.PhantomState.tissues.map(t => {
+        const datasets = window.PhantomState.tissues.filter(t => t.enabled !== false).map(t => {
             const sigsComplex = mprageSigs[t.name];
             const data = [];
             if (sigsComplex) {
