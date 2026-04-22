@@ -13,7 +13,7 @@
 /* global BrainPhantom, Chart */
 
 const BrainSim = (() => {
-    const SVG_URL = '../phantoms/brain.svg';
+    const SVG_URL = '../phantoms/MedicalImagingVectorPhantoms/2D_axial_brain.svg';
 
     // Multi-worker pool for parallelized phantom computation
     let _workers = [];          // Array of Worker instances

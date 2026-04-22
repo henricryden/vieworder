@@ -360,7 +360,7 @@
                         </select>
                     </div>
                     <div class="phantom-preview">
-                        <img src="../phantoms/brain.svg" id="phantom-svg-img" alt="Phantom preview">
+                        <img src="../phantoms/MedicalImagingVectorPhantoms/2D_axial_brain.svg" id="phantom-svg-img" alt="Phantom preview">
                     </div>
                 </div>
 
@@ -950,15 +950,6 @@
                 if (sl && sp) sl.addEventListener('input', () => { sp.textContent = sl.value; });
             });
         }
-
-        // ── RARE TISSUES ────────────────────────────────────────────────
-        const RARE_TISSUES_3T = [
-            { name: 'gray',       label: 'Gray matter',  T1: 1450, T2: 100,  PD: 1.0,  color: '#00ff00' },
-            { name: 'white',      label: 'White matter', T1: 830,  T2: 69,   PD: 0.92, color: '#d40000' },
-            { name: 'CSF',        label: 'CSF',          T1: 4160, T2: 2100, PD: 1.0,  color: '#00ffff' },
-            { name: 'adipose',    label: 'Adipose',      T1: 370,  T2: 130,  PD: 1.0,  color: '#ffe680' },
-            { name: 'bonemarrow', label: 'Bone marrow',  T1: 898,  T2: 34,   PD: 1.0,  color: '#ffff44' },
-        ];
 
         // RARE sequence: excitation → ETL × [dephase + ESP/2 + refocus + ESP/2 + rephase + ADC] → recovery + spoil
         function buildRARE(p) {
