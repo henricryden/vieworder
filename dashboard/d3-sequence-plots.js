@@ -128,7 +128,7 @@
     function createLinePlot(containerEl, opts) {
         // Clear before measuring so stale SVG doesn't inflate clientWidth
         containerEl.innerHTML = '';
-        const showLegend = opts.showLegend !== false && opts.datasets && opts.datasets.some(d => !d.hidden);
+        const showLegend = opts.showLegend !== false && opts.datasets && opts.datasets.length > 0;
         const width  = opts.width  || containerEl.clientWidth  || 500;
         const height = opts.height || containerEl.clientHeight || 260;
         const margin = opts.margin || {
@@ -244,11 +244,13 @@
 
         // Legend
         if (showLegend) {
-            const visDs = opts.datasets.filter(d => !d.hidden);
             const legendG = svg.append('g')
                 .attr('transform', `translate(${margin.left + innerW + 6}, ${margin.top})`);
-            visDs.forEach((ds, i) => {
-                const row = legendG.append('g').attr('transform', `translate(0,${i * 16})`);
+            opts.datasets.forEach((ds, i) => {
+                const row = legendG.append('g')
+                    .attr('transform', `translate(0,${i * 16})`)
+                    .attr('opacity', ds.hidden ? 0.35 : 1)
+                    .style('cursor', opts.onLegendClick ? 'pointer' : 'default');
                 row.append('line')
                     .attr('x1', 0).attr('y1', 6).attr('x2', 14).attr('y2', 6)
                     .attr('stroke', ds.color).attr('stroke-width', 2);
@@ -256,7 +258,11 @@
                     .attr('x', 18).attr('y', 10)
                     .attr('fill', DARK.axisText)
                     .attr('font-size', 10)
+                    .attr('text-decoration', ds.hidden ? 'line-through' : 'none')
                     .text(ds.label);
+                if (opts.onLegendClick) {
+                    row.on('click', () => opts.onLegendClick(ds.label, !ds.hidden));
+                }
             });
         }
 

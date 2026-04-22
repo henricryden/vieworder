@@ -817,6 +817,10 @@
         let Sequence, StateMatrix, RFPulse, Relaxation, GradientShift, ADC, Spoiler, Complex;
         let _ready = false;
         let _rareReady = false;
+        let _mprageHiddenLabels = new Set();
+        let _mprageLastSimData  = null;
+        let _rareHiddenLabels   = new Set();
+        let _rareLastSimData    = null;
 
         import('../js-epg/src/index.js')
             .then(m => {
@@ -1000,6 +1004,79 @@
 
         // ── Tab 2 "Simulate" button ─────────────────────────────────────
 
+        function renderMPRAGECharts() {
+            if (!_mprageLastSimData) return;
+            const { activeTissues, winResults, fullSel, fullRes,
+                    totalTrainPulses, totalTime,
+                    readoutPhaseBoxes, fullPhaseBoxes } = _mprageLastSimData;
+
+            const onLegendClick = (label, nowHidden) => {
+                if (nowHidden) _mprageHiddenLabels.add(label);
+                else _mprageHiddenLabels.delete(label);
+                renderMPRAGECharts();
+            };
+
+            const mkDatasets = (key) => activeTissues.map(t => ({
+                label: t.label,
+                data: winResults[t.name].map((pt) => {
+                    if (key === 'Mxy') {
+                        const re = pt.MxyRe || 0, im = pt.MxyIm || 0;
+                        return { x: pt.pulseIndex, y: Math.sqrt(re * re + im * im) };
+                    }
+                    return { x: pt.pulseIndex, y: pt[key] };
+                }),
+                color: t.color,
+                hidden: _mprageHiddenLabels.has(t.label),
+            }));
+
+            D3SeqPlots.createLinePlot(document.getElementById('mprage-mz-chart'), {
+                datasets: mkDatasets('Mz'),
+                xType: 'linear', xMin: 1, xMax: totalTrainPulses,
+                yMin: -1.2, yMax: 1.2,
+                xLabel: 'Echo index', yLabel: 'Mz',
+                phaseBoxes: readoutPhaseBoxes,
+                showLegend: true,
+                onLegendClick,
+            });
+
+            D3SeqPlots.createLinePlot(document.getElementById('mprage-mxy-chart'), {
+                datasets: mkDatasets('Mxy'),
+                xType: 'linear', xMin: 1, xMax: totalTrainPulses,
+                yMin: 0,
+                xLabel: 'Echo index', yLabel: 'Mxy',
+                phaseBoxes: readoutPhaseBoxes,
+                showLegend: true,
+                onLegendClick,
+            });
+
+            const fullDs = (key) => fullSel.map(t => ({
+                label: t.label,
+                data: fullRes[t.name].timeline.map(pt => ({ x: pt.time, y: pt[key] })),
+                color: t.color,
+                hidden: _mprageHiddenLabels.has(t.label),
+            }));
+
+            D3SeqPlots.createLinePlot(document.getElementById('mprage-fullmz-chart'), {
+                datasets: fullDs('Mz'),
+                xType: 'linear', xMin: 0, xMax: totalTime,
+                yMin: -1.2,
+                xLabel: 'Time (ms)', yLabel: 'Mz',
+                phaseBoxes: fullPhaseBoxes,
+                showLegend: true,
+                onLegendClick,
+            });
+
+            D3SeqPlots.createLinePlot(document.getElementById('mprage-fullmxy-chart'), {
+                datasets: fullDs('Mxy'),
+                xType: 'linear', xMin: 0, xMax: totalTime,
+                yMin: 0,
+                xLabel: 'Time (ms)', yLabel: 'Mxy',
+                phaseBoxes: fullPhaseBoxes,
+                showLegend: true,
+                onLegendClick,
+            });
+        }
+
         async function runMPRAGESimulation() {
             if (!_ready) { console.warn('[MPRAGE] EPG not ready'); return; }
             const btn = document.getElementById('mprage-simulate-btn');
@@ -1036,44 +1113,13 @@
             }
             console.log(`[MPRAGE] window sim in ${(performance.now()-t0).toFixed(0)} ms`);
 
-            const mkDatasets = (key) => activeTissues.map(t => ({
-                label: t.label, 
-                data: winResults[t.name].map((pt) => {
-                    if (key === 'Mxy') {
-                        const re = pt.MxyRe || 0, im = pt.MxyIm || 0;
-                        return { x: pt.pulseIndex, y: Math.sqrt(re * re + im * im) };
-                    }
-                    return { x: pt.pulseIndex, y: pt[key] };
-                }),
-                color: t.color,
-                hidden: ['CSF', 'adipose', 'bonemarrow'].includes(t.name),
-            }));
-
             const readoutPhaseBoxes = numDummyPulses > 0 ? [
                 { xStart: 0.5, xEnd: numDummyPulses + 0.5, color: 'rgba(255,180,80,0.14)', label: 'Dummy echoes' },
             ] : [];
 
-            D3SeqPlots.createLinePlot(document.getElementById('mprage-mz-chart'), {
-                datasets: mkDatasets('Mz'),
-                xType: 'linear', xMin: 1, xMax: totalTrainPulses,
-                yMin: -1.2, yMax: 1.2,
-                xLabel: 'Echo index', yLabel: 'Mz',
-                phaseBoxes: readoutPhaseBoxes,
-                showLegend: true,
-            });
-
-            D3SeqPlots.createLinePlot(document.getElementById('mprage-mxy-chart'), {
-                datasets: mkDatasets('Mxy'),
-                xType: 'linear', xMin: 1, xMax: totalTrainPulses,
-                yMin: 0,
-                xLabel: 'Echo index', yLabel: 'Mxy',
-                phaseBoxes: readoutPhaseBoxes,
-                showLegend: true,
-            });
-
-            // Full-sequence charts (first 3 enabled tissues for readability)
+            // Full-sequence charts (all enabled tissues)
             const t1 = performance.now();
-            const fullSel = activeTissues.slice(0, 3);
+            const fullSel = activeTissues;
             const fullRes = {};
             for (const t of fullSel) {
                 let st = null;
@@ -1085,37 +1131,16 @@
 
             const ref        = fullRes[fullSel[0].name];
             const totalTime  = ref.totalTime;
-            const phaseBoxes = [
+            const fullPhaseBoxes = [
                 { xStart: 0, xEnd: p.TI, color: 'rgba(255,100,100,0.12)', label: 'Inversion + TI' },
                 ...(numDummyPulses > 0 ? [{ xStart: p.TI, xEnd: p.TI + numDummyPulses * p.innerTR, color: 'rgba(255,180,80,0.14)', label: 'Dummy echoes' }] : []),
                 { xStart: p.TI + numDummyPulses * p.innerTR, xEnd: p.TI + totalTrainPulses * p.innerTR, color: 'rgba(100,200,255,0.12)', label: 'MPRAGE' },
                 { xStart: p.TI + totalTrainPulses * p.innerTR, xEnd: totalTime, color: 'rgba(100,255,100,0.12)', label: 'Recovery' },
             ];
 
-            const fullDs = (key) => fullSel.map(t => ({
-                label: t.label,
-                data: fullRes[t.name].timeline.map(pt => ({ x: pt.time, y: pt[key] })),
-                color: t.color,
-            }));
-
-            D3SeqPlots.createLinePlot(document.getElementById('mprage-fullmz-chart'), {
-                datasets: fullDs('Mz'),
-                xType: 'linear', xMin: 0, xMax: totalTime,
-                yMin: -1.2,
-                xLabel: 'Time (ms)', yLabel: 'Mz',
-                phaseBoxes,
-                showLegend: true,
-            });
-
-            D3SeqPlots.createLinePlot(document.getElementById('mprage-fullmxy-chart'), {
-                datasets: fullDs('Mxy'),
-                xType: 'linear', xMin: 0, xMax: totalTime,
-                yMin: 0,
-                xLabel: 'Time (ms)', yLabel: 'Mxy',
-                phaseBoxes,
-                showLegend: true,
-            });
-
+            _mprageLastSimData = { activeTissues, winResults, fullSel, fullRes,
+                                   totalTrainPulses, totalTime, readoutPhaseBoxes, fullPhaseBoxes };
+            renderMPRAGECharts();
             btn.disabled = false;
             console.log(`[MPRAGE] total sim in ${(performance.now()-t0).toFixed(0)} ms`);
         }
@@ -1532,6 +1557,111 @@
         let _rareSimRunning = false;
         let _rareSimQueued = false;
 
+        function renderRARECharts() {
+            if (!_rareLastSimData) return;
+            const { rareActiveTissues, echoResults, fullSel, fullRes,
+                    totalTrainEchoes, numDummyEchoes, ESP, etl, scheme,
+                    echoPhaseBoxes, fullPhaseBoxes, totalTime } = _rareLastSimData;
+
+            const onLegendClick = (label, nowHidden) => {
+                if (nowHidden) _rareHiddenLabels.add(label);
+                else _rareHiddenLabels.delete(label);
+                renderRARECharts();
+            };
+
+            const mkLineDs = (key) => rareActiveTissues.map(t => ({
+                label: t.label,
+                data: echoResults[t.name].map((pt) => {
+                    if (key === 'Mxy') {
+                        const re = pt.MxyRe || 0, im = pt.MxyIm || 0;
+                        return { x: pt.trainIndex, y: Math.sqrt(re * re + im * im) };
+                    }
+                    return { x: pt.trainIndex, y: pt[key] };
+                }),
+                color: t.color,
+                hidden: _rareHiddenLabels.has(t.label),
+            }));
+
+            const mxyPlot = D3SeqPlots.createLinePlot(document.getElementById('rare-echo-mxy-chart'), {
+                datasets: mkLineDs('Mxy'),
+                xType: 'linear', xMin: 1, xMax: totalTrainEchoes,
+                yMin: 0,
+                xLabel: 'Echo index', yLabel: 'Mxy',
+                phaseBoxes: echoPhaseBoxes,
+                showLegend: true,
+                onLegendClick,
+            });
+
+            D3SeqPlots.createLinePlot(document.getElementById('rare-echo-mz-chart'), {
+                datasets: mkLineDs('Mz'),
+                xType: 'linear', xMin: 1, xMax: totalTrainEchoes,
+                yMin: -0.1, yMax: 1.2,
+                xLabel: 'Echo index', yLabel: 'Mz',
+                phaseBoxes: echoPhaseBoxes,
+                showLegend: true,
+                onLegendClick,
+            });
+
+            // ── T2-optimal control points overlay ─────────────────────────
+            if (_mxyCtrlPtHandle) { _mxyCtrlPtHandle.remove(); _mxyCtrlPtHandle = null; }
+            if (scheme === 't2optimal') {
+                if (!_mxyCtrlPts) _mxyCtrlPts = defaultCtrlPts(etl);
+                const svgEl = document.querySelector('#rare-echo-mxy-chart svg');
+                if (svgEl) {
+                    const controlPoints = _mxyCtrlPts.map(pt => ({
+                        echoIndex: pt.echoIndex + numDummyEchoes,
+                        mxy: pt.mxy,
+                    }));
+                    _mxyCtrlPtHandle = D3SeqPlots.addMxyControlPoints(svgEl, {
+                        xScale: mxyPlot.xScale,
+                        yScale: mxyPlot.yScale,
+                        etl: totalTrainEchoes,
+                        points: controlPoints,
+                        onDragEnd: (newPts) => {
+                            _mxyCtrlPts = newPts.map(pt => ({
+                                echoIndex: Math.max(1, Math.min(etl, pt.echoIndex - numDummyEchoes)),
+                                mxy: pt.mxy,
+                            }));
+                            requestRARESimulation(0);
+                        },
+                    });
+                }
+            }
+
+            const fullMzDs = fullSel.map(t => ({
+                label: t.label,
+                data: fullRes[t.name].timeline.map(pt => ({ x: pt.time, y: pt.Mz })),
+                color: t.color,
+                hidden: _rareHiddenLabels.has(t.label),
+            }));
+            D3SeqPlots.createLinePlot(document.getElementById('rare-full-mz-chart'), {
+                datasets: fullMzDs,
+                xType: 'linear', xMin: 0, xMax: totalTime,
+                yMin: -0.2,
+                xLabel: 'Time (ms)', yLabel: 'Mz',
+                phaseBoxes: fullPhaseBoxes,
+                showLegend: true,
+                onLegendClick,
+            });
+
+            const fullMxyDs = fullSel.map(t => ({
+                label: t.label,
+                data: fullRes[t.name].timeline.filter(pt => pt.Mxy > 0).map(pt => ({ x: pt.time, y: pt.Mxy })),
+                color: t.color,
+                dots: true,
+                hidden: _rareHiddenLabels.has(t.label),
+            }));
+            D3SeqPlots.createLinePlot(document.getElementById('rare-full-mxy-chart'), {
+                datasets: fullMxyDs,
+                xType: 'linear', xMin: 0, xMax: totalTime,
+                yMin: 0,
+                xLabel: 'Time (ms)', yLabel: 'Mxy',
+                phaseBoxes: fullPhaseBoxes,
+                showLegend: true,
+                onLegendClick,
+            });
+        }
+
         async function runRARESimulation() {
             if (!_rareReady) { console.warn('[RARE] EPG not ready'); return; }
             const t0 = performance.now();
@@ -1605,8 +1735,7 @@
                 }
             }
 
-            // ── Echo train for all 5 tissues ─────────────────────────────
-            // Echo train for enabled tissues only
+            // ── Echo train for enabled tissues ────────────────────────────
             const rareActiveTissues = window.PhantomState.tissues.filter(t => t.enabled !== false);
             const echoResults = {};
             for (const t of rareActiveTissues) {
@@ -1617,70 +1746,13 @@
             }
             console.log(`[RARE] echo train sim in ${(performance.now() - t0).toFixed(0)} ms`);
 
-            const mkLineDs = (key) => rareActiveTissues.map(t => ({
-                label: t.label,
-                data: echoResults[t.name].map((pt) => {
-                    if (key === 'Mxy') {
-                        const re = pt.MxyRe || 0, im = pt.MxyIm || 0;
-                        return { x: pt.trainIndex, y: Math.sqrt(re * re + im * im) };
-                    }
-                    return { x: pt.trainIndex, y: pt[key] };
-                }),
-                color: t.color,
-                hidden: ['CSF', 'adipose', 'bonemarrow'].includes(t.name),
-            }));
-
             const echoPhaseBoxes = numDummyEchoes > 0 ? [
                 { xStart: 0.5, xEnd: numDummyEchoes + 0.5, color: 'rgba(255,180,80,0.14)', label: 'Dummy echoes' },
             ] : [];
 
-            const mxyPlot = D3SeqPlots.createLinePlot(document.getElementById('rare-echo-mxy-chart'), {
-                datasets: mkLineDs('Mxy'),
-                xType: 'linear', xMin: 1, xMax: totalTrainEchoes,
-                yMin: 0,
-                xLabel: 'Echo index', yLabel: 'Mxy',
-                phaseBoxes: echoPhaseBoxes,
-                showLegend: true,
-            });
-
-            D3SeqPlots.createLinePlot(document.getElementById('rare-echo-mz-chart'), {
-                datasets: mkLineDs('Mz'),
-                xType: 'linear', xMin: 1, xMax: totalTrainEchoes,
-                yMin: -0.1, yMax: 1.2,
-                xLabel: 'Echo index', yLabel: 'Mz',
-                phaseBoxes: echoPhaseBoxes,
-                showLegend: true,
-            });
-
-            // ── T2-optimal control points overlay ─────────────────────────
-            if (_mxyCtrlPtHandle) { _mxyCtrlPtHandle.remove(); _mxyCtrlPtHandle = null; }
-            if (scheme === 't2optimal') {
-                if (!_mxyCtrlPts) _mxyCtrlPts = defaultCtrlPts(etl);
-                const svgEl = document.querySelector('#rare-echo-mxy-chart svg');
-                if (svgEl) {
-                    const controlPoints = _mxyCtrlPts.map(pt => ({
-                        echoIndex: pt.echoIndex + numDummyEchoes,
-                        mxy: pt.mxy,
-                    }));
-                    _mxyCtrlPtHandle = D3SeqPlots.addMxyControlPoints(svgEl, {
-                        xScale: mxyPlot.xScale,
-                        yScale: mxyPlot.yScale,
-                        etl: totalTrainEchoes,
-                        points: controlPoints,
-                        onDragEnd: (newPts) => {
-                            _mxyCtrlPts = newPts.map(pt => ({
-                                echoIndex: Math.max(1, Math.min(etl, pt.echoIndex - numDummyEchoes)),
-                                mxy: pt.mxy,
-                            }));
-                            requestRARESimulation(0);
-                        },
-                    });
-                }
-            }
-
-            // ── Full sequence ─────────────────────────────────────────────
+            // ── Full sequence (all enabled tissues) ───────────────────────
             const t1 = performance.now();
-            const fullSel = rareActiveTissues.slice(0, 3);
+            const fullSel = rareActiveTissues;
             const fullRes = {};
             for (const t of fullSel) {
                 let st = null;
@@ -1692,40 +1764,15 @@
 
             const totalTime = fullRes[fullSel[0].name].totalTime;
             const prepEnd   = (etl + numDummyEchoes) * ESP;
-
-            const phaseBoxes = [
+            const fullPhaseBoxes = [
                 { xStart: 0,       xEnd: prepEnd,   color: 'rgba(100,200,255,0.12)', label: 'RARE' },
                 { xStart: prepEnd, xEnd: totalTime,  color: 'rgba(100,255,100,0.12)', label: 'Recovery' },
             ];
 
-            const fullMzDs = fullSel.map(t => ({
-                label: t.label,
-                data: fullRes[t.name].timeline.map(pt => ({ x: pt.time, y: pt.Mz })),
-                color: t.color,
-            }));
-            D3SeqPlots.createLinePlot(document.getElementById('rare-full-mz-chart'), {
-                datasets: fullMzDs,
-                xType: 'linear', xMin: 0, xMax: totalTime,
-                yMin: -0.2,
-                xLabel: 'Time (ms)', yLabel: 'Mz',
-                phaseBoxes,
-                showLegend: true,
-            });
-
-            const fullMxyDs = fullSel.map(t => ({
-                label: t.label,
-                data: fullRes[t.name].timeline.filter(pt => pt.Mxy > 0).map(pt => ({ x: pt.time, y: pt.Mxy })),
-                color: t.color,
-                dots: true,
-            }));
-            D3SeqPlots.createLinePlot(document.getElementById('rare-full-mxy-chart'), {
-                datasets: fullMxyDs,
-                xType: 'linear', xMin: 0, xMax: totalTime,
-                yMin: 0,
-                xLabel: 'Time (ms)', yLabel: 'Mxy',
-                phaseBoxes,
-                showLegend: true,
-            });
+            _rareLastSimData = { rareActiveTissues, echoResults, fullSel, fullRes,
+                                 totalTrainEchoes, numDummyEchoes, ESP, etl, scheme,
+                                 echoPhaseBoxes, fullPhaseBoxes, totalTime };
+            renderRARECharts();
             console.log(`[RARE] total sim in ${(performance.now() - t0).toFixed(0)} ms`);
         }
 
@@ -1867,8 +1914,9 @@
         }
 
         // ── FSPGR slider state ───────────────────────────────────────────
-        let _fspgrSsExc    = 0;  // auto-detected steady-state excitation index
-        let _fspgrShowExc  = 0;  // currently displayed excitation count
+        let _fspgrSsExc       = 0;   // auto-detected steady-state excitation index
+        let _fspgrShowExc     = 0;   // currently displayed excitation count
+        let _fspgrHiddenLabels = new Set();
 
         // ── Render both FSPGR charts for a given number of excitations ───
         function renderFSPGRCharts(showExc) {
@@ -1882,7 +1930,7 @@
                 const { Mxy, Mz } = simulateFSPGR(showExc, alpha, TR, TE, t.T1, t.T2, t.PD);
                 const rawMxy = Array.from({ length: showExc }, (_, i) => ({ x: i + 1, y: Mxy[i] }));
                 const rawMz  = Array.from({ length: showExc }, (_, i) => ({ x: i + 1, y: Mz[i]  }));
-                const hidden = false;
+                const hidden = _fspgrHiddenLabels.has(t.label);
                 mxyDs.push({ label: t.label, data: downsampleForPlot(rawMxy, 2000), color: t.color, hidden });
                 mzDs.push({  label: t.label, data: downsampleForPlot(rawMz,  2000), color: t.color, hidden });
             }
@@ -1891,12 +1939,18 @@
             document.getElementById('fspgr-plot-label-mz').textContent  = lbl;
             document.getElementById('fspgr-plot-label-mxy').textContent = lbl;
 
+            const onFspgrLegendClick = (label, nowHidden) => {
+                if (nowHidden) _fspgrHiddenLabels.add(label);
+                else _fspgrHiddenLabels.delete(label);
+                renderFSPGRCharts(_fspgrShowExc);
+            };
             D3SeqPlots.createLinePlot(document.getElementById('fspgr-mz-chart'), {
                 datasets: mzDs,
                 xType: 'linear', xMin: 1, xMax: showExc,
                 yMin: 0, yMax: 1.05,
                 xLabel: 'Excitation index', yLabel: 'Mz',
                 showLegend: true,
+                onLegendClick: onFspgrLegendClick,
             });
             D3SeqPlots.createLinePlot(document.getElementById('fspgr-mxy-chart'), {
                 datasets: mxyDs,
@@ -1904,6 +1958,7 @@
                 yMin: 0,
                 xLabel: 'Excitation index', yLabel: 'Mxy',
                 showLegend: true,
+                onLegendClick: onFspgrLegendClick,
             });
         }
 
