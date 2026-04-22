@@ -424,7 +424,7 @@ const BrainSim = (() => {
             } else {
                 for (let i = 0; i < etl; i++) data.push({ x: i + 1, y: 0 });
             }
-            return { label: t.label, data, color: t.color };
+            return { label: t.label, data, color: t.plotColor || t.color };
         });
 
         D3SeqPlots.createLinePlot(el, {

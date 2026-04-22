@@ -1025,7 +1025,7 @@
                     }
                     return { x: pt.pulseIndex, y: pt[key] };
                 }),
-                color: t.color,
+                color: t.plotColor || t.color,
                 hidden: _mprageHiddenLabels.has(t.label),
             }));
 
@@ -1052,7 +1052,7 @@
             const fullDs = (key) => fullSel.map(t => ({
                 label: t.label,
                 data: fullRes[t.name].timeline.map(pt => ({ x: pt.time, y: pt[key] })),
-                color: t.color,
+                color: t.plotColor || t.color,
                 hidden: _mprageHiddenLabels.has(t.label),
             }));
 
@@ -1578,7 +1578,7 @@
                     }
                     return { x: pt.trainIndex, y: pt[key] };
                 }),
-                color: t.color,
+                color: t.plotColor || t.color,
                 hidden: _rareHiddenLabels.has(t.label),
             }));
 
@@ -1631,7 +1631,7 @@
             const fullMzDs = fullSel.map(t => ({
                 label: t.label,
                 data: fullRes[t.name].timeline.map(pt => ({ x: pt.time, y: pt.Mz })),
-                color: t.color,
+                color: t.plotColor || t.color,
                 hidden: _rareHiddenLabels.has(t.label),
             }));
             D3SeqPlots.createLinePlot(document.getElementById('rare-full-mz-chart'), {
@@ -1647,7 +1647,7 @@
             const fullMxyDs = fullSel.map(t => ({
                 label: t.label,
                 data: fullRes[t.name].timeline.filter(pt => pt.Mxy > 0).map(pt => ({ x: pt.time, y: pt.Mxy })),
-                color: t.color,
+                color: t.plotColor || t.color,
                 dots: true,
                 hidden: _rareHiddenLabels.has(t.label),
             }));
@@ -1931,8 +1931,8 @@
                 const rawMxy = Array.from({ length: showExc }, (_, i) => ({ x: i + 1, y: Mxy[i] }));
                 const rawMz  = Array.from({ length: showExc }, (_, i) => ({ x: i + 1, y: Mz[i]  }));
                 const hidden = _fspgrHiddenLabels.has(t.label);
-                mxyDs.push({ label: t.label, data: downsampleForPlot(rawMxy, 2000), color: t.color, hidden });
-                mzDs.push({  label: t.label, data: downsampleForPlot(rawMz,  2000), color: t.color, hidden });
+                mxyDs.push({ label: t.label, data: downsampleForPlot(rawMxy, 2000), color: t.plotColor || t.color, hidden });
+                mzDs.push({  label: t.label, data: downsampleForPlot(rawMz,  2000), color: t.plotColor || t.color, hidden });
             }
 
             const lbl = `showing ${showExc} of ${fspgrNumExcitations()} excitations`;

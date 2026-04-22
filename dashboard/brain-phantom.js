@@ -41,7 +41,7 @@ const BrainPhantom = (() => {
         if (typeof window !== 'undefined' && window.PhantomState && window.PhantomState.tissues) {
             const map = {};
             for (const t of window.PhantomState.tissues) {
-                map[t.color] = { name: t.name, T1: t.T1, T2: t.T2, PD: t.PD, color: t.color };
+                map[t.color] = { name: t.name, T1: t.T1, T2: t.T2, PD: t.PD, color: t.plotColor || t.color };
             }
             return map;
         }
