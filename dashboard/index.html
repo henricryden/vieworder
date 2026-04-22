@@ -759,7 +759,7 @@
     <script src="d3-plots.js"></script>
     <script src="d3-sequence-plots.js"></script>
     <script src="phantom-state.js"></script>
-    <script src="app.js"></script>
+    <script src="app.js?v=20260422b"></script>
     <script src="brain-phantom.js"></script>
     <script src="brain-sim.js"></script>
 
@@ -2131,6 +2131,11 @@
             slider.value = showDef;
             sliderVal.textContent = showDef;
             sliderRow.style.display = '';
+            if (window.App?.renderAllSliderTicks) {
+                requestAnimationFrame(() => {
+                    window.App.renderAllSliderTicks();
+                });
+            }
 
             renderFSPGRCharts(showDef);
             console.log(`[FSPGR] done in ${(performance.now() - t0).toFixed(0)} ms — ss at exc ${ssExc}, showing ${showDef}/${numExc}`);

@@ -70,13 +70,16 @@ const App = (() => {
 
         const steps = Math.round((max - min) / step);
         if (steps <= 0) return;
+        const maxVisualTicks = Math.max(2, parseInt(input.dataset.maxTicks || '24', 10) || 24);
+        const visualTickCount = Math.min(steps, maxVisualTicks);
 
         const ticks = document.createElement('div');
         ticks.className = 'slider-ticks';
 
-        for (let i = 0; i <= steps; i++) {
+        for (let i = 0; i <= visualTickCount; i++) {
             const span = document.createElement('span');
-            const frac = steps > 0 ? (i / steps) : 0;
+            const stepIndex = visualTickCount > 0 ? Math.round((i / visualTickCount) * steps) : 0;
+            const frac = steps > 0 ? (stepIndex / steps) : 0;
             span.style.left = (frac * 100) + '%';
             ticks.appendChild(span);
         }
