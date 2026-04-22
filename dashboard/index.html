@@ -3,12 +3,33 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MRI Simulator</title>
+    <title>View Order — k-Space &amp; Sequence Simulator</title>
+    <link rel="icon" type="image/svg+xml" href="favicon.svg">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:ital,wght@0,400;0,600;0,700;1,400&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <script src="https://d3js.org/d3.v7.min.js"></script>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
     <div id="spinner" class="spinner hidden"></div>
+
+    <header class="site-header">
+        <a class="site-header-logo" href="#">
+            <svg width="22" height="22" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg">
+                <defs>
+                    <clipPath id="disc">
+                        <circle cx="16" cy="16" r="15"></circle>
+                    </clipPath>
+                </defs>
+                <circle cx="16" cy="16" r="15.5" fill="white" stroke="#d8d8d8" stroke-width="0.5"></circle>
+                <polyline points="27,6 10,16 27,26" fill="none" stroke="#111111" stroke-width="2.2" stroke-linejoin="miter" stroke-linecap="round" clip-path="url(#disc)"></polyline>
+                <path d="M 5,28 Q 7,22 10,18 Q 12,15 16,14.5 Q 21,14 26,14.5 Q 29,15 31,16" fill="none" stroke="#c8102e" stroke-width="1.5" stroke-linecap="round" clip-path="url(#disc)"></path>
+            </svg>
+            View Order
+        </a>
+        <span class="site-header-subtitle">k-Space &amp; Sequence Simulator</span>
+    </header>
 
     <div class="container">
         <h1>View order with arbitrary center echoes</h1>
@@ -394,15 +415,15 @@
                     </div>
                     <div class="control-group">
                         <label>Inversion time (TI) <span class="value" id="tiValue">400</span> ms</label>
-                        <input type="range" id="ti" min="100" max="1200" value="400" step="50">
+                        <input type="range" id="ti" min="100" max="1200" value="400" step="50" class="slider">
                     </div>
                     <div class="control-group">
                         <label>Recovery time <span class="value" id="recoveryValue">1000</span> ms</label>
-                        <input type="range" id="recovery" min="500" max="2000" value="1000" step="100">
+                        <input type="range" id="recovery" min="500" max="2000" value="1000" step="100" class="slider">
                     </div>
                     <div class="control-group">
                         <label>Flip angle <span class="value" id="alphaValue">8</span> °</label>
-                        <input type="range" id="alpha" min="2" max="20" value="8" step="1">
+                        <input type="range" id="alpha" min="2" max="20" value="8" step="1" class="slider">
                     </div>
                 </div>
 
@@ -412,19 +433,19 @@
                     <div style="height:50px;"></div>
                     <div class="control-group">
                         <label>Inner TR <span class="value" id="trValue">7</span> ms</label>
-                        <input type="range" id="tr" min="3" max="15" value="7" step="0.5">
+                        <input type="range" id="tr" min="3" max="15" value="7" step="0.5" class="slider">
                     </div>
                     <div class="control-group">
                         <label>TE <span class="value" id="teValue">3.5</span> ms</label>
-                        <input type="range" id="te" min="0" max="10" value="3.5" step="0.5">
+                        <input type="range" id="te" min="0" max="10" value="3.5" step="0.5" class="slider">
                     </div>
                     <div class="control-group">
                         <label>Dummy echoes <span class="value" id="mprage-dummyValue">0</span></label>
-                            <input type="range" id="mprage-dummy" min="0" max="40" value="0" step="1">
+                            <input type="range" id="mprage-dummy" min="0" max="40" value="0" step="1" class="slider">
                     </div>
                     <div class="control-group">
                         <label>Steady-state cycles <span class="value" id="numSimsValue">4</span></label>
-                        <input type="range" id="numSims" min="1" max="5" value="4" step="1">
+                        <input type="range" id="numSims" min="1" max="5" value="4" step="1" class="slider">
                     </div>
                 </div>
 
@@ -481,11 +502,11 @@
                     </div>
                     <div class="control-group">
                         <label>TR <span class="value" id="rare-tr-value">3000</span> ms</label>
-                        <input type="range" id="rare-tr" min="1000" max="8000" value="3000" step="500">
+                        <input type="range" id="rare-tr" min="1000" max="8000" value="3000" step="500" class="slider">
                     </div>
                     <div class="control-group">
                             <label>Echo spacing (ESP) <span class="value" id="rare-esp-value">5</span> ms</label>
-                            <input type="range" id="rare-esp" min="1" max="15" value="5" step="1">
+                            <input type="range" id="rare-esp" min="1" max="15" value="5" step="1" class="slider">
                     </div>
                 </div>
 
@@ -495,11 +516,11 @@
                     <div style="height:50px;"></div>
                     <div class="control-group">
                         <label>Dummy echoes <span class="value" id="rare-dummy-echoes-value">0</span></label>
-                            <input type="range" id="rare-dummy-echoes" min="0" max="40" value="0" step="1">
+                            <input type="range" id="rare-dummy-echoes" min="0" max="40" value="0" step="1" class="slider">
                     </div>
                     <div class="control-group">
                         <label>Steady-state cycles <span class="value" id="rare-numSims-value">2</span></label>
-                        <input type="range" id="rare-numSims" min="1" max="5" value="2" step="1">
+                        <input type="range" id="rare-numSims" min="1" max="5" value="2" step="1" class="slider">
                     </div>
                 </div>
             </div><!-- /mprage-params-grid -->
@@ -518,17 +539,17 @@
                 <div id="rare-scheme-constant" class="rare-scheme-block">
                     <div class="control-group">
                         <label>Flip angle <span class="value" id="rare-reffa-value">180</span> °</label>
-                        <input type="range" id="rare-reffa" min="0" max="180" value="180" step="5">
+                        <input type="range" id="rare-reffa" min="0" max="180" value="180" step="5" class="slider">
                     </div>
                 </div>
                 <div id="rare-scheme-linear" class="rare-scheme-block" style="display:none;">
                     <div class="control-group">
                         <label>Start FA <span class="value" id="rare-fa-start-value">180</span> °</label>
-                        <input type="range" id="rare-fa-start" min="0" max="180" value="180" step="5">
+                        <input type="range" id="rare-fa-start" min="0" max="180" value="180" step="5" class="slider">
                     </div>
                     <div class="control-group">
                         <label>End FA <span class="value" id="rare-fa-end-value">120</span> °</label>
-                        <input type="range" id="rare-fa-end" min="0" max="180" value="120" step="5">
+                        <input type="range" id="rare-fa-end" min="0" max="180" value="120" step="5" class="slider">
                     </div>
                 </div>
                 <div id="rare-scheme-t2optimal" class="rare-scheme-block" style="display:none;">
@@ -598,7 +619,7 @@
                     </div>
                     <div class="control-group">
                         <label>Flip angle <span class="value" id="fspgr-alpha-value">15</span> °</label>
-                        <input type="range" id="fspgr-alpha" min="1" max="90" value="15" step="1">
+                        <input type="range" id="fspgr-alpha" min="1" max="90" value="15" step="1" class="slider">
                     </div>
                 </div>
 
@@ -608,11 +629,11 @@
                     <div style="height:10px;"></div>
                     <div class="control-group">
                         <label>TR <span class="value" id="fspgr-tr-value">7</span> ms</label>
-                        <input type="range" id="fspgr-tr" min="3" max="50" value="7" step="0.5">
+                        <input type="range" id="fspgr-tr" min="3" max="50" value="7" step="0.5" class="slider">
                     </div>
                     <div class="control-group">
                         <label>TE <span class="value" id="fspgr-te-value">3.5</span> ms</label>
-                        <input type="range" id="fspgr-te" min="0" max="20" value="3.5" step="0.5">
+                        <input type="range" id="fspgr-te" min="0" max="20" value="3.5" step="0.5" class="slider">
                     </div>
                     <div style="color:#a0a0c0;font-size:0.85em;margin-top:6px;">Perfect spoiling assumed</div>
                 </div>
@@ -625,7 +646,7 @@
                     <label>Show <span class="value" id="fspgr-show-shots-value">200</span> excitations
                         <span style="color:#666;font-size:0.85em;">(drag to expand beyond auto-detected steady state)</span>
                     </label>
-                    <input type="range" id="fspgr-show-shots" min="1" max="10000" value="200" step="1">
+                    <input type="range" id="fspgr-show-shots" min="1" max="10000" value="200" step="1" class="slider">
                 </div>
             </div>
 
