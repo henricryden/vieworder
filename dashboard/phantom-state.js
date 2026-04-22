@@ -9,13 +9,13 @@
     // Tissue values from SpinSight constants.py (3T)
     window.PHANTOM_DEFS = {
         brain: {
-            label: 'Brain',
-            scanLabel: 'Brain Scan',
+            label: 'Brain (Axial)',
+            scanLabel: 'Scan (Axial brain)',
             tissues: [
-                { name: 'gray',       label: 'Gray matter',   T1: 1450, T2: 100,  PD: 1.0,  color: '#625e42', enabled: true },
-                { name: 'white',      label: 'White matter',  T1: 830,  T2: 69,   PD: 0.92, color: '#a09c7f', enabled: true },
-                { name: 'CSF',        label: 'CSF',           T1: 4160, T2: 2100, PD: 1.0,  color: '#c6c5b2', enabled: true },
-                { name: 'adipose',    label: 'Adipose',       T1: 370,  T2: 130,  PD: 1.0,  color: '#b6985f', enabled: true },
+                { name: 'gray',       label: 'Gray matter',   T1: 1450, T2: 100,  PD: 1.0,  color: '#626262', enabled: true },
+                { name: 'white',      label: 'White matter',  T1: 830,  T2: 69,   PD: 0.92, color: '#ffffff', enabled: true },
+                { name: 'CSF',        label: 'CSF',           T1: 4160, T2: 2100, PD: 1.0,  color: '#5098fd', enabled: true },
+                { name: 'adipose',    label: 'Adipose',       T1: 370,  T2: 130,  PD: 1.0,  color: '#fff200', enabled: true },
                 { name: 'bonemarrow', label: 'Bone marrow',   T1: 898,  T2: 34,   PD: 1.0,  color: '#a78f23', enabled: false },
                 { name: 'muscle',     label: 'Muscle',        T1: 1400, T2: 50,   PD: 1.0,  color: '#500f05', enabled: false },
                 { name: 'cortical',   label: 'Cortical bone', T1: 900,  T2: 0.5,  PD: 0.2,  color: '#504010', enabled: false },
