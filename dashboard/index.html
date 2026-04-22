@@ -406,51 +406,47 @@
         <!-- ══ TAB 3: MPRAGE Simulator ════════════════════════════════ -->
         <div id="tab-mprage" class="tab-panel">
             <div class="mprage-params-grid">
-
-                <!-- Left column: Inversion & Relaxation parameters -->
                 <div class="mprage-panel">
-                    <h2>Inversion & Relaxation</h2>
+                    <h2>Parameters</h2>
                     <div class="mprage-etl-note">
                         ETL = <strong id="mprage-etl-display">72</strong> pulses (set in Tab ①)
                     </div>
-                    <div class="control-group">
-                        <label>Inversion time (TI) <span class="value" id="tiValue">400</span> ms</label>
-                        <input type="range" id="ti" min="100" max="1200" value="400" step="50" class="slider">
+                    <div class="params-fields-grid">
+                        <div class="params-fields-col">
+                            <div class="control-group">
+                                <label>Inversion time (TI) <span class="value" id="tiValue">400</span> ms</label>
+                                <input type="range" id="ti" min="100" max="1200" value="400" step="50" class="slider">
+                            </div>
+                            <div class="control-group">
+                                <label>Recovery time <span class="value" id="recoveryValue">1000</span> ms</label>
+                                <input type="range" id="recovery" min="500" max="2000" value="1000" step="100" class="slider">
+                            </div>
+                            <div class="control-group">
+                                <label>Flip angle <span class="value" id="alphaValue">8</span> °</label>
+                                <input type="range" id="alpha" min="2" max="20" value="8" step="1" class="slider">
+                            </div>
+                        </div>
+                        <div class="params-fields-col">
+                            <div class="control-group">
+                                <label>Inner TR <span class="value" id="trValue">7</span> ms</label>
+                                <input type="range" id="tr" min="3" max="15" value="7" step="0.5" class="slider">
+                            </div>
+                            <div class="control-group">
+                                <label>TE <span class="value" id="teValue">3.5</span> ms</label>
+                                <input type="range" id="te" min="0" max="10" value="3.5" step="0.5" class="slider">
+                            </div>
+                            <div class="control-group">
+                                <label>Dummy echoes <span class="value" id="mprage-dummyValue">0</span></label>
+                                    <input type="range" id="mprage-dummy" min="0" max="40" value="0" step="1" class="slider">
+                            </div>
+                            <div class="control-group">
+                                <label>Steady-state cycles <span class="value" id="numSimsValue">4</span></label>
+                                <input type="range" id="numSims" min="1" max="5" value="4" step="1" class="slider">
+                            </div>
+                        </div>
                     </div>
-                    <div class="control-group">
-                        <label>Recovery time <span class="value" id="recoveryValue">1000</span> ms</label>
-                        <input type="range" id="recovery" min="500" max="2000" value="1000" step="100" class="slider">
-                    </div>
-                    <div class="control-group">
-                        <label>Flip angle <span class="value" id="alphaValue">8</span> °</label>
-                        <input type="range" id="alpha" min="2" max="20" value="8" step="1" class="slider">
-                    </div>
+                    <button class="mprage-btn-simulate" id="mprage-simulate-btn">▶ Simulate MPRAGE</button>
                 </div>
-
-                <!-- Right column: Readout parameters -->
-                <div class="mprage-panel">
-                    <h2>Readout</h2>
-                    <div style="height:50px;"></div>
-                    <div class="control-group">
-                        <label>Inner TR <span class="value" id="trValue">7</span> ms</label>
-                        <input type="range" id="tr" min="3" max="15" value="7" step="0.5" class="slider">
-                    </div>
-                    <div class="control-group">
-                        <label>TE <span class="value" id="teValue">3.5</span> ms</label>
-                        <input type="range" id="te" min="0" max="10" value="3.5" step="0.5" class="slider">
-                    </div>
-                    <div class="control-group">
-                        <label>Dummy echoes <span class="value" id="mprage-dummyValue">0</span></label>
-                            <input type="range" id="mprage-dummy" min="0" max="40" value="0" step="1" class="slider">
-                    </div>
-                    <div class="control-group">
-                        <label>Steady-state cycles <span class="value" id="numSimsValue">4</span></label>
-                        <input type="range" id="numSims" min="1" max="5" value="4" step="1" class="slider">
-                    </div>
-                </div>
-
-                <!-- Simulate button spans both columns -->
-                <button class="mprage-btn-simulate" id="mprage-simulate-btn" style="grid-column: 1 / -1;">▶ Simulate MPRAGE</button>
             </div><!-- /mprage-params-grid -->
 
             <!-- MPRAGE window charts (Mz + Mxy, 5 tissues) -->
@@ -493,87 +489,88 @@
         <!-- ══ TAB 4: RARE Simulator ══════════════════════════════════ -->
         <div id="tab-rare" class="tab-panel">
             <div class="mprage-params-grid">
-
-                <!-- Left column: Timing -->
                 <div class="mprage-panel">
-                    <h2>Timing</h2>
+                    <h2>Parameters</h2>
                     <div class="mprage-etl-note">
                         ETL = <strong id="rare-etl-display">72</strong> echoes (set in Tab ①)
                     </div>
-                    <div class="control-group">
-                        <label>TR <span class="value" id="rare-tr-value">3000</span> ms</label>
-                        <input type="range" id="rare-tr" min="1000" max="8000" value="3000" step="500" class="slider">
-                    </div>
-                    <div class="control-group">
-                            <label>Echo spacing (ESP) <span class="value" id="rare-esp-value">5</span> ms</label>
-                            <input type="range" id="rare-esp" min="1" max="15" value="5" step="1" class="slider">
-                    </div>
-                </div>
-
-                <!-- Right column: Refocusing -->
-                <div class="mprage-panel">
-                    <h2>Refocusing</h2>
-                    <div style="height:50px;"></div>
-                    <div class="control-group">
-                        <label style="display:flex;align-items:center;gap:8px;">
-                            <input type="checkbox" id="rare-pss-enable" checked>
-                            PSS startup stabilization
-                        </label>
-                    </div>
-                    <div class="control-group">
-                        <label>PSS pulses <span class="value" id="rare-pss-count-value">3</span></label>
-                        <input type="range" id="rare-pss-count" min="0" max="8" value="3" step="1" class="slider">
-                    </div>
-                    <div class="control-group">
-                        <label>PSS start FA <span class="value" id="rare-pss-start-value">180</span> °</label>
-                        <input type="range" id="rare-pss-start" min="0" max="180" value="180" step="5" class="slider">
-                    </div>
-                    <p id="rare-pss-note" style="color:#a0a0c0;font-size:0.85em;margin:4px 0 8px;">PSS modifies the first few existing refocusing pulses, ramping them down from the PSS start FA to the train plateau.</p>
-                    <div class="control-group">
-                        <label>Dummy echoes <span class="value" id="rare-dummy-echoes-value">0</span></label>
-                            <input type="range" id="rare-dummy-echoes" min="0" max="40" value="0" step="1" class="slider">
-                    </div>
-                    <div class="control-group">
-                        <label>Steady-state cycles <span class="value" id="rare-numSims-value">2</span></label>
-                        <input type="range" id="rare-numSims" min="1" max="5" value="2" step="1" class="slider">
+                    <div class="params-fields-grid">
+                        <div class="params-fields-col">
+                            <div class="control-group">
+                                <label>TR <span class="value" id="rare-tr-value">3000</span> ms</label>
+                                <input type="range" id="rare-tr" min="1000" max="8000" value="3000" step="500" class="slider">
+                            </div>
+                            <div class="control-group">
+                                    <label>Echo spacing (ESP) <span class="value" id="rare-esp-value">5</span> ms</label>
+                                    <input type="range" id="rare-esp" min="1" max="15" value="5" step="1" class="slider">
+                            </div>
+                        </div>
+                        <div class="params-fields-col">
+                            <div class="control-group">
+                                <label style="display:flex;align-items:center;gap:8px;">
+                                    <input type="checkbox" id="rare-pss-enable" checked>
+                                    PSS startup stabilization
+                                </label>
+                            </div>
+                            <div class="control-group">
+                                <label>PSS pulses <span class="value" id="rare-pss-count-value">3</span></label>
+                                <input type="range" id="rare-pss-count" min="0" max="8" value="3" step="1" class="slider">
+                            </div>
+                            <div class="control-group">
+                                <label>PSS start FA <span class="value" id="rare-pss-start-value">180</span> °</label>
+                                <input type="range" id="rare-pss-start" min="0" max="180" value="180" step="5" class="slider">
+                            </div>
+                            <p id="rare-pss-note" style="color:#a0a0c0;font-size:0.85em;margin:4px 0 8px;">PSS modifies the first few existing refocusing pulses, ramping them down from the PSS start FA to the train plateau.</p>
+                            <div class="control-group">
+                                <label>Dummy echoes <span class="value" id="rare-dummy-echoes-value">0</span></label>
+                                    <input type="range" id="rare-dummy-echoes" min="0" max="40" value="0" step="1" class="slider">
+                            </div>
+                            <div class="control-group">
+                                <label>Steady-state cycles <span class="value" id="rare-numSims-value">2</span></label>
+                                <input type="range" id="rare-numSims" min="1" max="5" value="2" step="1" class="slider">
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div><!-- /mprage-params-grid -->
 
             <!-- FA Scheme selector + param rows -->
-            <div class="rare-scheme-row" style="margin-top:16px;">
-                <label>Flip angle scheme</label>
-                <select id="rare-fa-scheme">
-                    <option value="constant">Constant</option>
-                    <option value="linear">Linear ramp</option>
-                    <option value="t2optimal">T2-optimal</option>
-                    <option value="custom">Custom</option>
-                </select>
-            </div>
-            <div class="rare-scheme-params">
-                <div id="rare-scheme-constant" class="rare-scheme-block">
-                    <div class="control-group">
-                        <label>Flip angle <span class="value" id="rare-reffa-value">180</span> °</label>
-                        <input type="range" id="rare-reffa" min="0" max="180" value="180" step="5" class="slider">
-                    </div>
+            <div class="mprage-panel rare-scheme-panel">
+                <h2>Flip angle scheme</h2>
+                <div class="rare-scheme-row">
+                    <label>Scheme</label>
+                    <select id="rare-fa-scheme">
+                        <option value="constant">Constant</option>
+                        <option value="linear">Linear ramp</option>
+                        <option value="t2optimal">T2-optimal</option>
+                        <option value="custom">Custom</option>
+                    </select>
                 </div>
-                <div id="rare-scheme-linear" class="rare-scheme-block" style="display:none;">
-                    <div class="control-group">
-                        <label>Start FA <span class="value" id="rare-fa-start-value">180</span> °</label>
-                        <input type="range" id="rare-fa-start" min="0" max="180" value="180" step="5" class="slider">
+                <div class="rare-scheme-params">
+                    <div id="rare-scheme-constant" class="rare-scheme-block">
+                        <div class="control-group">
+                            <label>Flip angle <span class="value" id="rare-reffa-value">180</span> °</label>
+                            <input type="range" id="rare-reffa" min="0" max="180" value="180" step="5" class="slider">
+                        </div>
                     </div>
-                    <div class="control-group">
-                        <label>End FA <span class="value" id="rare-fa-end-value">120</span> °</label>
-                        <input type="range" id="rare-fa-end" min="0" max="180" value="120" step="5" class="slider">
+                    <div id="rare-scheme-linear" class="rare-scheme-block" style="display:none;">
+                        <div class="control-group">
+                            <label>Start FA <span class="value" id="rare-fa-start-value">180</span> °</label>
+                            <input type="range" id="rare-fa-start" min="0" max="180" value="180" step="5" class="slider">
+                        </div>
+                        <div class="control-group">
+                            <label>End FA <span class="value" id="rare-fa-end-value">120</span> °</label>
+                            <input type="range" id="rare-fa-end" min="0" max="180" value="120" step="5" class="slider">
+                        </div>
                     </div>
-                </div>
-                <div id="rare-scheme-t2optimal" class="rare-scheme-block" style="display:none;">
-                    <p style="color:#a0a0c0;font-size:0.9em;margin:4px 0;">Drag control points on the Mxy chart below to set the target echo train.</p>
-                </div>
-                <div id="rare-scheme-custom" class="rare-scheme-block" style="display:none;">
-                    <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;">
-                        <p style="color:#a0a0c0;font-size:0.9em;margin:4px 0;">Drag nodes on the flip angle chart. Linear fit between nodes.</p>
-                        <button id="rare-custom-add-node" class="rare-node-btn">+ Add node</button>
+                    <div id="rare-scheme-t2optimal" class="rare-scheme-block" style="display:none;">
+                        <p style="color:#a0a0c0;font-size:0.9em;margin:4px 0;">Drag control points on the Mxy chart below to set the target echo train.</p>
+                    </div>
+                    <div id="rare-scheme-custom" class="rare-scheme-block" style="display:none;">
+                        <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;">
+                            <p style="color:#a0a0c0;font-size:0.9em;margin:4px 0;">Drag nodes on the flip angle chart. Linear fit between nodes.</p>
+                            <button id="rare-custom-add-node" class="rare-node-btn">+ Add node</button>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -628,35 +625,32 @@
         <!-- ══ TAB: FSPGR Simulator ═══════════════════════════════════ -->
         <div id="tab-fspgr" class="tab-panel">
             <div class="mprage-params-grid">
-
-                <!-- Left column: Excitation -->
                 <div class="mprage-panel">
-                    <h2>Excitation</h2>
+                    <h2>Parameters</h2>
                     <div class="mprage-etl-note">
                         <strong id="fspgr-numexc-display">—</strong> excitations
                         (phase encodes from Tab ①)
                     </div>
-                    <div class="control-group">
-                        <label>Flip angle <span class="value" id="fspgr-alpha-value">15</span> °</label>
-                        <input type="range" id="fspgr-alpha" min="1" max="90" value="15" step="1" class="slider">
+                    <div class="params-fields-grid">
+                        <div class="params-fields-col">
+                            <div class="control-group">
+                                <label>Flip angle <span class="value" id="fspgr-alpha-value">15</span> °</label>
+                                <input type="range" id="fspgr-alpha" min="1" max="90" value="15" step="1" class="slider">
+                            </div>
+                        </div>
+                        <div class="params-fields-col">
+                            <div class="control-group">
+                                <label>TR <span class="value" id="fspgr-tr-value">7</span> ms</label>
+                                <input type="range" id="fspgr-tr" min="3" max="50" value="7" step="0.5" class="slider">
+                            </div>
+                            <div class="control-group">
+                                <label>TE <span class="value" id="fspgr-te-value">3.5</span> ms</label>
+                                <input type="range" id="fspgr-te" min="0" max="20" value="3.5" step="0.5" class="slider">
+                            </div>
+                            <div style="color:#a0a0c0;font-size:0.85em;margin-top:6px;">Perfect spoiling assumed</div>
+                        </div>
                     </div>
                 </div>
-
-                <!-- Right column: Timing -->
-                <div class="mprage-panel">
-                    <h2>Timing</h2>
-                    <div style="height:10px;"></div>
-                    <div class="control-group">
-                        <label>TR <span class="value" id="fspgr-tr-value">7</span> ms</label>
-                        <input type="range" id="fspgr-tr" min="3" max="50" value="7" step="0.5" class="slider">
-                    </div>
-                    <div class="control-group">
-                        <label>TE <span class="value" id="fspgr-te-value">3.5</span> ms</label>
-                        <input type="range" id="fspgr-te" min="0" max="20" value="3.5" step="0.5" class="slider">
-                    </div>
-                    <div style="color:#a0a0c0;font-size:0.85em;margin-top:6px;">Perfect spoiling assumed</div>
-                </div>
-
             </div><!-- /mprage-params-grid -->
 
             <!-- Excitations-to-show slider (shown after first simulation) -->

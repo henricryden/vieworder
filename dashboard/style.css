@@ -463,9 +463,8 @@ select:focus { outline: none; border-color: var(--red); }
 .control-group.disabled .slider-ticks span { background: rgba(150,150,150,0.3); }
 
 .mprage-params-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 20px;
+  display: block;
+  width: 100%;
 }
 
 .mprage-panel {
@@ -473,6 +472,8 @@ select:focus { outline: none; border-color: var(--red); }
   border: 1px solid var(--rule);
   border-top: 3px solid var(--ink);
   padding: 22px;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .mprage-panel h2 {
@@ -484,6 +485,17 @@ select:focus { outline: none; border-color: var(--red); }
 }
 
 .mprage-panel .control-group { margin-bottom: 12px; }
+
+.params-fields-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+  align-items: start;
+}
+
+.params-fields-col {
+  min-width: 0;
+}
 
 .mprage-panel .control-group label {
   display: flex;
@@ -534,6 +546,11 @@ select:focus { outline: none; border-color: var(--red); }
 
 .mprage-btn-simulate:hover { background: #2b2b2b; }
 .mprage-btn-simulate:disabled { opacity: 0.45; cursor: default; }
+
+.mprage-panel .mprage-btn-simulate {
+  margin-top: 8px;
+  grid-column: auto;
+}
 
 .mprage-plot-panel {
   background: #0f0f14;
@@ -993,6 +1010,10 @@ select:focus { outline: none; border-color: var(--red); }
 }
 
 .rare-node-btn:hover { background: var(--ink); color: white; }
+
+.rare-scheme-panel {
+  margin-top: 16px;
+}
 
 .mprage-phantom-note {
   display: flex;
