@@ -28,6 +28,24 @@ const BrainPhantom = (() => {
     // Precomputed per-tissue edge arrays: Float64Array of [Ly, Lz, rcy, rcz] quads
     let _edgeData = null;
 
+    // ── Tissue map ────────────────────────────────────────────────────────────
+
+    /**
+     * Build a { [colorHex]: {name, T1, T2, PD, color} } map.
+     * Reads from window.PhantomState when available (main thread with phantom-state.js loaded);
+     * falls back to the static TISSUE_MAP for worker contexts.
+     */
+    function getTissueMap() {
+        if (typeof window !== 'undefined' && window.PhantomState && window.PhantomState.tissues) {
+            const map = {};
+            for (const t of window.PhantomState.tissues) {
+                map[t.color] = { name: t.name, T1: t.T1, T2: t.T2, PD: t.PD, color: t.color };
+            }
+            return map;
+        }
+        return TISSUE_MAP;
+    }
+
     // Cache: key = `${Ny}x${Nz}` → {tissueName: Float32Array[Ny*Nz*2]} (interleaved re,im)
     const _cache = new Map();
 
@@ -192,8 +210,9 @@ const BrainPhantom = (() => {
         const doc = parser.parseFromString(svgText, 'image/svg+xml');
         const paths = doc.querySelectorAll('path');
 
+        const tissueMap = getTissueMap();
         const tissuePolygons = {};
-        for (const info of Object.values(TISSUE_MAP)) {
+        for (const info of Object.values(tissueMap)) {
             tissuePolygons[info.name] = [];
         }
 
@@ -201,7 +220,7 @@ const BrainPhantom = (() => {
             const style = path.getAttribute('style') || '';
             const fm = style.match(/fill:(#[0-9a-f]+)/);
             if (!fm) continue;
-            const info = TISSUE_MAP[fm[1]];
+            const info = tissueMap[fm[1]];
             if (!info) continue;
 
             const hasScale = (path.getAttribute('transform') || '').includes('scale');
@@ -362,7 +381,7 @@ const BrainPhantom = (() => {
     // ── Public API ────────────────────────────────────────────────────────────
 
     return {
-        TISSUE_MAP,
+        get TISSUE_MAP() { return getTissueMap(); },
         FOV_Y,
         FOV_Z,
 

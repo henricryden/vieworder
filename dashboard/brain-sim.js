@@ -30,15 +30,6 @@ const BrainSim = (() => {
     // Chart.js instance for Mxy display
     let _mxyChart = null;
 
-    // Tissue display order and colors (matching SVG fill colors)
-    const TISSUE_INFO = [
-        { name: 'gray',       label: 'Gray matter',   color: '#00ff00' },
-        { name: 'white',      label: 'White matter',  color: '#d40000' },
-        { name: 'CSF',        label: 'CSF',           color: '#00ffff' },
-        { name: 'adipose',    label: 'Adipose',       color: '#ffe680' },
-        { name: 'bonemarrow', label: 'Bone marrow',   color: '#ffff44' },
-    ];
-
     // ── FFT (radix-2 Cooley-Tukey, in-place) ─────────────────────────────────
 
     function nextPoT(n) {
@@ -304,7 +295,7 @@ const BrainSim = (() => {
         const progressContainer = document.getElementById('brain-progress-container');
         if (progressContainer) progressContainer.style.display = 'block';
 
-        const tissues = Object.keys(BrainPhantom.TISSUE_MAP).map(hex => BrainPhantom.TISSUE_MAP[hex].name);
+        const tissues = window.PhantomState.tissues.map(t => t.name);
         const assembledGrids = {};
         for (const name of tissues) assembledGrids[name] = new Float32Array(Ny * Nz * 2);
 
@@ -345,9 +336,9 @@ const BrainSim = (() => {
         const ksp_re = new Float32Array(Ny * Nz);
         const ksp_im = new Float32Array(Ny * Nz);
 
-        const tissues = TISSUE_INFO.map(t => t.name);
+        const tissues = window.PhantomState.tissues.map(t => t.name);
         const PD_map  = Object.fromEntries(
-            Object.entries(BrainPhantom.TISSUE_MAP).map(([, v]) => [v.name, v.PD])
+            window.PhantomState.tissues.map(t => [t.name, t.PD])
         );
 
         for (const coord of coords) {
@@ -426,7 +417,7 @@ const BrainSim = (() => {
 
         const labels = Array.from({ length: etl }, (_, i) => i + 1);
 
-        const datasets = TISSUE_INFO.map(t => {
+        const datasets = window.PhantomState.tissues.map(t => {
             const sigsComplex = mprageSigs[t.name];
             const data = [];
             if (sigsComplex) {
@@ -641,6 +632,17 @@ const BrainSim = (() => {
             if (simBtn) simBtn.disabled = false;
         }
     }
+
+    // ── Phantom change: invalidate grid cache + reinit workers ────────────
+    window.addEventListener('phantomChanged', () => {
+        console.log('[BrainSim] Phantom changed — clearing grid cache and reinitializing workers.');
+        _gridCache.clear();
+        for (const w of _workers) w.terminate();
+        _workers = [];
+        _workerCount = 0;
+        _workersReady = 0;
+        // SVG text is still cached; workers will re-receive edge data on next ensureSVGParsed()
+    });
 
     return { runScan, renderMxyChart, saveReference };
 })();

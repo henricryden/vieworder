@@ -17,8 +17,9 @@
         <!-- ── Tab navigation ─────────────────────────────────────────── -->
         <div class="tab-bar">
             <button class="tab-btn active" onclick="switchTab('view-order')">① View Order</button>
-            <button class="tab-btn"        onclick="switchTab('mprage')">② MPRAGE</button>
-            <button class="tab-btn"        onclick="switchTab('brain-scan')">③ Brain Scan</button>
+            <button class="tab-btn"        onclick="switchTab('phantom')">② Phantom</button>
+            <button class="tab-btn"        onclick="switchTab('mprage')">③ MPRAGE</button>
+            <button class="tab-btn"        onclick="switchTab('brain-scan')">④ Brain Scan</button>
         </div>
 
         <!-- ══ TAB 1: View Order ══════════════════════════════════════ -->
@@ -339,13 +340,45 @@
         </div>
         </div><!-- /tab-view-order -->
 
-        <!-- ══ TAB 2: MPRAGE Simulator ════════════════════════════════ -->
+        <!-- ══ TAB 2: Phantom ═════════════════════════════════════════ -->
+        <div id="tab-phantom" class="tab-panel">
+            <div class="phantom-layout">
+                <div class="phantom-selector-panel">
+                    <h2>Phantom</h2>
+                    <div class="control-group">
+                        <label for="phantom-select">Select phantom</label>
+                        <select id="phantom-select" class="phantom-select">
+                            <option value="brain">Brain (3 T)</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="phantom-table-panel">
+                    <h2>Tissue Parameters</h2>
+                    <p class="phantom-table-note">Edit values and re-run the simulation. Reset restores literature defaults.</p>
+                    <table class="phantom-tissue-table">
+                        <thead>
+                            <tr>
+                                <th>Tissue</th>
+                                <th>T1 (ms)</th>
+                                <th>T2 (ms)</th>
+                                <th>PD</th>
+                            </tr>
+                        </thead>
+                        <tbody id="phantom-tissue-body"></tbody>
+                    </table>
+                    <button class="phantom-reset-btn" id="phantom-reset-btn">↺ Reset all</button>
+                </div>
+            </div>
+        </div><!-- /tab-phantom -->
+
+        <!-- ══ TAB 3: MPRAGE Simulator ════════════════════════════════ -->
         <div id="tab-mprage" class="tab-panel">
             <div class="mprage-params-grid">
 
-                <!-- Sequence parameters -->
+                <!-- Left column: Inversion & Relaxation parameters -->
                 <div class="mprage-panel">
-                    <h2>Sequence Parameters</h2>
+                    <h2>Inversion & Relaxation</h2>
                     <div class="mprage-etl-note">
                         ETL = <strong id="mprage-etl-display">72</strong> pulses (set in Tab ①)
                     </div>
@@ -361,6 +394,12 @@
                         <label>Flip angle <span class="value" id="alphaValue">8</span> °</label>
                         <input type="range" id="alpha" min="2" max="20" value="8" step="1">
                     </div>
+                </div>
+
+                <!-- Right column: Readout parameters -->
+                <div class="mprage-panel">
+                    <h2>Readout</h2>
+                    <div style="height:50px;"></div>
                     <div class="control-group">
                         <label>Inner TR <span class="value" id="trValue">7</span> ms</label>
                         <input type="range" id="tr" min="3" max="15" value="7" step="0.5">
@@ -373,27 +412,10 @@
                         <label>Steady-state cycles <span class="value" id="numSimsValue">4</span></label>
                         <input type="range" id="numSims" min="1" max="5" value="4" step="1">
                     </div>
-                    <button class="mprage-btn-simulate" id="mprage-simulate-btn">▶ Simulate MPRAGE</button>
                 </div>
 
-                <!-- Tissue table (read-only) -->
-                <div class="mprage-panel">
-                    <h2>Tissue Parameters (3 T)</h2>
-                    <p style="font-size:0.88em;color:#666;margin-bottom:12px;">
-                        Fixed literature values. All 5 tissues simulated.
-                    </p>
-                    <table style="width:100%;font-size:0.87em;border-collapse:collapse;">
-                        <thead>
-                            <tr style="border-bottom:2px solid #667eea;">
-                                <th style="text-align:left;padding:4px 6px;color:#667eea;">Tissue</th>
-                                <th style="text-align:right;padding:4px 6px;color:#667eea;">T1</th>
-                                <th style="text-align:right;padding:4px 6px;color:#667eea;">T2</th>
-                                <th style="text-align:right;padding:4px 6px;color:#667eea;">PD</th>
-                            </tr>
-                        </thead>
-                        <tbody id="tissue-table-body"></tbody>
-                    </table>
-                </div>
+                <!-- Simulate button spans both columns -->
+                <button class="mprage-btn-simulate" id="mprage-simulate-btn" style="grid-column: 1 / -1;">▶ Simulate MPRAGE</button>
             </div><!-- /mprage-params-grid -->
 
             <!-- MPRAGE window charts (Mz + Mxy, 5 tissues) -->
@@ -497,6 +519,7 @@
     <!-- Static JS: view order (order matters — kspace-utils before app) -->
     <script src="kspace-utils.js"></script>
     <script src="d3-plots.js"></script>
+    <script src="phantom-state.js"></script>
     <script src="app.js"></script>
     <script src="brain-phantom.js"></script>
     <script src="brain-sim.js"></script>
@@ -507,10 +530,10 @@
             document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
             document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
             document.getElementById('tab-' + id).classList.add('active');
-            const idx = ['view-order', 'mprage', 'brain-scan'].indexOf(id);
+            const idx = ['view-order', 'phantom', 'mprage', 'brain-scan'].indexOf(id);
             if (idx >= 0) document.querySelectorAll('.tab-btn')[idx].classList.add('active');
             // Sync ETL display when switching to MPRAGE or Brain Scan tabs
-            if (id !== 'view-order') {
+            if (id === 'mprage' || id === 'brain-scan') {
                 const etl = window.AppState ? window.AppState.params.etl : 72;
                 const el  = document.getElementById('mprage-etl-display');
                 if (el) el.textContent = etl;
@@ -530,37 +553,11 @@
                    GradientShift, ADC, Spoiler, Complex } = m);
                 _ready = true;
                 console.log('✓ EPG modules loaded');
-                populateTissueTable();
                 setupMPRAGESliders();
             })
             .catch(err => {
                 console.error('✗ EPG module load failed:', err);
             });
-
-        // ── 3 T tissue values (SpinSight constants.py) ─────────────────
-        const TISSUES_3T = [
-            { name: 'gray',       label: 'Gray matter',  T1: 1450, T2: 100,   PD: 1.0,  color: '#00ff00' },
-            { name: 'white',      label: 'White matter', T1: 830,  T2: 69,    PD: 0.92,  color: '#d40000' },
-            { name: 'CSF',        label: 'CSF',          T1: 4160, T2: 2100, PD: 1.0,  color: '#00ffff' },
-            { name: 'adipose',    label: 'Adipose',      T1: 370,  T2: 130,  PD: 1.0,  color: '#ffe680' },
-            { name: 'bonemarrow', label: 'Bone marrow',  T1: 898,  T2: 34,   PD: 1.0,  color: '#ffff44' },
-        ];
-
-        function populateTissueTable() {
-            const tbody = document.getElementById('tissue-table-body');
-            if (!tbody) return;
-            tbody.innerHTML = TISSUES_3T.map(t => `
-                <tr style="border-bottom:1px solid #dee2e6;">
-                    <td style="padding:5px 6px;display:flex;align-items:center;gap:7px;">
-                        <span style="display:inline-block;width:11px;height:11px;border-radius:2px;
-                                     background:${t.color};border:1px solid #aaa;flex-shrink:0;"></span>
-                        ${t.label}
-                    </td>
-                    <td style="text-align:right;padding:5px 6px;font-family:monospace;">${t.T1} ms</td>
-                    <td style="text-align:right;padding:5px 6px;font-family:monospace;">${t.T2} ms</td>
-                    <td style="text-align:right;padding:5px 6px;font-family:monospace;">${t.PD.toFixed(2)}</td>
-                </tr>`).join('');
-        }
 
         // ── MPRAGE sequence builder ─────────────────────────────────────
         function buildMPRAGE(p) {
@@ -674,7 +671,7 @@
             };
             const seq = buildMPRAGE(p);
             const result = {};
-            for (const t of TISSUES_3T) {
+            for (const t of window.PhantomState.tissues) {
                 let st = null;
                 for (let i = 0; i < numSims; i++)
                     st = simulateAndTrackWithState(seq, t.T1, t.T2, st ? st.finalState : null, t.PD);
@@ -719,7 +716,7 @@
 
             // Window charts (all 5 tissues)
             const winResults = {};
-            for (const t of TISSUES_3T) {
+            for (const t of window.PhantomState.tissues) {
                 let st = null;
                 for (let i = 0; i < numSims; i++)
                     st = simulateAndTrackWithState(seq, t.T1, t.T2, st ? st.finalState : null, t.PD);
@@ -740,7 +737,7 @@
                 },
             };
 
-            const mkDatasets = (key) => TISSUES_3T.map(t => ({
+            const mkDatasets = (key) => window.PhantomState.tissues.map(t => ({
                 label: t.label, 
                 data: winResults[t.name].map(pt => {
                     if (key === 'Mxy') {
@@ -770,7 +767,7 @@
 
             // Full-sequence charts (first 3 tissues for readability)
             const t1 = performance.now();
-            const fullSel = TISSUES_3T.slice(0, 3);
+            const fullSel = window.PhantomState.tissues.slice(0, 3);
             const fullRes = {};
             for (const t of fullSel) {
                 let st = null;
