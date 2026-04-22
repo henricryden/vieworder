@@ -499,6 +499,7 @@
      *   yScale,       // d3 linear scale  (flip angle)
      *   margin?,
      *   etl,          // number of echoes (x snap range 1..etl)
+    *   xOffset?,     // optional number of prefixed non-acquired bars before echo 1
     *   yMin?,        // default 0
      *   yMax?,        // default 180
      *   points,       // [{echoIndex, fa}]
@@ -509,19 +510,21 @@
     function addFAControlPoints(svgEl, opts) {
         const margin = opts.margin || { ...DEFAULT_MARGIN };
         const { xScale, yScale } = opts;
+        const xOffset = opts.xOffset || 0;
         const yMin = opts.yMin ?? 0;
         const yMax = opts.yMax ?? 180;
         let points = opts.points.map(p => ({ ...p }));
 
         // Map echo index (1-based) to pixel x using the band scale's band centres
         function echoToPx(echo) {
-            const label = String(echo);
+            const domain = xScale.domain ? xScale.domain() : [];
+            const label = domain[1 + xOffset + (echo - 1)] ?? String(echo);
             const x = xScale(label);
-            // xScale might be a band scale (labels = ['EX','1','2',...]) — skip 'EX'
+            // xScale might be a band scale (labels = ['EX','D1','1','2',...])
             // or a linear scale — handle both
             if (x === undefined) {
                 // fall back: treat as linear
-                return xScale(echo) ?? 0;
+                return xScale(echo + xOffset) ?? 0;
             }
             return x + (xScale.bandwidth ? xScale.bandwidth() / 2 : 0);
         }

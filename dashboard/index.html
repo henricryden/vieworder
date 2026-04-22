@@ -487,6 +487,10 @@
                     <h2>Refocusing</h2>
                     <div style="height:50px;"></div>
                     <div class="control-group">
+                        <label>Dummy echoes <span class="value" id="rare-dummy-echoes-value">0</span></label>
+                        <input type="range" id="rare-dummy-echoes" min="0" max="10" value="0" step="1">
+                    </div>
+                    <div class="control-group">
                         <label>Steady-state cycles <span class="value" id="rare-numSims-value">2</span></label>
                         <input type="range" id="rare-numSims" min="1" max="5" value="2" step="1">
                     </div>
@@ -649,6 +653,8 @@
 
     <!-- Tab switching -->
     <script>
+        window.BrainScanSignalSource = window.BrainScanSignalSource || 'mprage';
+
         function selectTab3Sequence(seq) {
             document.getElementById('tab3-label').textContent = seq;
             window.tab3Sequence = seq;
@@ -666,8 +672,19 @@
             document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
             document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
             document.getElementById('tab-' + id).classList.add('active');
-            const idx = ['view-order', 'phantom', 'mprage', 'rare', 'brain-scan'].indexOf(id);
-            if (idx >= 0) document.querySelectorAll('.tab-btn')[idx].classList.add('active');
+
+            const activeButton = {
+                'view-order': document.querySelectorAll('.tab-btn')[0],
+                phantom:      document.querySelectorAll('.tab-btn')[1],
+                mprage:       document.getElementById('tab3-btn'),
+                rare:         document.getElementById('tab3-btn'),
+                'brain-scan': document.querySelectorAll('.tab-btn')[3],
+            }[id];
+            if (activeButton) activeButton.classList.add('active');
+
+            if (id === 'mprage') window.BrainScanSignalSource = 'mprage';
+            if (id === 'rare') window.BrainScanSignalSource = 'rare';
+
             // Sync ETL display when switching to MPRAGE, RARE or Brain Scan tabs
             if (id === 'mprage' || id === 'rare' || id === 'brain-scan') {
                 const etl = window.AppState ? window.AppState.params.etl : 72;
@@ -1066,31 +1083,31 @@
             return faSchedule;
         }
 
-        function defaultCustomNodes(etl) {
+        function defaultCustomNodes(trainLength) {
             return [
                 { echoIndex: 1,                        fa: 180 },
-                { echoIndex: Math.max(1, Math.round(etl / 3)),     fa: 160 },
-                { echoIndex: Math.max(1, Math.round(2 * etl / 3)), fa: 140 },
-                { echoIndex: etl,                      fa: 120 },
+                { echoIndex: Math.max(1, Math.round(trainLength / 3)),     fa: 160 },
+                { echoIndex: Math.max(1, Math.round(2 * trainLength / 3)), fa: 140 },
+                { echoIndex: trainLength,              fa: 120 },
             ];
         }
 
-        function normalizeCustomNodes(nodes, etl) {
+        function normalizeCustomNodes(nodes, trainLength) {
             const byEcho = new Map();
             for (const node of nodes || []) {
-                const echoIndex = Math.max(1, Math.min(etl, Math.round(node.echoIndex)));
+                const echoIndex = Math.max(1, Math.min(trainLength, Math.round(node.echoIndex)));
                 const fa = Math.max(0, Math.min(180, node.fa));
                 byEcho.set(echoIndex, { echoIndex, fa });
             }
             return [...byEcho.values()].sort((a, b) => a.echoIndex - b.echoIndex);
         }
 
-        function linearInterpFA(nodes, etl) {
-            const sorted = normalizeCustomNodes(nodes, etl);
-            if (!sorted.length) return Array(etl).fill(180);
+        function linearInterpFA(nodes, trainLength) {
+            const sorted = normalizeCustomNodes(nodes, trainLength);
+            if (!sorted.length) return Array(trainLength).fill(180);
 
             const faSchedule = [];
-            for (let echo = 1; echo <= etl; echo++) {
+            for (let echo = 1; echo <= trainLength; echo++) {
                 if (echo <= sorted[0].echoIndex) {
                     faSchedule.push(sorted[0].fa);
                     continue;
@@ -1138,23 +1155,54 @@
             }
         }
 
+        class RareEchoSampleMarker {
+            constructor(trainIndex, acquiredIndex = null) {
+                this.trainIndex = trainIndex;
+                this.acquiredIndex = acquiredIndex;
+                this.isDummy = acquiredIndex == null;
+            }
+            apply() {}
+        }
+
         // ── RARE sequence builder (accepts per-echo FA schedule) ─────────
         function buildRARE(p) {
             const seq = new Sequence(20);
             seq.add(new RFPulse(90, 90));
-            for (let i = 0; i < p.numEchoes; i++) {
+            const numDummyEchoes = p.numDummyEchoes || 0;
+            const totalRefocusingPulses = numDummyEchoes + p.numEchoes;
+            for (let i = 0; i < totalRefocusingPulses; i++) {
                 seq.add(new GradientShift(1));
                 seq.add(new Relaxation(p.ESP / 2, 1000, 100));
                 const fa = Array.isArray(p.faSchedule) ? p.faSchedule[i] : p.refFA;
                 seq.add(new RFPulse(fa, 0));
                 seq.add(new Relaxation(p.ESP / 2, 1000, 100));
                 seq.add(new GradientShift(1));
-                seq.add(new ADC(`echo_${i + 1}`));
+                const acquiredIndex = i >= numDummyEchoes ? i - numDummyEchoes + 1 : null;
+                seq.add(new RareEchoSampleMarker(i + 1, acquiredIndex));
+                if (i >= numDummyEchoes) {
+                    seq.add(new ADC(`echo_${acquiredIndex}`));
+                }
             }
-            const recovery = Math.max(0, p.TR - p.numEchoes * p.ESP);
+            const recovery = Math.max(0, p.TR - totalRefocusingPulses * p.ESP);
             if (recovery > 0) seq.add(new Relaxation(recovery, 1000, 100));
             seq.add(new Spoiler());
             return seq;
+        }
+
+        function expandWithDummyEchoes(acquiredSchedule, numDummyEchoes) {
+            if (!acquiredSchedule.length) return [];
+            return [
+                ...Array(numDummyEchoes).fill(acquiredSchedule[0]),
+                ...acquiredSchedule,
+            ];
+        }
+
+        function buildRefocusingSchedule(scheme, params, etl, numDummyEchoes) {
+            if (scheme === 'custom') {
+                return computeFlipAngles(scheme, params, etl + numDummyEchoes);
+            }
+            const acquiredSchedule = computeFlipAngles(scheme, params, etl);
+            return expandWithDummyEchoes(acquiredSchedule, numDummyEchoes);
         }
 
         function cloneWithTissueRARE(seq, T1, T2) {
@@ -1177,9 +1225,21 @@
             const timeline = [];
             let t = 0;
             for (const op of ts.operators) {
-                if (op instanceof ADC) {
+                if (op instanceof RareEchoSampleMarker) {
                     const f0 = s.F0();
-                    timeline.push({ time: t, Mz: s.Z0().real, MxyRe: f0.real, MxyIm: f0.imag });
+                    timeline.push({
+                        time: t,
+                        trainIndex: op.trainIndex,
+                        acquiredIndex: op.acquiredIndex,
+                        isDummy: op.isDummy,
+                        Mz: s.Z0().real,
+                        MxyRe: f0.real,
+                        MxyIm: f0.imag,
+                    });
+                }
+                if (op instanceof ADC) {
+                    // ADCs are still used for acquired-only consumers elsewhere, but plotting
+                    // samples come from RareEchoSampleMarker so dummy echoes can be shown too.
                 }
                 op.apply(s);
                 if (op instanceof Relaxation) t += op.tau;
@@ -1202,8 +1262,20 @@
             let phase = 'prep';
 
             for (const op of ts.operators) {
+                if (op instanceof RareEchoSampleMarker) {
+                    timeline.push({
+                        time: ct,
+                        Mz: s.Z0().real,
+                        Mxy: Complex.magnitude(s.F0()),
+                        phase,
+                        isDummy: op.isDummy,
+                        trainIndex: op.trainIndex,
+                        acquiredIndex: op.acquiredIndex,
+                    });
+                }
                 if (op instanceof ADC) {
-                    timeline.push({ time: ct, Mz: s.Z0().real, Mxy: Complex.magnitude(s.F0()), phase });
+                    // Keep ADCs in the sequence for acquisition semantics, but full-train plotting
+                    // is driven by RareEchoSampleMarker so dummy echoes are visible.
                 }
                 if (op instanceof Relaxation && op.tau > 100) {
                     const t0  = ct;
@@ -1234,11 +1306,17 @@
             const etl     = appParams.etl;
             const TR      = parseInt(document.getElementById('rare-tr').value);
             const ESP     = parseFloat(document.getElementById('rare-esp').value);
+            const numDummyEchoes = parseInt(document.getElementById('rare-dummy-echoes').value);
             const numSims = parseInt(document.getElementById('rare-numSims').value);
             const scheme  = document.getElementById('rare-fa-scheme').value;
-            const faSchedule = computeFlipAngles(scheme, readSchemeParams(etl, ESP), etl);
+            const faSchedule = buildRefocusingSchedule(
+                scheme,
+                readSchemeParams(etl, ESP, etl + numDummyEchoes),
+                etl,
+                numDummyEchoes
+            );
 
-            const p   = { numEchoes: etl, TR, ESP, faSchedule };
+            const p   = { numEchoes: etl, numDummyEchoes, TR, ESP, faSchedule };
             const seq = buildRARE(p);
             const result = {};
             for (const t of RARE_TISSUES_3T) {
@@ -1246,7 +1324,7 @@
                 for (let i = 0; i < numSims; i++)
                     st = simulateRAREEchoTrain(seq, t.T1, t.T2, st ? st.finalState : null, t.PD);
                 const MxyComplex = new Float32Array(etl * 2);
-                st.timeline.forEach((pt, i) => {
+                st.timeline.filter(pt => !pt.isDummy).forEach((pt, i) => {
                     if (i < etl) {
                         MxyComplex[i * 2]     = pt.MxyRe;
                         MxyComplex[i * 2 + 1] = pt.MxyIm;
@@ -1271,7 +1349,7 @@
             }));
         }
 
-        function readSchemeParams(etl, ESP) {
+        function readSchemeParams(etl, ESP, trainLength = etl) {
             const scheme = document.getElementById('rare-fa-scheme').value;
             const params = { ESP };
             if (scheme === 'constant') {
@@ -1283,8 +1361,8 @@
                 if (!_mxyCtrlPts) _mxyCtrlPts = defaultCtrlPts(etl);
                 params.mxyControlPoints = _mxyCtrlPts;
             } else if (scheme === 'custom') {
-                if (!_customNodes) _customNodes = defaultCustomNodes(etl);
-                params.faNodes = _customNodes;
+                if (!_customNodes) _customNodes = defaultCustomNodes(trainLength);
+                params.faNodes = normalizeCustomNodes(_customNodes, trainLength);
             }
             return params;
         }
@@ -1299,6 +1377,7 @@
             const etl     = window.AppState ? window.AppState.params.etl : 72;
             const TR      = parseInt(document.getElementById('rare-tr').value);
             const ESP     = parseFloat(document.getElementById('rare-esp').value);
+            const numDummyEchoes = parseInt(document.getElementById('rare-dummy-echoes').value);
             const numSims = parseInt(document.getElementById('rare-numSims').value);
             const scheme  = document.getElementById('rare-fa-scheme').value;
 
@@ -1306,30 +1385,36 @@
             document.getElementById('etlDisplayRareMz').textContent     = etl;
             document.getElementById('etlDisplayRareMxy').textContent    = etl;
 
-            if (ESP * etl >= TR) {
-                alert(`ETL × ESP (${etl * ESP} ms) must be less than TR (${TR} ms).\nReduce ETL or ESP, or increase TR.`);
+            const totalTrainEchoes = etl + numDummyEchoes;
+            if (ESP * totalTrainEchoes >= TR) {
+                alert(`(ETL + dummy echoes) × ESP (${totalTrainEchoes * ESP} ms) must be less than TR (${TR} ms).\nReduce ETL/dummy echoes or ESP, or increase TR.`);
                 btn.disabled = false;
                 return;
             }
 
             // Init custom nodes if needed
             if (scheme === 'custom' && !_customNodes) {
-                _customNodes = defaultCustomNodes(etl);
+                _customNodes = defaultCustomNodes(totalTrainEchoes);
             }
 
-            const schemeParams = readSchemeParams(etl, ESP);
-            const faSchedule   = computeFlipAngles(scheme, schemeParams, etl);
+            const schemeParams = readSchemeParams(etl, ESP, totalTrainEchoes);
+            const faSchedule   = buildRefocusingSchedule(scheme, schemeParams, etl, numDummyEchoes);
             // Persist custom nodes (they were already mutated via drag; no reset needed)
 
-            const p   = { numEchoes: etl, TR, ESP, faSchedule };
+            const p   = { numEchoes: etl, numDummyEchoes, TR, ESP, faSchedule };
             const seq = buildRARE(p);
 
             // ── Flip angle bar chart ──────────────────────────────────────
             {
-                const faLabels = ['EX', ...Array.from({ length: etl }, (_, i) => String(i + 1))];
+                const faLabels = [
+                    'EX',
+                    ...Array.from({ length: numDummyEchoes }, (_, i) => `D${i + 1}`),
+                    ...Array.from({ length: etl }, (_, i) => String(i + 1)),
+                ];
                 const faValues = [90,   ...faSchedule];
                 const faColors = [
                     'rgba(100,160,255,0.85)',
+                    ...Array(numDummyEchoes).fill('rgba(255,180,80,0.80)'),
                     ...Array(etl).fill('rgba(160,100,255,0.80)'),
                 ];
                 const faPlot = D3SeqPlots.createBarPlot(document.getElementById('rare-fa-chart'), {
@@ -1349,12 +1434,12 @@
                         _faCtrlPtHandle = D3SeqPlots.addFAControlPoints(svgEl, {
                             xScale: faPlot.xScale,
                             yScale: faPlot.yScale,
-                            etl,
+                            etl: totalTrainEchoes,
                             yMin: 0,
                             yMax: 180,
-                            points: normalizeCustomNodes(_customNodes, etl),
+                            points: normalizeCustomNodes(_customNodes, totalTrainEchoes),
                             onDragEnd: (newPts) => {
-                                _customNodes = normalizeCustomNodes(newPts, etl);
+                                _customNodes = normalizeCustomNodes(newPts, totalTrainEchoes);
                                 runRARESimulation();
                             },
                         });
@@ -1374,30 +1459,36 @@
 
             const mkLineDs = (key) => RARE_TISSUES_3T.map(t => ({
                 label: t.label,
-                data: echoResults[t.name].map((pt, i) => {
+                data: echoResults[t.name].map((pt) => {
                     if (key === 'Mxy') {
                         const re = pt.MxyRe || 0, im = pt.MxyIm || 0;
-                        return { x: i + 1, y: Math.sqrt(re * re + im * im) };
+                        return { x: pt.trainIndex, y: Math.sqrt(re * re + im * im) };
                     }
-                    return { x: i + 1, y: pt[key] };
+                    return { x: pt.trainIndex, y: pt[key] };
                 }),
                 color: t.color,
                 hidden: ['CSF', 'adipose', 'bonemarrow'].includes(t.name),
             }));
 
+            const echoPhaseBoxes = numDummyEchoes > 0 ? [
+                { xStart: 0.5, xEnd: numDummyEchoes + 0.5, color: 'rgba(255,180,80,0.14)', label: 'Dummy echoes' },
+            ] : [];
+
             const mxyPlot = D3SeqPlots.createLinePlot(document.getElementById('rare-echo-mxy-chart'), {
                 datasets: mkLineDs('Mxy'),
-                xType: 'linear', xMin: 1, xMax: etl,
+                xType: 'linear', xMin: 1, xMax: totalTrainEchoes,
                 yMin: 0,
                 xLabel: 'Echo index', yLabel: 'Mxy',
+                phaseBoxes: echoPhaseBoxes,
                 showLegend: true,
             });
 
             D3SeqPlots.createLinePlot(document.getElementById('rare-echo-mz-chart'), {
                 datasets: mkLineDs('Mz'),
-                xType: 'linear', xMin: 1, xMax: etl,
+                xType: 'linear', xMin: 1, xMax: totalTrainEchoes,
                 yMin: -0.1, yMax: 1.2,
                 xLabel: 'Echo index', yLabel: 'Mz',
+                phaseBoxes: echoPhaseBoxes,
                 showLegend: true,
             });
 
@@ -1407,13 +1498,20 @@
                 if (!_mxyCtrlPts) _mxyCtrlPts = defaultCtrlPts(etl);
                 const svgEl = document.querySelector('#rare-echo-mxy-chart svg');
                 if (svgEl) {
+                    const controlPoints = _mxyCtrlPts.map(pt => ({
+                        echoIndex: pt.echoIndex + numDummyEchoes,
+                        mxy: pt.mxy,
+                    }));
                     _mxyCtrlPtHandle = D3SeqPlots.addMxyControlPoints(svgEl, {
                         xScale: mxyPlot.xScale,
                         yScale: mxyPlot.yScale,
-                        etl,
-                        points: _mxyCtrlPts,
+                        etl: totalTrainEchoes,
+                        points: controlPoints,
                         onDragEnd: (newPts) => {
-                            _mxyCtrlPts = newPts;
+                            _mxyCtrlPts = newPts.map(pt => ({
+                                echoIndex: Math.max(1, Math.min(etl, pt.echoIndex - numDummyEchoes)),
+                                mxy: pt.mxy,
+                            }));
                             runRARESimulation();
                         },
                     });
@@ -1433,7 +1531,7 @@
             console.log(`[RARE] full seq sim in ${(performance.now() - t1).toFixed(0)} ms`);
 
             const totalTime = fullRes[fullSel[0].name].totalTime;
-            const prepEnd   = etl * ESP;
+            const prepEnd   = (etl + numDummyEchoes) * ESP;
 
             const phaseBoxes = [
                 { xStart: 0,       xEnd: prepEnd,   color: 'rgba(100,200,255,0.12)', label: 'RARE' },
@@ -1494,7 +1592,9 @@
 
             document.getElementById('rare-custom-add-node').addEventListener('click', function () {
                 const etl = window.AppState ? window.AppState.params.etl : 72;
-                if (!_customNodes) { _customNodes = defaultCustomNodes(etl); }
+                const numDummyEchoes = parseInt(document.getElementById('rare-dummy-echoes').value);
+                const totalTrainEchoes = etl + numDummyEchoes;
+                if (!_customNodes) { _customNodes = defaultCustomNodes(totalTrainEchoes); }
                 const sorted = [..._customNodes].sort((a, b) => a.echoIndex - b.echoIndex);
                 // Find the largest gap between adjacent nodes (or edges)
                 const gaps = [];
@@ -1502,19 +1602,20 @@
                     gaps.push({ lo: 1, hi: sorted[0].echoIndex, loFA: sorted[0].fa, hiFA: sorted[0].fa });
                 for (let i = 0; i < sorted.length - 1; i++)
                     gaps.push({ lo: sorted[i].echoIndex, hi: sorted[i + 1].echoIndex, loFA: sorted[i].fa, hiFA: sorted[i + 1].fa });
-                if (sorted[sorted.length - 1].echoIndex < etl)
-                    gaps.push({ lo: sorted[sorted.length - 1].echoIndex, hi: etl, loFA: sorted[sorted.length - 1].fa, hiFA: sorted[sorted.length - 1].fa });
+                if (sorted[sorted.length - 1].echoIndex < totalTrainEchoes)
+                    gaps.push({ lo: sorted[sorted.length - 1].echoIndex, hi: totalTrainEchoes, loFA: sorted[sorted.length - 1].fa, hiFA: sorted[sorted.length - 1].fa });
                 gaps.sort((a, b) => (b.hi - b.lo) - (a.hi - a.lo));
                 const best = gaps[0];
                 const midEcho = Math.round((best.lo + best.hi) / 2);
                 const midFA   = (best.loFA + best.hiFA) / 2;
-                _customNodes = [..._customNodes, { echoIndex: midEcho, fa: midFA }];
+                _customNodes = normalizeCustomNodes([..._customNodes, { echoIndex: midEcho, fa: midFA }], totalTrainEchoes);
                 runRARESimulation();
             });
 
             [
                 ['rare-tr',       'rare-tr-value'],
                 ['rare-esp',      'rare-esp-value'],
+                ['rare-dummy-echoes', 'rare-dummy-echoes-value'],
                 ['rare-reffa',    'rare-reffa-value'],
                 ['rare-fa-start', 'rare-fa-start-value'],
                 ['rare-fa-end',   'rare-fa-end-value'],
