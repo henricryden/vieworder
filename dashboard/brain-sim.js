@@ -420,7 +420,7 @@ const BrainSim = (() => {
         console.log(`[BrainSim] Image rendered ${width}×${height} in ${(performance.now() - t0).toFixed(0)} ms`);
     }
 
-    function renderMxyChart(mprageSigs, etl) {
+    function renderMxyChart(mprageSigs, etl, sourceLabel = 'MPRAGE') {
         const ctx = document.getElementById('brain-mxy-chart');
         if (!ctx) return;
 
@@ -459,7 +459,7 @@ const BrainSim = (() => {
                 animation: false,
                 plugins: {
                     legend: { position: 'right', labels: { color: '#e0e0ff', font: { size: 11 } } },
-                    title:  { display: true, text: 'MPRAGE Mxy(echo) per tissue', color: '#e0e0ff' },
+                    title:  { display: true, text: `${sourceLabel} Mxy(echo) per tissue`, color: '#e0e0ff' },
                 },
                 scales: {
                     x: {
@@ -583,16 +583,29 @@ const BrainSim = (() => {
             }
             const { ky: Ny, kz: Nz, etl: ETL } = params;
 
-            // 2. MPRAGE signals per tissue
-            if (!window.MPRAGEModule || !window.MPRAGEModule.ready) {
-                setStatus('MPRAGE module not ready — please wait.', true);
-                return;
+            // 2. Tissue signals — from whichever source the user selected
+            const sigSource = window.BrainScanSignalSource || 'mprage';
+            let sigs;
+            if (sigSource === 'rare') {
+                if (!window.RAREModule || !window.RAREModule.ready) {
+                    setStatus('RARE module not ready — open Tab ③ first.', true);
+                    return;
+                }
+                setStatus('Simulating RARE…');
+                const t1 = performance.now();
+                sigs = window.RAREModule.getRARESignals(params);
+                console.log(`[BrainSim] RARE simulation in ${(performance.now() - t1).toFixed(0)} ms`, sigs);
+                if (!sigs) { setStatus('RARE signals returned null — check console.', true); return; }
+            } else {
+                if (!window.MPRAGEModule || !window.MPRAGEModule.ready) {
+                    setStatus('MPRAGE module not ready — please wait.', true);
+                    return;
+                }
+                setStatus('Simulating MPRAGE…');
+                const t1 = performance.now();
+                sigs = window.MPRAGEModule.getMPRAGESignals(params);
+                console.log(`[BrainSim] MPRAGE simulation in ${(performance.now() - t1).toFixed(0)} ms`);
             }
-
-            setStatus('Simulating MPRAGE…');
-            const t1 = performance.now();
-            const mprageSigs = window.MPRAGEModule.getMPRAGESignals(params);
-            console.log(`[BrainSim] MPRAGE simulation in ${(performance.now() - t1).toFixed(0)} ms`);
 
             // 3. Phantom grid
             const grid = await ensureGrid(Ny, Nz);
@@ -602,7 +615,7 @@ const BrainSim = (() => {
 
             // 4. Assemble k-space
             setStatus('Assembling k-space…');
-            const [ksp_re, ksp_im] = assembleMeasuredKspace(coords, mprageSigs, grid, Ny, Nz);
+            const [ksp_re, ksp_im] = assembleMeasuredKspace(coords, sigs, grid, Ny, Nz);
 
             // 5. Reconstruct
             setStatus('Reconstructing image…');
@@ -610,7 +623,10 @@ const BrainSim = (() => {
 
             // 6. Render
             renderImage(canvas, img, width, height);
-            renderMxyChart(mprageSigs, ETL);
+            const sourceLabel = sigSource === 'rare' ? 'RARE' : 'MPRAGE';
+            const titleEl = document.getElementById('brain-mxy-title');
+            if (titleEl) titleEl.textContent = `${sourceLabel} Mxy(echo) per tissue — used in this scan`;
+            renderMxyChart(sigs, ETL, sourceLabel);
 
             // Store current image for save/diff
             _currentImg    = img;

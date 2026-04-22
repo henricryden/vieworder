@@ -18,7 +18,8 @@
         <div class="tab-bar">
             <button class="tab-btn active" onclick="switchTab('view-order')">① View Order</button>
             <button class="tab-btn"        onclick="switchTab('mprage')">② MPRAGE</button>
-            <button class="tab-btn"        onclick="switchTab('brain-scan')">③ Brain Scan</button>
+            <button class="tab-btn"        onclick="switchTab('rare')">③ RARE</button>
+            <button class="tab-btn"        onclick="switchTab('brain-scan')">④ Brain Scan</button>
         </div>
 
         <!-- ══ TAB 1: View Order ══════════════════════════════════════ -->
@@ -433,25 +434,120 @@
             </div>
         </div><!-- /tab-mprage -->
 
-        <!-- ══ TAB 3: Brain Scan ══════════════════════════════════════ -->
+        <!-- ══ TAB 3: RARE Simulator ══════════════════════════════════ -->
+        <div id="tab-rare" class="tab-panel">
+            <div class="mprage-params-grid">
+
+                <!-- Sequence parameters -->
+                <div class="mprage-panel">
+                    <h2>Sequence Parameters</h2>
+                    <div class="mprage-etl-note">
+                        ETL = <strong id="rare-etl-display">72</strong> echoes (set in Tab ①)
+                    </div>
+                    <div class="control-group">
+                        <label>TR <span class="value" id="rare-tr-value">3000</span> ms</label>
+                        <input type="range" id="rare-tr" min="1000" max="8000" value="3000" step="500">
+                    </div>
+                    <div class="control-group">
+                        <label>Echo spacing (ESP) <span class="value" id="rare-esp-value">10</span> ms</label>
+                        <input type="range" id="rare-esp" min="5" max="30" value="10" step="1">
+                    </div>
+                    <div class="control-group">
+                        <label>Refocusing flip angle <span class="value" id="rare-reffa-value">180</span> °</label>
+                        <input type="range" id="rare-reffa" min="90" max="180" value="180" step="5">
+                    </div>
+                    <div class="control-group">
+                        <label>Steady-state cycles <span class="value" id="rare-numSims-value">2</span></label>
+                        <input type="range" id="rare-numSims" min="1" max="5" value="2" step="1">
+                    </div>
+                    <button class="mprage-btn-simulate" id="rare-simulate-btn">▶ Simulate RARE</button>
+                </div>
+
+                <!-- Tissue table (read-only) -->
+                <div class="mprage-panel">
+                    <h2>Tissue Parameters (3 T)</h2>
+                    <p style="font-size:0.88em;color:#666;margin-bottom:12px;">
+                        Fixed literature values. All 5 tissues simulated.
+                    </p>
+                    <table style="width:100%;font-size:0.87em;border-collapse:collapse;">
+                        <thead>
+                            <tr style="border-bottom:2px solid #667eea;">
+                                <th style="text-align:left;padding:4px 6px;color:#667eea;">Tissue</th>
+                                <th style="text-align:right;padding:4px 6px;color:#667eea;">T1</th>
+                                <th style="text-align:right;padding:4px 6px;color:#667eea;">T2</th>
+                                <th style="text-align:right;padding:4px 6px;color:#667eea;">PD</th>
+                            </tr>
+                        </thead>
+                        <tbody id="rare-tissue-table-body"></tbody>
+                    </table>
+                </div>
+            </div><!-- /mprage-params-grid -->
+
+            <!-- Flip angle schedule -->
+            <div class="mprage-plots-row full" style="margin-top:22px;">
+                <div class="mprage-plot-panel">
+                    <h3>Flip angle schedule</h3>
+                    <div class="mprage-chart-wrapper" style="height:180px;"><canvas id="rareFlipAngleChart"></canvas></div>
+                </div>
+            </div>
+
+            <!-- Echo train charts -->
+            <div class="mprage-plots-row" style="margin-top:20px;">
+                <div class="mprage-plot-panel">
+                    <h3>Echo train — Mxy per echo</h3>
+                    <div class="mprage-chart-wrapper"><canvas id="rareEchoMxyChart"></canvas></div>
+                </div>
+                <div class="mprage-plot-panel">
+                    <h3>Echo train — Mz per echo</h3>
+                    <div class="mprage-chart-wrapper"><canvas id="rareEchoMzChart"></canvas></div>
+                </div>
+            </div>
+
+            <!-- Full-sequence charts -->
+            <div class="mprage-plots-row full" style="margin-top:20px;">
+                <div class="mprage-plot-panel">
+                    <h3>Full Sequence — Mz</h3>
+                    <div class="mprage-chart-wrapper tall"><canvas id="rareFullMzChart"></canvas></div>
+                    <div class="mprage-phase-legend">
+                        <div style="background:rgba(100,200,255,.15);border-left:3px solid #64c8ff;"><strong>RARE</strong> (<span id="etlDisplayRareMz">72</span> echoes)</div>
+                        <div style="background:rgba(100,255,100,.15);border-left:3px solid #64ff64;"><strong>Recovery</strong></div>
+                    </div>
+                </div>
+            </div>
+            <div class="mprage-plots-row full" style="margin-top:20px;">
+                <div class="mprage-plot-panel">
+                    <h3>Full Sequence — Mxy (echo amplitudes)</h3>
+                    <div class="mprage-chart-wrapper tall"><canvas id="rareFullMxyChart"></canvas></div>
+                    <div class="mprage-phase-legend">
+                        <div style="background:rgba(100,200,255,.15);border-left:3px solid #64c8ff;"><strong>RARE</strong> (<span id="etlDisplayRareMxy">72</span> echoes)</div>
+                        <div style="background:rgba(100,255,100,.15);border-left:3px solid #64ff64;"><strong>Recovery</strong></div>
+                    </div>
+                </div>
+            </div>
+        </div><!-- /tab-rare -->
+
+        <!-- ══ TAB 4: Brain Scan ══════════════════════════════════════ -->
         <div id="tab-brain-scan" class="tab-panel">
             <div class="brain-layout">
                 <div class="brain-controls">
                     <h2>Brain Scan Simulation</h2>
                     <p style="font-size:0.88em;color:#555;margin-bottom:14px;">
-                        Simulates an acquisition with view order from Tab ① and MPRAGE tissue signals from Tab ②,
-                        using an analytical brain phantom from <a href="https://github.com/bretglun/SpinSight">SpinSight</a> to reconstruct
-                        a brain image.
-                        <br><br>
-                        The reconstru
-                        <br><br>
+                        Combines view order from Tab ① with tissue signals from the selected sequence simulator,
+                        using an analytical brain phantom from <a href="https://github.com/bretglun/SpinSight">SpinSight</a>.
+                        The phantom k-space is computed analytically from SVG polygons
+                        and cached per matrix size (Ny × Nz from Tab ①).
                         FOV 200 × 200 mm, 3 T.
                     </p>
-                    <p style="font-size:0.85em;color:#777;margin-bottom:10px;">
-                        Phantom k-space is computed analytically from SVG polygons<br>
-                        and cached per matrix size (Ny × Nz from Tab ①).<br>
-                        Tissues: GM, WM, CSF, adipose, and bone marrow.
-                    </p>
+
+                    <!-- Signal source selector -->
+                    <div class="brain-signal-source">
+                        <label>Signal source</label>
+                        <button id="brain-source-mprage" class="brain-signal-btn active-mprage"
+                                onclick="selectBrainSignalSource('mprage')">② MPRAGE</button>
+                        <button id="brain-source-rare"   class="brain-signal-btn"
+                                onclick="selectBrainSignalSource('rare')">③ RARE</button>
+                    </div>
+
                     <button class="brain-sim-btn" id="brain-simulate-btn"
                             onclick="BrainSim.runScan()">▶ Simulate Brain Scan</button>
                     <div class="brain-status" id="brain-status">Ready — press Simulate to run.</div>
@@ -487,7 +583,7 @@
             </div>
 
             <div class="brain-mxy-panel" style="margin-top:20px;">
-                <h3>MPRAGE Mxy(echo) per tissue — used in this scan</h3>
+                <h3 id="brain-mxy-title">Mxy(echo) per tissue — used in this scan</h3>
                 <canvas id="brain-mxy-chart"></canvas>
             </div>
         </div><!-- /tab-brain-scan -->
@@ -503,17 +599,29 @@
 
     <!-- Tab switching -->
     <script>
+        window.BrainScanSignalSource = 'mprage';
+
+        function selectBrainSignalSource(source) {
+            window.BrainScanSignalSource = source;
+            document.getElementById('brain-source-mprage').className =
+                'brain-signal-btn' + (source === 'mprage' ? ' active-mprage' : '');
+            document.getElementById('brain-source-rare').className =
+                'brain-signal-btn' + (source === 'rare' ? ' active-rare' : '');
+        }
+
         function switchTab(id) {
             document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
             document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
             document.getElementById('tab-' + id).classList.add('active');
-            const idx = ['view-order', 'mprage', 'brain-scan'].indexOf(id);
+            const idx = ['view-order', 'mprage', 'rare', 'brain-scan'].indexOf(id);
             if (idx >= 0) document.querySelectorAll('.tab-btn')[idx].classList.add('active');
-            // Sync ETL display when switching to MPRAGE or Brain Scan tabs
+            // Sync ETL display when switching away from View Order tab
             if (id !== 'view-order') {
                 const etl = window.AppState ? window.AppState.params.etl : 72;
-                const el  = document.getElementById('mprage-etl-display');
-                if (el) el.textContent = etl;
+                const mpEl   = document.getElementById('mprage-etl-display');
+                if (mpEl) mpEl.textContent = etl;
+                const rareEl = document.getElementById('rare-etl-display');
+                if (rareEl) rareEl.textContent = etl;
             }
         }
     </script>
@@ -849,6 +957,373 @@
         window.MPRAGEModule = {
             get ready() { return _ready; },
             getMPRAGESignals,
+        };
+    </script>
+    <!-- RARE EPG module -->
+    <script type="module">
+        let Sequence, StateMatrix, RFPulse, Relaxation, GradientShift, ADC, Spoiler, Complex;
+        let _rareReady = false;
+
+        import('../js-epg/src/index.js')
+            .then(m => {
+                ({ Sequence, StateMatrix, RFPulse, Relaxation,
+                   GradientShift, ADC, Spoiler, Complex } = m);
+                _rareReady = true;
+                console.log('✓ RARE EPG modules loaded');
+                populateRARETissueTable();
+                setupRARESliders();
+            })
+            .catch(err => console.error('✗ RARE EPG module load failed:', err));
+
+        const RARE_TISSUES_3T = [
+            { name: 'gray',       label: 'Gray matter',  T1: 1450, T2: 100,  PD: 1.0,  color: '#00ff00' },
+            { name: 'white',      label: 'White matter', T1: 830,  T2: 69,   PD: 0.92, color: '#d40000' },
+            { name: 'CSF',        label: 'CSF',          T1: 4160, T2: 2100, PD: 1.0,  color: '#00ffff' },
+            { name: 'adipose',    label: 'Adipose',      T1: 370,  T2: 130,  PD: 1.0,  color: '#ffe680' },
+            { name: 'bonemarrow', label: 'Bone marrow',  T1: 898,  T2: 34,   PD: 1.0,  color: '#ffff44' },
+        ];
+
+        function populateRARETissueTable() {
+            const tbody = document.getElementById('rare-tissue-table-body');
+            if (!tbody) return;
+            tbody.innerHTML = RARE_TISSUES_3T.map(t => `
+                <tr style="border-bottom:1px solid #dee2e6;">
+                    <td style="padding:5px 6px;display:flex;align-items:center;gap:7px;">
+                        <span style="display:inline-block;width:11px;height:11px;border-radius:2px;
+                                     background:${t.color};border:1px solid #aaa;flex-shrink:0;"></span>
+                        ${t.label}
+                    </td>
+                    <td style="text-align:right;padding:5px 6px;font-family:monospace;">${t.T1} ms</td>
+                    <td style="text-align:right;padding:5px 6px;font-family:monospace;">${t.T2} ms</td>
+                    <td style="text-align:right;padding:5px 6px;font-family:monospace;">${t.PD.toFixed(2)}</td>
+                </tr>`).join('');
+        }
+
+        // RARE sequence: excitation → ETL × [dephase + ESP/2 + refocus + ESP/2 + rephase + ADC] → recovery + spoil
+        function buildRARE(p) {
+            const seq = new Sequence(20);
+            seq.add(new RFPulse(90, 90));
+            for (let i = 0; i < p.numEchoes; i++) {
+                seq.add(new GradientShift(1));
+                seq.add(new Relaxation(p.ESP / 2, 1000, 100));
+                seq.add(new RFPulse(p.refFA, 0));
+                seq.add(new Relaxation(p.ESP / 2, 1000, 100));
+                seq.add(new GradientShift(1));
+                seq.add(new ADC(`echo_${i + 1}`));
+            }
+            const recovery = Math.max(0, p.TR - p.numEchoes * p.ESP);
+            if (recovery > 0) seq.add(new Relaxation(recovery, 1000, 100));
+            seq.add(new Spoiler());
+            return seq;
+        }
+
+        function cloneWithTissueRARE(seq, T1, T2) {
+            const n = new Sequence(seq.initialNState);
+            for (const op of seq.operators)
+                n.add(op instanceof Relaxation ? new Relaxation(op.tau, T1, T2, op.g) : op);
+            return n;
+        }
+
+        function simulateRAREEchoTrain(seq, T1, T2, initState, PD) {
+            const ts = cloneWithTissueRARE(seq, T1, T2);
+            const s  = initState || new StateMatrix(20);
+            if (!initState && PD !== 1.0) {
+                for (const st of s.states()) {
+                    st[0].real *= PD; st[0].imag *= PD;
+                    st[1].real *= PD; st[1].imag *= PD;
+                    st[2].real *= PD; st[2].imag *= PD;
+                }
+            }
+            const timeline = [];
+            let t = 0;
+            for (const op of ts.operators) {
+                if (op instanceof ADC) {
+                    const f0 = s.F0();
+                    timeline.push({ time: t, Mz: s.Z0().real, MxyRe: f0.real, MxyIm: f0.imag });
+                }
+                op.apply(s);
+                if (op instanceof Relaxation) t += op.tau;
+            }
+            return { timeline, finalState: s };
+        }
+
+        function simulateFullSequenceRAREWithState(seq, T1, T2, initState, PD) {
+            const ts = cloneWithTissueRARE(seq, T1, T2);
+            const s  = initState || new StateMatrix(20);
+            if (!initState && PD !== 1.0) {
+                for (const st of s.states()) {
+                    st[0].real *= PD; st[0].imag *= PD;
+                    st[1].real *= PD; st[1].imag *= PD;
+                    st[2].real *= PD; st[2].imag *= PD;
+                }
+            }
+            const timeline = [];
+            let ct = 0;
+            let phase = 'prep';
+
+            for (const op of ts.operators) {
+                if (op instanceof ADC) {
+                    timeline.push({ time: ct, Mz: s.Z0().real, Mxy: Complex.magnitude(s.F0()), phase });
+                }
+                if (op instanceof Relaxation && op.tau > 100) {
+                    // Recovery period — sample continuously
+                    const t0  = ct;
+                    const Mz0 = s.Z0().real;
+                    phase = 'recovery';
+                    const step = Math.max(5, op.tau / 300);
+                    for (let dt = 0; dt <= op.tau; dt += step) {
+                        timeline.push({
+                            time: t0 + dt,
+                            Mz:  1 - (1 - Mz0) * Math.exp(-dt / T1),
+                            Mxy: 0,
+                            phase: 'recovery',
+                        });
+                    }
+                    op.apply(s);
+                    ct += op.tau;
+                } else {
+                    op.apply(s);
+                    if (op instanceof Relaxation) ct += op.tau;
+                }
+            }
+            return { timeline, totalTime: ct, finalState: s };
+        }
+
+        function getRARESignals(appParams) {
+            console.log('[RAREModule] getRARESignals called, _rareReady=', _rareReady, 'etl=', appParams && appParams.etl);
+            if (!_rareReady) return null;
+            const etl     = appParams.etl;
+            const TR      = parseInt(document.getElementById('rare-tr').value);
+            const ESP     = parseFloat(document.getElementById('rare-esp').value);
+            const refFA   = parseFloat(document.getElementById('rare-reffa').value);
+            const numSims = parseInt(document.getElementById('rare-numSims').value);
+
+            const p   = { numEchoes: etl, TR, ESP, refFA };
+            const seq = buildRARE(p);
+            const result = {};
+            for (const t of RARE_TISSUES_3T) {
+                let st = null;
+                for (let i = 0; i < numSims; i++)
+                    st = simulateRAREEchoTrain(seq, t.T1, t.T2, st ? st.finalState : null, t.PD);
+                const MxyComplex = new Float32Array(etl * 2);
+                st.timeline.forEach((pt, i) => {
+                    if (i < etl) {
+                        MxyComplex[i * 2]     = pt.MxyRe;
+                        MxyComplex[i * 2 + 1] = pt.MxyIm;
+                    }
+                });
+                result[t.name] = MxyComplex;
+            }
+            const gray0 = result.gray ? result.gray[0] : 'N/A';
+            console.log(`[RAREModule] getRARESignals done, gray echo[0]=${gray0}`);
+            return result;
+        }
+
+        let rareFlipAngleChart = null;
+        let rareEchoMxyChart = null, rareEchoMzChart = null;
+        let rareFullMzChart  = null, rareFullMxyChart  = null;
+
+        async function runRARESimulation() {
+            if (!_rareReady) { console.warn('[RARE] EPG not ready'); return; }
+            const btn = document.getElementById('rare-simulate-btn');
+            btn.disabled = true;
+            const t0 = performance.now();
+
+            const etl     = window.AppState ? window.AppState.params.etl : 72;
+            const TR      = parseInt(document.getElementById('rare-tr').value);
+            const ESP     = parseFloat(document.getElementById('rare-esp').value);
+            const refFA   = parseFloat(document.getElementById('rare-reffa').value);
+            const numSims = parseInt(document.getElementById('rare-numSims').value);
+
+            document.getElementById('rare-etl-display').textContent    = etl;
+            document.getElementById('etlDisplayRareMz').textContent     = etl;
+            document.getElementById('etlDisplayRareMxy').textContent    = etl;
+
+            if (ESP * etl >= TR) {
+                alert(`ETL × ESP (${etl * ESP} ms) must be less than TR (${TR} ms).\nReduce ETL or ESP, or increase TR.`);
+                btn.disabled = false;
+                return;
+            }
+
+            const p   = { numEchoes: etl, TR, ESP, refFA };
+            const seq = buildRARE(p);
+
+            // Flip angle chart
+            {
+                const faLabels = ['EX', ...Array.from({ length: etl }, (_, i) => String(i + 1))];
+                const faData   = [90,   ...Array(etl).fill(refFA)];
+                const faColors = [
+                    'rgba(100,160,255,0.85)',
+                    ...Array(etl).fill('rgba(160,100,255,0.80)'),
+                ];
+                if (rareFlipAngleChart) rareFlipAngleChart.destroy();
+                rareFlipAngleChart = new Chart(document.getElementById('rareFlipAngleChart'), {
+                    type: 'bar',
+                    data: { labels: faLabels, datasets: [{ data: faData, backgroundColor: faColors, borderWidth: 0 }] },
+                    options: {
+                        responsive: true, maintainAspectRatio: false, animation: false,
+                        plugins: {
+                            legend: { display: false },
+                            tooltip: {
+                                callbacks: {
+                                    title: (items) => items[0].label === 'EX' ? 'Excitation' : `Refocusing echo ${items[0].label}`,
+                                    label: (item)  => `${item.raw}°`,
+                                },
+                            },
+                        },
+                        scales: {
+                            x: { ticks: { color: '#a0a0c0', maxTicksLimit: 20 },
+                                 grid:  { color: 'rgba(255,255,255,0.05)' },
+                                 title: { display: true, text: 'Pulse index', color: '#e0e0ff' } },
+                            y: { min: 0, max: 190,
+                                 ticks: { color: '#a0a0c0', callback: v => v + '°' },
+                                 grid:  { color: 'rgba(255,255,255,0.05)' },
+                                 title: { display: true, text: 'Flip angle (°)', color: '#e0e0ff' } },
+                        },
+                        barPercentage: 0.8, categoryPercentage: 0.9,
+                    },
+                });
+            }
+
+            // Echo train for all 5 tissues
+            const echoResults = {};
+            for (const t of RARE_TISSUES_3T) {
+                let st = null;
+                for (let i = 0; i < numSims; i++)
+                    st = simulateRAREEchoTrain(seq, t.T1, t.T2, st ? st.finalState : null, t.PD);
+                echoResults[t.name] = st.timeline;
+            }
+            console.log(`[RARE] echo train sim in ${(performance.now() - t0).toFixed(0)} ms`);
+
+            const labels = Array.from({ length: etl }, (_, i) => String(i + 1));
+            const dark = {
+                responsive: true, maintainAspectRatio: false, animation: false,
+                interaction: { mode: 'index', intersect: false },
+                plugins: { legend: { position: 'right', labels: { color: '#e0e0ff', font: { size: 10 } } } },
+                scales: {
+                    x: { ticks: { color: '#a0a0c0', maxTicksLimit: 12 },
+                         grid: { color: 'rgba(255,255,255,0.05)' },
+                         title: { display: true, text: 'Echo index', color: '#e0e0ff' } },
+                    y: { ticks: { color: '#a0a0c0' }, grid: { color: 'rgba(255,255,255,0.05)' } },
+                },
+            };
+
+            const mkDatasets = (key) => RARE_TISSUES_3T.map(t => ({
+                label: t.label,
+                data: echoResults[t.name].map(pt => {
+                    if (key === 'Mxy') {
+                        const re = pt.MxyRe || 0, im = pt.MxyIm || 0;
+                        return Math.sqrt(re * re + im * im);
+                    }
+                    return pt[key];
+                }),
+                borderColor: t.color, backgroundColor: 'transparent',
+                borderWidth: 2, pointRadius: 0, tension: 0,
+                hidden: ['CSF', 'adipose', 'bonemarrow'].includes(t.name),
+            }));
+
+            if (rareEchoMxyChart) rareEchoMxyChart.destroy();
+            rareEchoMxyChart = new Chart(document.getElementById('rareEchoMxyChart'), {
+                type: 'line', data: { labels, datasets: mkDatasets('Mxy') },
+                options: { ...dark, scales: { ...dark.scales, y: { ...dark.scales.y, min: 0 } } },
+            });
+
+            if (rareEchoMzChart) rareEchoMzChart.destroy();
+            rareEchoMzChart = new Chart(document.getElementById('rareEchoMzChart'), {
+                type: 'line', data: { labels, datasets: mkDatasets('Mz') },
+                options: { ...dark, scales: { ...dark.scales, y: { ...dark.scales.y, min: -0.1, max: 1.2 } } },
+            });
+
+            // Full sequence for first 3 tissues
+            const t1 = performance.now();
+            const fullSel = RARE_TISSUES_3T.slice(0, 3);
+            const fullRes = {};
+            for (const t of fullSel) {
+                let st = null;
+                for (let i = 0; i < numSims; i++)
+                    st = simulateFullSequenceRAREWithState(seq, t.T1, t.T2, st ? st.finalState : null, t.PD);
+                fullRes[t.name] = st;
+            }
+            console.log(`[RARE] full seq sim in ${(performance.now() - t1).toFixed(0)} ms`);
+
+            const totalTime = fullRes[fullSel[0].name].totalTime;
+            const prepEnd   = etl * ESP;
+
+            const phaseBoxPlugin = {
+                id: 'rarePhaseBoxes',
+                afterDatasetsDraw(ch) {
+                    const { ctx, scales: { x, y }, chartArea } = ch;
+                    [
+                        { color: 'rgba(100,200,255,0.12)', s: 0,       e: prepEnd    },
+                        { color: 'rgba(100,255,100,0.12)', s: prepEnd,  e: totalTime  },
+                    ].forEach(({ color, s, e }) => {
+                        ctx.fillStyle = color;
+                        ctx.fillRect(
+                            x.getPixelForValue(s), chartArea.top,
+                            x.getPixelForValue(e) - x.getPixelForValue(s),
+                            chartArea.bottom - chartArea.top
+                        );
+                    });
+                },
+            };
+
+            const fullOpts = (yMin) => ({
+                ...dark,
+                scales: {
+                    x: { type: 'linear', min: 0, max: totalTime,
+                         ticks: { color: '#a0a0c0' }, grid: { color: 'rgba(255,255,255,0.05)' },
+                         title: { display: true, text: 'Time (ms)', color: '#e0e0ff' } },
+                    y: { min: yMin, ticks: { color: '#a0a0c0' }, grid: { color: 'rgba(255,255,255,0.05)' } },
+                },
+            });
+
+            const fullMzDs = fullSel.map(t => ({
+                label: t.label,
+                data: fullRes[t.name].timeline.map(p => ({ x: p.time, y: p.Mz })),
+                borderColor: t.color, backgroundColor: 'transparent',
+                borderWidth: 1.5, pointRadius: 0, tension: 0,
+            }));
+
+            const fullMxyDs = fullSel.map(t => ({
+                label: t.label,
+                data: fullRes[t.name].timeline.filter(p => p.Mxy > 0).map(p => ({ x: p.time, y: p.Mxy })),
+                borderColor: t.color, backgroundColor: t.color,
+                borderWidth: 0, pointRadius: 3, tension: 0,
+            }));
+
+            if (rareFullMzChart) rareFullMzChart.destroy();
+            rareFullMzChart = new Chart(document.getElementById('rareFullMzChart'), {
+                type: 'line', data: { datasets: fullMzDs },
+                options: fullOpts(-0.2), plugins: [phaseBoxPlugin],
+            });
+
+            if (rareFullMxyChart) rareFullMxyChart.destroy();
+            rareFullMxyChart = new Chart(document.getElementById('rareFullMxyChart'), {
+                type: 'scatter', data: { datasets: fullMxyDs },
+                options: fullOpts(0), plugins: [phaseBoxPlugin],
+            });
+
+            btn.disabled = false;
+            console.log(`[RARE] total sim in ${(performance.now() - t0).toFixed(0)} ms`);
+        }
+
+        function setupRARESliders() {
+            document.getElementById('rare-simulate-btn').addEventListener('click', runRARESimulation);
+            [
+                ['rare-tr',      'rare-tr-value'],
+                ['rare-esp',     'rare-esp-value'],
+                ['rare-reffa',   'rare-reffa-value'],
+                ['rare-numSims', 'rare-numSims-value'],
+            ].forEach(([id, valId]) => {
+                const sl = document.getElementById(id);
+                const sp = document.getElementById(valId);
+                if (sl && sp) sl.addEventListener('input', () => { sp.textContent = sl.value; });
+            });
+        }
+
+        window.RAREModule = {
+            get ready() { return _rareReady; },
+            getRARESignals,
         };
     </script>
 </body>
