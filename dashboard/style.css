@@ -877,7 +877,7 @@ select:focus { outline: none; border-color: var(--red); }
   vertical-align: middle;
 }
 
-.phantom-tissue-table td:first-child {
+.phantom-tissue-label {
   display: flex;
   align-items: center;
   gap: 8px;

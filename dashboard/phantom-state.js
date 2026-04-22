@@ -58,9 +58,11 @@
             const row = document.createElement('tr');
             row.innerHTML = `
                 <td>
-                    <input type="checkbox" class="tissue-enable-cb" data-tissue="${i}" ${t.enabled !== false ? 'checked' : ''} title="Include in simulation">
-                    <span class="tissue-color-swatch" style="background:${t.plotColor || t.color};"></span>
-                    ${t.label}
+                    <div class="phantom-tissue-label">
+                        <input type="checkbox" class="tissue-enable-cb" data-tissue="${i}" ${t.enabled !== false ? 'checked' : ''} title="Include in simulation">
+                        <span class="tissue-color-swatch" style="background:${t.plotColor || t.color};"></span>
+                        <span>${t.label}</span>
+                    </div>
                 </td>
                 <td><input type="number" class="tissue-input" data-tissue="${i}" data-field="T1"
                            value="${t.T1}" min="1" max="10000" step="10"></td>
