@@ -444,3 +444,5 @@ const BrainPhantom = (() => {
         },
     };
 })();
+
+globalThis.BrainPhantom = BrainPhantom;

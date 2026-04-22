@@ -20,6 +20,8 @@ const BrainSim = (() => {
     let _workerCount = 0;       // Number of active workers
     let _svgText = null;        // cached SVG text for grid display
     let _workersReady = 0;      // Count of workers that have completed SVG parsing
+    let _svgInitPromise = null; // In-flight worker/SVG initialization promise
+    let _scanInFlight = false;  // Prevent duplicate scan starts from concurrent handlers
 
     // Main-thread grid cache: key = `${Ny}x${Nz}` → grids object
     const _gridCache = new Map();
@@ -178,12 +180,14 @@ const BrainSim = (() => {
 
         for (let wid = 0; wid < poolSize; wid++) {
             const worker = new Worker('brain-phantom-worker.js');
+            worker._brainReady = false;
             
             worker.onmessage = function (e) {
                 const msg = e.data;
 
                 if (msg.type === 'workerReady') {
-                    _workersReady++;
+                    worker._brainReady = true;
+                    _workersReady = _workers.filter(w => w._brainReady === true).length;
                     console.log(`[BrainSim] Worker ${wid} ready (${_workersReady}/${poolSize})`);
 
                 } else if (msg.type === 'progress') {
@@ -246,32 +250,57 @@ const BrainSim = (() => {
     async function ensureSVGParsed() {
         // Guard: skip if already initialised and all workers ready
         if (_workers.length > 0 && _workersReady === _workers.length) return;
+        if (_svgInitPromise) return _svgInitPromise;
 
-        initWorkerPool();
+        _svgInitPromise = (async () => {
+            initWorkerPool();
 
-        if (!_svgText) {
-            const t0 = performance.now();
-            const resp = await fetch(SVG_URL);
-            _svgText = await resp.text();
-            console.log(`[BrainSim] Fetched brain.svg in ${(performance.now() - t0).toFixed(0)} ms`);
+            if (!_svgText) {
+                const t0 = performance.now();
+                const resp = await fetch(SVG_URL);
+                _svgText = await resp.text();
+                console.log(`[BrainSim] Fetched brain.svg in ${(performance.now() - t0).toFixed(0)} ms`);
+            }
+
+            // Parse SVG in main thread (DOMParser is not available in Web Workers)
+            const tParse = performance.now();
+            const edgeData = BrainPhantom.parseSVG(_svgText);
+            console.log(`[BrainSim] Parsed SVG in main thread in ${(performance.now() - tParse).toFixed(0)} ms`);
+
+            _workersReady = 0;
+            const readyWorkers = new Set();
+
+            // Send parsed edge data to all workers
+            for (let i = 0; i < _workers.length; i++) {
+                _workers[i]._brainReady = false;
+                _workers[i].postMessage({ type: 'setEdgeData', edgeData, workerId: i });
+            }
+
+            // Wait for all workers to acknowledge
+            await new Promise((resolve, reject) => {
+                const timeout = setTimeout(() => {
+                    clearInterval(check);
+                    reject(new Error(`Phantom workers failed to initialize (${readyWorkers.size}/${_workers.length} ready).`));
+                }, 5000);
+                const check = setInterval(() => {
+                    for (let i = 0; i < _workers.length; i++) {
+                        if (_workers[i] && _workers[i]._brainReady === true) readyWorkers.add(i);
+                    }
+                    _workersReady = readyWorkers.size;
+                    if (_workersReady === _workers.length) {
+                        clearTimeout(timeout);
+                        clearInterval(check);
+                        resolve();
+                    }
+                }, 20);
+            });
+        })();
+
+        try {
+            await _svgInitPromise;
+        } finally {
+            _svgInitPromise = null;
         }
-
-        // Parse SVG in main thread (DOMParser is not available in Web Workers)
-        const tParse = performance.now();
-        const edgeData = BrainPhantom.parseSVG(_svgText);
-        console.log(`[BrainSim] Parsed SVG in main thread in ${(performance.now() - tParse).toFixed(0)} ms`);
-        
-        // Send parsed edge data to all workers
-        for (let i = 0; i < _workers.length; i++) {
-            _workers[i].postMessage({ type: 'setEdgeData', edgeData, workerId: i });
-        }
-        
-        // Wait for all workers to acknowledge
-        await new Promise(resolve => {
-            const check = setInterval(() => {
-                if (_workersReady === _workers.length) { clearInterval(check); resolve(); }
-            }, 20);
-        });
     }
 
     /**
@@ -286,6 +315,7 @@ const BrainSim = (() => {
             return _gridCache.get(key);
         }
 
+        setStatus('Preparing phantom workers…');
         await ensureSVGParsed();
 
         setStatus(`Computing phantom grid ${Ny}×${Nz}…`);
@@ -529,6 +559,8 @@ const BrainSim = (() => {
         const simBtn = document.getElementById('brain-simulate-btn');
 
         if (!canvas) { console.error('[BrainSim] Canvas not found'); return; }
+        if (_scanInFlight) return;
+        _scanInFlight = true;
         if (simBtn) simBtn.disabled = true;
         setStatus('Running scan simulation…');
 
@@ -623,6 +655,7 @@ const BrainSim = (() => {
             console.error('[BrainSim] Error in runScan:', err);
             setStatus('Error: ' + err.message, true);
         } finally {
+            _scanInFlight = false;
             if (simBtn) simBtn.disabled = false;
         }
     }
@@ -635,8 +668,29 @@ const BrainSim = (() => {
         _workers = [];
         _workerCount = 0;
         _workersReady = 0;
+        _svgInitPromise = null;
         // SVG text is still cached; workers will re-receive edge data on next ensureSVGParsed()
     });
 
     return { runScan, renderMxyChart, saveReference };
 })();
+
+window.BrainSim = BrainSim;
+
+document.addEventListener('DOMContentLoaded', () => {
+    const runBtn = document.getElementById('brain-simulate-btn');
+    if (runBtn) {
+        runBtn.addEventListener('click', (event) => {
+            event.preventDefault();
+            BrainSim.runScan();
+        });
+    }
+
+    const saveBtn = document.getElementById('brain-save-btn');
+    if (saveBtn) {
+        saveBtn.addEventListener('click', (event) => {
+            event.preventDefault();
+            BrainSim.saveReference();
+        });
+    }
+});
