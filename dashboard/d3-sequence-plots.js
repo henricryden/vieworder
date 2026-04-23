@@ -253,6 +253,7 @@
                         .attr('fill', 'none')
                         .attr('stroke', ds.color)
                         .attr('stroke-width', ds.strokeWidth || 2)
+                        .attr('stroke-dasharray', ds.dashed ? '6,4' : null)
                         .attr('d', lineGen);
                 }
             }
@@ -271,7 +272,8 @@
                     .style('cursor', opts.onLegendClick ? 'pointer' : 'default');
                 row.append('line')
                     .attr('x1', 0).attr('y1', 6).attr('x2', 14).attr('y2', 6)
-                    .attr('stroke', ds.color).attr('stroke-width', 2);
+                    .attr('stroke', ds.color).attr('stroke-width', 2)
+                    .attr('stroke-dasharray', ds.dashed ? '4,3' : null);
                 row.append('text')
                     .attr('x', 18).attr('y', 10)
                     .attr('fill', DARK.axisText)

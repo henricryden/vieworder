@@ -426,10 +426,21 @@ const BrainSim = (() => {
         return { logMag, maxLog };
     }
 
+    function _computeLinearMag(re, im, Ny, Nz) {
+        const N = Ny * Nz;
+        const mag = new Float32Array(N);
+        let maxMag = 0;
+        for (let i = 0; i < N; i++) {
+            const m = Math.sqrt(re[i] * re[i] + im[i] * im[i]);
+            mag[i] = m;
+            if (m > maxMag) maxMag = m;
+        }
+        return { mag, maxMag };
+    }
+
     function computeMtfKspace(coords, sigs, Ny, Nz) {
         const N = Ny * Nz;
         const weights = new Float32Array(N);
-        const zeroIm  = new Float32Array(N);
         const tissues = window.PhantomState.tissues.filter(t => t.enabled !== false).map(t => t.name);
         for (const coord of coords) {
             const { y_idx, z_idx, echo } = coord;
@@ -445,7 +456,7 @@ const BrainSim = (() => {
             }
             weights[z_idx * Ny + y_idx] = cnt > 0 ? sumMag / cnt : 0;
         }
-        return _computeLogMag(weights, zeroIm, Ny, Nz);
+        return _computeLinearMag(weights, new Float32Array(N), Ny, Nz);
     }
 
     function interpolateCividis(t) {
@@ -471,7 +482,7 @@ const BrainSim = (() => {
         ];
     }
 
-    function _drawKspCanvas({ logMag, maxLog }, Ny, Nz, useColormap = false) {
+    function _drawKspCanvas(data, Ny, Nz, useColormap = false) {
         const canvas = document.getElementById('brain-kspace-canvas');
         if (!canvas) return;
         canvas.width  = Ny;
@@ -480,9 +491,11 @@ const BrainSim = (() => {
         const imageData = ctx.createImageData(Ny, Nz);
         const d = imageData.data;
         const N = Ny * Nz;
-        const scale = maxLog > 0 ? 1 / maxLog : 1;
+        const magArray = data.logMag || data.mag;
+        const maxVal = data.maxLog || data.maxMag || 1;
+        const scale = maxVal > 0 ? 1 / maxVal : 1;
         for (let i = 0; i < N; i++) {
-            const t = Math.min(1, logMag[i] * scale);  // 0..1
+            const t = Math.min(1, magArray[i] * scale);  // 0..1
             let r, g, b;
             if (useColormap) {
                 [r, g, b] = interpolateCividis(t);
@@ -501,7 +514,7 @@ const BrainSim = (() => {
         const useColormap = _kspMode === 'mtf';
         _drawKspCanvas(data, _kspNy, _kspNz, useColormap);
         const h3 = document.querySelector('.brain-mtf-panel h3');
-        if (h3) h3.textContent = _kspMode === 'mtf' ? 'log |acquisition weight|' : 'log |k-space|';
+        if (h3) h3.textContent = _kspMode === 'mtf' ? '|acquisition weight|' : 'log |k-space|';
     }
 
     function renderKspaceCanvas(ksp_re, ksp_im, sigs, coords, Ny, Nz) {
@@ -535,7 +548,20 @@ const BrainSim = (() => {
         console.log(`[BrainSim] Image rendered ${width}×${height} in ${(performance.now() - t0).toFixed(0)} ms`);
     }
 
-    function renderMxyChart(mprageSigs, etl, sourceLabel = 'MPRAGE') {
+    function boxMullerRandom() {
+        const u1 = 1 - Math.random(); // avoid log(0)
+        const u2 = Math.random();
+        return Math.sqrt(-2 * Math.log(u1)) * Math.cos(2 * Math.PI * u2);
+    }
+
+    function addKspaceNoise(ksp_re, ksp_im, sigma) {
+        for (let i = 0; i < ksp_re.length; i++) {
+            ksp_re[i] += sigma * boxMullerRandom();
+            ksp_im[i] += sigma * boxMullerRandom();
+        }
+    }
+
+    function renderMxyChart(mprageSigs, etl, sourceLabel = 'MPRAGE', noiseLevel = 0) {
         const el = document.getElementById('brain-mxy-chart');
         if (!el) return;
 
@@ -553,6 +579,16 @@ const BrainSim = (() => {
             }
             return { label: t.label, data, color: t.plotColor || t.color };
         });
+
+        if (noiseLevel > 0) {
+            datasets.push({
+                label: 'Noise \u03c3',
+                data: [{ x: 1, y: noiseLevel }, { x: etl, y: noiseLevel }],
+                color: 'rgba(200,200,200,0.75)',
+                dashed: true,
+                strokeWidth: 1.5,
+            });
+        }
 
         D3SeqPlots.createLinePlot(el, {
             datasets,
@@ -731,6 +767,42 @@ const BrainSim = (() => {
             setStatus('Assembling k-space…');
             const [ksp_re, ksp_im] = assembleMeasuredKspace(coords, sigs, grid, Ny, Nz);
 
+            // Compute maxMxy and update slider range (preserving current value)
+            let maxMxy = 0;
+            for (const t of window.PhantomState.tissues.filter(t => t.enabled !== false)) {
+                const s = sigs[t.name];
+                if (!s) continue;
+                for (let i = 0; i < ETL; i++) {
+                    const re = s[i * 2] || 0, im = s[i * 2 + 1] || 0;
+                    const mag = Math.sqrt(re * re + im * im);
+                    if (mag > maxMxy) maxMxy = mag;
+                }
+            }
+            const noiseSlider = document.getElementById('brain-noise-level');
+            if (noiseSlider) noiseSlider.max = maxMxy.toFixed(4);
+
+            // Add k-space noise if requested
+            const noiseLevel = noiseSlider ? parseFloat(noiseSlider.value) : 0;
+            if (noiseLevel > 0 && maxMxy > 0) {
+                // Scale noise to k-space domain.
+                // At slider = maxMxy, noiseScaled = kspDC / sqrt(Ny*Nz),
+                // which gives image noise std ≈ image bright pixel → SNR ≈ 1 (almost entirely noise).
+                const dcIdx = Math.floor(Nz / 2) * Ny + Math.floor(Ny / 2);
+                const kspDC = Math.sqrt(ksp_re[dcIdx] * ksp_re[dcIdx] + ksp_im[dcIdx] * ksp_im[dcIdx]);
+                const noiseScaled = noiseLevel * kspDC / (maxMxy * Math.sqrt(Ny * Nz));
+                
+                // Only add noise to sampled k-space points
+                const sampledIndices = new Set();
+                for (const coord of coords) {
+                    const { y_idx, z_idx } = coord;
+                    sampledIndices.add(z_idx * Ny + y_idx);
+                }
+                for (const idx of sampledIndices) {
+                    ksp_re[idx] += noiseScaled * boxMullerRandom();
+                    ksp_im[idx] += noiseScaled * boxMullerRandom();
+                }
+            }
+
             // 5. Reconstruct
             setStatus('Reconstructing image…');
             const { img, width, height } = ifft2centered(ksp_re, ksp_im, Ny, Nz);
@@ -741,7 +813,7 @@ const BrainSim = (() => {
             const sourceLabel = sigSource === 'rare' ? 'RARE' : sigSource === 'fspgr' ? 'FSPGR' : sigSource === 'enrage' ? 'ENRAGE' : 'MPRAGE';
             const titleEl = document.getElementById('brain-mxy-title');
             if (titleEl) titleEl.textContent = `${sourceLabel} Mxy(echo) per tissue — used in this scan`;
-            renderMxyChart(sigs, ETL, sourceLabel);
+            renderMxyChart(sigs, ETL, sourceLabel, noiseLevel);
 
             // Store current image for save/diff
             _currentImg    = img;

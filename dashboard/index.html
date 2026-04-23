@@ -850,6 +850,14 @@
 
             <div class="brain-mxy-panel" style="margin-top:20px;">
                 <h3 id="brain-mxy-title">Mxy(echo) per tissue — used in this scan</h3>
+                <div style="display:flex;align-items:center;gap:12px;margin-bottom:8px;">
+                    <label for="brain-noise-level" style="color:#a0a0c0;font-size:0.9em;white-space:nowrap;">Noise &sigma;</label>
+                    <input type="range" id="brain-noise-level" min="0" max="0.5" value="0" step="0.001"
+                           style="flex:1;max-width:220px;"
+                           oninput="document.getElementById('brain-noise-level-value').textContent = parseFloat(this.value).toFixed(3)"
+                           onchange="BrainSim.runScan()">
+                    <span id="brain-noise-level-value" style="color:#a0a0c0;font-size:0.9em;font-family:monospace;min-width:4ch;">0.000</span>
+                </div>
                 <div id="brain-mxy-chart" style="height:260px;"></div>
             </div>
         </div><!-- /tab-brain-scan -->
