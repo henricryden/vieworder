@@ -700,6 +700,16 @@ const BrainSim = (() => {
                 sigs = window.FSPGRModule.getFSPGRSignals(params);
                 console.log(`[BrainSim] FSPGR simulation in ${(performance.now() - t1).toFixed(0)} ms`);
                 if (!sigs) { setStatus('FSPGR signals returned null — check console.', true); return; }
+            } else if (sigSource === 'enrage') {
+                if (!window.ENRAGEModule || !window.ENRAGEModule.ready) {
+                    setStatus('ENRAGE module not ready — open Tab ③ first.', true);
+                    return;
+                }
+                setStatus('Simulating ENRAGE…');
+                const t1 = performance.now();
+                sigs = window.ENRAGEModule.getENRAGESignals(params);
+                console.log(`[BrainSim] ENRAGE simulation in ${(performance.now() - t1).toFixed(0)} ms`);
+                if (!sigs) { setStatus('ENRAGE signals returned null — check console.', true); return; }
             } else {
                 if (!window.MPRAGEModule || !window.MPRAGEModule.ready) {
                     setStatus('MPRAGE module not ready — please wait.', true);
@@ -728,7 +738,7 @@ const BrainSim = (() => {
             // 6. Render image + k-space
             renderImage(canvas, img, width, height);
             renderKspaceCanvas(ksp_re, ksp_im, sigs, coords, Ny, Nz);
-            const sourceLabel = sigSource === 'rare' ? 'RARE' : sigSource === 'fspgr' ? 'FSPGR' : 'MPRAGE';
+            const sourceLabel = sigSource === 'rare' ? 'RARE' : sigSource === 'fspgr' ? 'FSPGR' : sigSource === 'enrage' ? 'ENRAGE' : 'MPRAGE';
             const titleEl = document.getElementById('brain-mxy-title');
             if (titleEl) titleEl.textContent = `${sourceLabel} Mxy(echo) per tissue — used in this scan`;
             renderMxyChart(sigs, ETL, sourceLabel);

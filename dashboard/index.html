@@ -45,6 +45,7 @@
                     <button onclick="selectTab3Sequence('MPRAGE')" class="selected">MPRAGE</button>
                     <button onclick="selectTab3Sequence('FSPGR')">FSPGR</button>
                     <button onclick="selectTab3Sequence('bSSFP')">bSSFP</button>
+                    <button onclick="selectTab3Sequence('ENRAGE')">ENRAGE</button>
                 </div>
             </div>
             <button class="tab-btn"        onclick="switchTab('brain-scan')">④ Brain Scan</button>
@@ -445,7 +446,6 @@
                             </div>
                         </div>
                     </div>
-                    <button class="mprage-btn-simulate" id="mprage-simulate-btn">▶ Simulate MPRAGE</button>
                 </div>
             </div><!-- /mprage-params-grid -->
 
@@ -708,6 +708,92 @@
             </div>
         </div><!-- /tab-fspgr -->
 
+        <!-- ══ TAB: ENRAGE Simulator ══════════════════════════════════ -->
+        <div id="tab-enrage" class="tab-panel">
+            <div class="mprage-params-grid">
+                <div class="mprage-panel">
+                    <h2>Parameters</h2>
+                    <div class="mprage-etl-note">
+                        ETL = <strong id="enrage-etl-display">72</strong> pulses (set in Tab ①)
+                    </div>
+                    <div class="params-fields-grid">
+                        <div class="params-fields-col">
+                            <div class="control-group">
+                                <label>TD1 (recovery after 90°) <span class="value" id="enrage-td1-value">250</span> ms</label>
+                                <input type="range" id="enrage-td1" min="0" max="2000" value="250" step="50" class="slider">
+                            </div>
+                            <div class="control-group">
+                                <label style="display:flex;align-items:center;gap:8px;">
+                                    <input type="checkbox" id="enrage-invert-enable" checked>
+                                    Inversion pulse
+                                </label>
+                            </div>
+                            <div class="control-group" id="enrage-td2-group">
+                                <label>TD2 (inversion wait) <span class="value" id="enrage-td2-value">250</span> ms</label>
+                                <input type="range" id="enrage-td2" min="0" max="1200" value="250" step="50" class="slider">
+                            </div>
+                        </div>
+                        <div class="params-fields-col">
+                            <div class="control-group">
+                                <label>Flip angle <span class="value" id="enrage-alpha-value">8</span> °</label>
+                                <input type="range" id="enrage-alpha" min="0" max="20" value="8" step="1" class="slider">
+                            </div>
+                            <div class="control-group">
+                                <label>Inner TR <span class="value" id="enrage-tr-value">7</span> ms</label>
+                                <input type="range" id="enrage-tr" min="1" max="15" value="7" step="0.5" class="slider">
+                            </div>
+                            <div class="control-group">
+                                <label>TE <span class="value" id="enrage-te-value">3.5</span> ms</label>
+                                <input type="range" id="enrage-te" min="0" max="10" value="3.5" step="0.5" class="slider">
+                            </div>
+                            <div class="control-group">
+                                <label>Dummy echoes <span class="value" id="enrage-dummy-value">0</span></label>
+                                <input type="range" id="enrage-dummy" min="0" max="40" value="0" step="1" class="slider">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div><!-- /mprage-params-grid -->
+
+            <!-- ENRAGE window charts (Mz + Mxy) -->
+            <div class="mprage-plots-row" style="margin-top:22px;">
+                <div class="mprage-plot-panel">
+                    <h3>ENRAGE window — Mz per echo</h3>
+                    <div class="mprage-chart-wrapper" id="enrage-mz-chart"></div>
+                </div>
+                <div class="mprage-plot-panel">
+                    <h3>ENRAGE window — Mxy per echo</h3>
+                    <div class="mprage-chart-wrapper" id="enrage-mxy-chart"></div>
+                </div>
+            </div>
+
+            <!-- Full-sequence charts -->
+            <div class="mprage-plots-row full" style="margin-top:20px;">
+                <div class="mprage-plot-panel">
+                    <h3>Full Sequence — Mz</h3>
+                    <div class="mprage-chart-wrapper tall" id="enrage-fullmz-chart"></div>
+                    <div class="mprage-phase-legend" id="enrage-fullmz-legend">
+                        <div style="background:rgba(255,180,80,.15);border-left:3px solid #ffb450;"><strong>90° prep + TD1</strong></div>
+                        <div id="enrage-legend-inv-mz" style="background:rgba(255,100,100,.15);border-left:3px solid #ff6464;"><strong>Inversion + TI</strong></div>
+                        <div style="background:rgba(100,200,255,.15);border-left:3px solid #64c8ff;"><strong>ENRAGE</strong> (<span id="enrage-etl-display-mz">72</span> pulses)</div>
+                        <div style="background:rgba(100,255,100,.15);border-left:3px solid #64ff64;"><strong>TD2 recovery</strong></div>
+                    </div>
+                </div>
+            </div>
+            <div class="mprage-plots-row full" style="margin-top:20px;">
+                <div class="mprage-plot-panel">
+                    <h3>Full Sequence — Mxy</h3>
+                    <div class="mprage-chart-wrapper tall" id="enrage-fullmxy-chart"></div>
+                    <div class="mprage-phase-legend" id="enrage-fullmxy-legend">
+                        <div style="background:rgba(255,180,80,.15);border-left:3px solid #ffb450;"><strong>90° prep + TD1</strong></div>
+                        <div id="enrage-legend-inv-mxy" style="background:rgba(255,100,100,.15);border-left:3px solid #ff6464;"><strong>Inversion + TI</strong></div>
+                        <div style="background:rgba(100,200,255,.15);border-left:3px solid #64c8ff;"><strong>ENRAGE</strong> (<span id="enrage-etl-display-mxy">72</span> pulses)</div>
+                        <div style="background:rgba(100,255,100,.15);border-left:3px solid #64ff64;"><strong>TD2 recovery</strong></div>
+                    </div>
+                </div>
+            </div>
+        </div><!-- /tab-enrage -->
+
         <!-- ══ TAB 5: Brain Scan ══════════════════════════════════════ -->
         <div id="tab-brain-scan" class="tab-panel">
 
@@ -784,7 +870,7 @@
         window.BrainScanSignalSource = window.BrainScanSignalSource || 'mprage';
 
         function switchTab3Current() {
-            const seqToTab = { 'RARE': 'rare', 'MPRAGE': 'mprage', 'FSPGR': 'fspgr', 'bSSFP': 'mprage' };
+            const seqToTab = { 'RARE': 'rare', 'MPRAGE': 'mprage', 'FSPGR': 'fspgr', 'bSSFP': 'mprage', 'ENRAGE': 'enrage' };
             const tabId = seqToTab[window.tab3Sequence || 'MPRAGE'] || 'mprage';
             switchTab(tabId);
         }
@@ -797,7 +883,7 @@
                 b.classList.toggle('selected', b.textContent === seq);
             });
             // Map sequence to tab ID
-            const seqToTab = { 'RARE': 'rare', 'MPRAGE': 'mprage', 'FSPGR': 'fspgr', 'bSSFP': 'mprage' };
+            const seqToTab = { 'RARE': 'rare', 'MPRAGE': 'mprage', 'FSPGR': 'fspgr', 'bSSFP': 'mprage', 'ENRAGE': 'enrage' };
             const tabId = seqToTab[seq] || 'mprage';
             switchTab(tabId);
         }
@@ -819,6 +905,7 @@
                 mprage:       document.getElementById('tab3-btn'),
                 rare:         document.getElementById('tab3-btn'),
                 fspgr:        document.getElementById('tab3-btn'),
+                enrage:       document.getElementById('tab3-btn'),
                 'brain-scan': document.querySelectorAll('.tab-btn')[3],
             }[id];
             if (activeButton) activeButton.classList.add('active');
@@ -826,12 +913,18 @@
             if (id === 'mprage') window.BrainScanSignalSource = 'mprage';
             if (id === 'rare')   window.BrainScanSignalSource = 'rare';
             if (id === 'fspgr')  window.BrainScanSignalSource = 'fspgr';
+            if (id === 'enrage') window.BrainScanSignalSource = 'enrage';
 
             // Sync ETL display when switching to sequence tabs
             if (id === 'mprage' || id === 'rare' || id === 'brain-scan') {
                 const etl = window.AppState ? window.AppState.params.etl : 72;
                 const el  = document.getElementById('mprage-etl-display');
                 if (el) el.textContent = etl;
+            }
+            if (id === 'enrage') {
+                const etl = window.AppState ? window.AppState.params.etl : 72;
+                const displays = ['enrage-etl-display', 'enrage-etl-display-mz', 'enrage-etl-display-mxy'];
+                displays.forEach(elId => { const el = document.getElementById(elId); if (el) el.textContent = etl; });
             }
 
             if (id === 'brain-scan') {
@@ -852,10 +945,13 @@
                 const coords = window.AppState ? window.AppState.coords : [];
                 const el     = document.getElementById('fspgr-numexc-display');
                 if (el) el.textContent = coords.length || '—';
-                // Auto-run simulation when tab is selected
-                if (window.FSPGRModule && window.FSPGRModule.runSimulation) {
-                    window.FSPGRModule.runSimulation();
-                }
+                if (window.FSPGRModule?.runSimulation) window.FSPGRModule.runSimulation();
+            }
+            if (id === 'mprage') {
+                if (window.MPRAGEModule?.runSimulation) window.MPRAGEModule.runSimulation();
+            }
+            if (id === 'enrage') {
+                if (window.ENRAGEModule?.runSimulation) window.ENRAGEModule.runSimulation();
             }
         }
     </script>
@@ -878,13 +974,16 @@
                 _ready = true;
                 _rareReady = true;
                 console.log('✓ EPG modules loaded');
-                setupMPRAGESliders();
                 setupRARESliders();
                 setupFSPGRSliders();
             })
             .catch(err => {
                 console.error('✗ EPG module load failed:', err);
             });
+
+        // MPRAGE and ENRAGE use Bloch equations — set up immediately, no EPG needed
+        setupMPRAGESliders();
+        setupENRAGESliders();
 
         // ── MPRAGE sequence builder ─────────────────────────────────────
         class MPRAGEPulseSampleMarker {
@@ -1015,35 +1114,26 @@
 
         // ── getMPRAGESignals: called by brain-sim.js ────────────────────
         function getMPRAGESignals(appParams) {
-            if (!_ready) return null;
             const etl     = appParams.etl;
             const numDummyPulses = parseInt(document.getElementById('mprage-dummy').value);
             const numSims = parseInt(document.getElementById('numSims').value);
             const t0      = performance.now();
 
             const p = {
-                TI:                    parseInt(document.getElementById('ti').value),
-                flipAngle:             parseFloat(document.getElementById('alpha').value),
-                innerTR:               parseFloat(document.getElementById('tr').value),
-                TE:                    parseFloat(document.getElementById('te').value),
+                TI:        parseInt(document.getElementById('ti').value),
+                flipAngle: parseFloat(document.getElementById('alpha').value),
+                innerTR:   parseFloat(document.getElementById('tr').value),
+                TE:        parseFloat(document.getElementById('te').value),
                 numDummyPulses,
-                numPulses:             etl,
-                recovery:              parseInt(document.getElementById('recovery').value),
-                perfectSpoilingEnable: true,
+                numPulses: etl,
+                recovery:  parseInt(document.getElementById('recovery').value),
             };
-            const seq = buildMPRAGE(p);
             const result = {};
             for (const t of window.PhantomState.tissues.filter(t => t.enabled !== false)) {
-                let st = null;
-                for (let i = 0; i < numSims; i++)
-                    st = simulateAndTrackWithState(seq, t.T1, t.T2, st ? st.finalState : null, t.PD);
-                // Store complex signals: [re0, im0, re1, im1, ..., re(etl-1), im(etl-1)]
+                const { timeline } = simulateMPRAGEBloch(t.T1, t.T2, t.PD, p, numSims);
                 const MxyComplex = new Float32Array(etl * 2);
-                st.timeline.filter(pt => !pt.isDummy).forEach((pt, i) => {
-                    if (i < etl) { 
-                        MxyComplex[i * 2] = pt.MxyRe; 
-                        MxyComplex[i * 2 + 1] = pt.MxyIm; 
-                    }
+                timeline.filter(pt => !pt.isDummy).forEach((pt, i) => {
+                    if (i < etl) { MxyComplex[i * 2] = pt.MxyRe; MxyComplex[i * 2 + 1] = pt.MxyIm; }
                 });
                 result[t.name] = MxyComplex;
             }
@@ -1126,10 +1216,7 @@
             });
         }
 
-        async function runMPRAGESimulation() {
-            if (!_ready) { console.warn('[MPRAGE] EPG not ready'); return; }
-            const btn = document.getElementById('mprage-simulate-btn');
-            btn.disabled = true;
+        function runMPRAGESimulation() {
             const t0 = performance.now();
 
             const etl     = window.AppState ? window.AppState.params.etl : 72;
@@ -1140,46 +1227,30 @@
             document.getElementById('etlDisplayMxy').textContent = etl;
 
             const p = {
-                TI:                    parseInt(document.getElementById('ti').value),
-                flipAngle:             parseFloat(document.getElementById('alpha').value),
-                innerTR:               parseFloat(document.getElementById('tr').value),
-                TE:                    parseFloat(document.getElementById('te').value),
+                TI:        parseInt(document.getElementById('ti').value),
+                flipAngle: parseFloat(document.getElementById('alpha').value),
+                innerTR:   parseFloat(document.getElementById('tr').value),
+                TE:        parseFloat(document.getElementById('te').value),
                 numDummyPulses,
-                numPulses:             etl,
-                recovery:              parseInt(document.getElementById('recovery').value),
-                perfectSpoilingEnable: true,
+                numPulses: etl,
+                recovery:  parseInt(document.getElementById('recovery').value),
             };
-            const seq = buildMPRAGE(p);
 
-            // Window charts (enabled tissues only)
             const activeTissues = window.PhantomState.tissues.filter(t => t.enabled !== false);
             const winResults = {};
-            for (const t of activeTissues) {
-                let st = null;
-                for (let i = 0; i < numSims; i++)
-                    st = simulateAndTrackWithState(seq, t.T1, t.T2, st ? st.finalState : null, t.PD);
-                winResults[t.name] = st.timeline;
-            }
-            console.log(`[MPRAGE] window sim in ${(performance.now()-t0).toFixed(0)} ms`);
+            for (const t of activeTissues)
+                winResults[t.name] = simulateMPRAGEBloch(t.T1, t.T2, t.PD, p, numSims).timeline;
 
             const readoutPhaseBoxes = numDummyPulses > 0 ? [
                 { xStart: 0.5, xEnd: numDummyPulses + 0.5, color: 'rgba(255,180,80,0.14)', label: 'Dummy echoes' },
             ] : [];
 
-            // Full-sequence charts (all enabled tissues)
-            const t1 = performance.now();
             const fullSel = activeTissues;
             const fullRes = {};
-            for (const t of fullSel) {
-                let st = null;
-                for (let i = 0; i < numSims; i++)
-                    st = simulateFullSequenceWithState(seq, t.T1, t.T2, st ? st.finalState : null, t.PD);
-                fullRes[t.name] = st;
-            }
-            console.log(`[MPRAGE] full seq sim in ${(performance.now()-t1).toFixed(0)} ms`);
+            for (const t of fullSel)
+                fullRes[t.name] = simulateMPRAGEBlochFull(t.T1, t.T2, t.PD, p, numSims);
 
-            const ref        = fullRes[fullSel[0].name];
-            const totalTime  = ref.totalTime;
+            const totalTime = fullRes[fullSel[0].name].totalTime;
             const fullPhaseBoxes = [
                 { xStart: 0, xEnd: p.TI, color: 'rgba(255,100,100,0.12)', label: 'Inversion + TI' },
                 ...(numDummyPulses > 0 ? [{ xStart: p.TI, xEnd: p.TI + numDummyPulses * p.innerTR, color: 'rgba(255,180,80,0.14)', label: 'Dummy echoes' }] : []),
@@ -1190,18 +1261,18 @@
             _mprageLastSimData = { activeTissues, winResults, fullSel, fullRes,
                                    totalTrainPulses, totalTime, readoutPhaseBoxes, fullPhaseBoxes };
             renderMPRAGECharts();
-            btn.disabled = false;
-            console.log(`[MPRAGE] total sim in ${(performance.now()-t0).toFixed(0)} ms`);
+            console.log(`[MPRAGE] sim in ${(performance.now()-t0).toFixed(0)} ms`);
         }
 
         // ── MPRAGE slider live-update ────────────────────────────────────
         function setupMPRAGESliders() {
-            document.getElementById('mprage-simulate-btn')
-                    .addEventListener('click', runMPRAGESimulation);
             ['ti','recovery','alpha','tr','te','mprage-dummy','numSims'].forEach(id => {
                 const sl = document.getElementById(id);
                 const sp = document.getElementById(id + 'Value');
-                if (sl && sp) sl.addEventListener('input', () => { sp.textContent = sl.value; });
+                if (sl && sp) sl.addEventListener('input', () => {
+                    sp.textContent = sl.value;
+                    runMPRAGESimulation();
+                });
             });
         }
 
@@ -2446,10 +2517,470 @@
             }
         }
 
+        // ── Analytical Bloch simulation helpers (no EPG) ─────────────────
+        // All four functions assume perfect spoiling. E1/E2 are precomputed.
+
+        function simulateMPRAGEBloch(T1, T2, PD, p, numSims) {
+            const TE    = p.TE || (p.innerTR / 2);
+            const E1_TI = Math.exp(-p.TI       / T1);
+            const E1_TR = Math.exp(-p.innerTR  / T1);
+            const E1_rec= Math.exp(-p.recovery / T1);
+            const E2_TE = Math.exp(-TE / T2);
+            const ca    = Math.cos(p.flipAngle * Math.PI / 180);
+            const sa    = Math.sin(p.flipAngle * Math.PI / 180);
+            const numDummy = p.numDummyPulses || 0;
+            const total    = numDummy + p.numPulses;
+            let Mz = PD;
+            let timeline = [];
+            for (let sim = 0; sim < numSims; sim++) {
+                timeline = [];
+                Mz = -Mz;                                       // inversion
+                Mz = PD + (Mz - PD) * E1_TI;                   // recover for TI
+                for (let i = 0; i < total; i++) {
+                    const isDummy = i < numDummy;
+                    const pulseIndex = i + 1;
+                    const acquiredIndex = isDummy ? null : i - numDummy + 1;
+                    const MxyRe = Mz * sa * E2_TE;
+                    timeline.push({ pulseIndex, acquiredIndex, isDummy, Mz, MxyRe, MxyIm: 0 });
+                    Mz = Mz * ca * E1_TR + PD * (1 - E1_TR);
+                }
+                Mz = Mz * E1_rec + PD * (1 - E1_rec);          // post-train recovery
+            }
+            return { timeline, mzFinal: Mz };
+        }
+
+        function simulateMPRAGEBlochFull(T1, T2, PD, p, numSims) {
+            const TE    = p.TE || (p.innerTR / 2);
+            const E1_TR = Math.exp(-p.innerTR / T1);
+            const E2_TE = Math.exp(-TE / T2);
+            const ca    = Math.cos(p.flipAngle * Math.PI / 180);
+            const sa    = Math.sin(p.flipAngle * Math.PI / 180);
+            const numDummy = p.numDummyPulses || 0;
+            const total    = numDummy + p.numPulses;
+            // Sample a relaxation period at ~300 points for smooth plot
+            function sampleRelax(tStart, Mz0, dur, phase, out) {
+                if (dur <= 0) return;
+                const nSteps = Math.max(2, Math.min(300, Math.ceil(dur)));
+                const step = dur / nSteps;
+                for (let k = 0; k <= nSteps; k++) {
+                    const e = k * step;
+                    out.push({ time: tStart + e, Mz: PD + (Mz0 - PD) * Math.exp(-e / T1), Mxy: 0, phase });
+                }
+            }
+            let Mz = PD;
+            let timeline = [];
+            let totalTime = 0;
+            for (let sim = 0; sim < numSims; sim++) {
+                timeline = [];
+                let ct = 0;
+                const Mz_beforeInv = Mz;
+                Mz = -Mz;                                       // inversion
+                sampleRelax(ct, Mz, p.TI, 'inversion', timeline);
+                Mz = PD + (Mz - PD) * Math.exp(-p.TI / T1);
+                ct += p.TI;
+                for (let i = 0; i < total; i++) {
+                    const isDummy = i < numDummy;
+                    const pulseIndex = i + 1;
+                    const acquiredIndex = isDummy ? null : i - numDummy + 1;
+                    const MxyRe = Mz * sa * E2_TE;
+                    timeline.push({ time: ct, Mz, Mxy: Math.abs(MxyRe), phase: 'readout', pulseIndex, acquiredIndex, isDummy });
+                    Mz = Mz * ca * E1_TR + PD * (1 - E1_TR);
+                    ct += p.innerTR;
+                }
+                const Mz_afterTrain = Mz;
+                sampleRelax(ct, Mz_afterTrain, p.recovery, 'recovery', timeline);
+                Mz = PD + (Mz_afterTrain - PD) * Math.exp(-p.recovery / T1);
+                ct += p.recovery;
+                totalTime = ct;
+            }
+            return { timeline, totalTime, mzFinal: Mz };
+        }
+
+        function simulateENRAGEBloch(T1, T2, PD, p, numSims) {
+            const TE     = p.TE || (p.innerTR / 2);
+            const E1_TD1 = p.TD1 > 0 ? Math.exp(-p.TD1     / T1) : 1;
+            const E1_TD2 = p.TD2 > 0 ? Math.exp(-p.TD2     / T1) : 1;
+            const E1_TR  = Math.exp(-p.innerTR / T1);
+            const E2_TE  = Math.exp(-TE / T2);
+            const ca     = Math.cos(p.flipAngle * Math.PI / 180);
+            const sa     = Math.sin(p.flipAngle * Math.PI / 180);
+            const numDummy = p.numDummyPulses || 0;
+            const total    = numDummy + p.numPulses;
+            let Mz = PD;
+            let timeline = [];
+            for (let sim = 0; sim < numSims; sim++) {
+                timeline = [];
+                // 90° + perfect spoil → Mz=0, then recover for TD1
+                Mz = PD * (1 - E1_TD1);
+                // optional inversion + recover for TD2
+                if (p.invertEnable) {
+                    Mz = -Mz;
+                    Mz = PD + (Mz - PD) * E1_TD2;
+                }
+                // GRE train
+                for (let i = 0; i < total; i++) {
+                    const isDummy = i < numDummy;
+                    const pulseIndex = i + 1;
+                    const acquiredIndex = isDummy ? null : i - numDummy + 1;
+                    const MxyRe = Mz * sa * E2_TE;
+                    timeline.push({ pulseIndex, acquiredIndex, isDummy, Mz, MxyRe, MxyIm: 0 });
+                    Mz = Mz * ca * E1_TR + PD * (1 - E1_TR);
+                }
+            }
+            return { timeline, mzFinal: Mz };
+        }
+
+        function simulateENRAGEBlochFull(T1, T2, PD, p, numSims) {
+            const TE    = p.TE || (p.innerTR / 2);
+            const E1_TR = Math.exp(-p.innerTR / T1);
+            const E2_TE = Math.exp(-TE / T2);
+            const ca    = Math.cos(p.flipAngle * Math.PI / 180);
+            const sa    = Math.sin(p.flipAngle * Math.PI / 180);
+            const numDummy = p.numDummyPulses || 0;
+            const total    = numDummy + p.numPulses;
+            function sampleRelax(tStart, Mz0, dur, phase, out) {
+                if (dur <= 0) return;
+                const nSteps = Math.max(2, Math.min(300, Math.ceil(dur)));
+                const step = dur / nSteps;
+                for (let k = 0; k <= nSteps; k++) {
+                    const e = k * step;
+                    out.push({ time: tStart + e, Mz: PD + (Mz0 - PD) * Math.exp(-e / T1), Mxy: 0, phase });
+                }
+            }
+            let Mz = PD;
+            let timeline = [];
+            let totalTime = 0;
+            for (let sim = 0; sim < numSims; sim++) {
+                timeline = [];
+                let ct = 0;
+                // 90° + spoil → Mz=0, recover for TD1
+                if (p.TD1 > 0) {
+                    sampleRelax(ct, 0, p.TD1, 'prep', timeline);
+                    Mz = PD * (1 - Math.exp(-p.TD1 / T1));
+                    ct += p.TD1;
+                } else {
+                    Mz = 0;
+                }
+                // Optional inversion + TD2
+                if (p.invertEnable) {
+                    Mz = -Mz;
+                    if (p.TD2 > 0) {
+                        sampleRelax(ct, Mz, p.TD2, 'inversion', timeline);
+                        Mz = PD + (Mz - PD) * Math.exp(-p.TD2 / T1);
+                        ct += p.TD2;
+                    }
+                }
+                // GRE train
+                for (let i = 0; i < total; i++) {
+                    const isDummy = i < numDummy;
+                    const pulseIndex = i + 1;
+                    const acquiredIndex = isDummy ? null : i - numDummy + 1;
+                    const MxyRe = Mz * sa * E2_TE;
+                    timeline.push({ time: ct, Mz, Mxy: Math.abs(MxyRe), phase: 'readout', pulseIndex, acquiredIndex, isDummy });
+                    Mz = Mz * ca * E1_TR + PD * (1 - E1_TR);
+                    ct += p.innerTR;
+                }
+                totalTime = ct;
+            }
+            return { timeline, totalTime, mzFinal: Mz };
+        }
+
+        // ── ENRAGE sequence builder ──────────────────────────────────────
+        function buildENRAGE(p) {
+            const seq = new Sequence(20);
+            const TE  = p.TE || (p.innerTR / 2);
+            const numDummyPulses   = p.numDummyPulses || 0;
+            const totalReadoutPulses = numDummyPulses + p.numPulses;
+
+            // Initial 90° excitation → spoil → TD1 recovery
+            seq.add(new RFPulse(90, 0));
+            seq.add(new Spoiler());
+            if (p.TD1 > 0) seq.add(new Relaxation(p.TD1, 1000, 100));
+
+            // Optional inversion + TD2 (inversion wait)
+            if (p.invertEnable) {
+                seq.add(new RFPulse(180, 0));
+                if (p.TD2 > 0) seq.add(new Relaxation(p.TD2, 1000, 100));
+            }
+
+            // GRE readout train
+            for (let i = 0; i < totalReadoutPulses; i++) {
+                seq.add(new RFPulse(p.flipAngle, 90));
+                seq.add(new Relaxation(TE, 1000, 100));
+                const acquiredIndex = i >= numDummyPulses ? i - numDummyPulses + 1 : null;
+                seq.add(new MPRAGEPulseSampleMarker(i + 1, acquiredIndex));
+                if (i >= numDummyPulses) seq.add(new ADC(`p${acquiredIndex}`));
+                const rem = p.innerTR - TE;
+                if (rem > 0) seq.add(new Relaxation(rem, 1000, 100));
+                if (p.perfectSpoilingEnable) seq.add(new Spoiler());
+                seq.add(new GradientShift(1));
+            }
+
+            return seq;
+        }
+
+        // ── ENRAGE full-sequence simulator (tracks phases) ───────────────
+        function simulateENRAGEFullSequence(seq, T1, T2, initState, PD, p) {
+            const ts = cloneWithTissue(seq, T1, T2);
+            const s  = initState || new StateMatrix(20);
+            if (!initState && PD !== 1.0) {
+                for (const st of s.states()) {
+                    st[0].real *= PD; st[0].imag *= PD;
+                    st[1].real *= PD; st[1].imag *= PD;
+                    st[2].real *= PD; st[2].imag *= PD;
+                }
+            }
+            const timeline = [];
+            let ct = 0;
+
+            // Phase boundaries (ms) computed from params
+            const prepEnd      = 1 + (p.TD1 || 0);  // after 90°+spoiler+TD1 (~1ms for RF+spoiler)
+            const readoutStart = prepEnd + (p.invertEnable ? 1 + (p.TI || 0) : 0);
+            const readoutEnd   = readoutStart + (p.numDummyPulses + p.numPulses) * p.innerTR;
+
+            for (const op of ts.operators) {D2
+                if (op instanceof MPRAGEPulseSampleMarker) {
+                    const phase = ct < readoutStart ? 'prep'
+                                : ct < readoutEnd   ? 'readout'
+                                : 'recovery';
+                    timeline.push({
+                        time: ct,
+                        Mz: s.Z0().real,
+                        Mxy: Complex.magnitude(s.F0()),
+                        phase,
+                        pulseIndex: op.trainIndex,
+                        acquiredIndex: op.acquiredIndex,
+                        isDummy: op.isDummy,
+                    });
+                }
+                if (op instanceof Relaxation && op.tau > 100) {
+                    const t0 = ct;
+                    for (let rt = t0; rt <= t0 + op.tau; rt += 1) {
+                        const e = rt - t0;
+                        const phase = t0 < prepEnd    ? 'prep'
+                                    : t0 < readoutStart ? 'inversion'
+                                    : t0 < readoutEnd   ? 'readout'
+                                    : 'recovery';
+                        timeline.push({ time: rt,
+                            Mz:  1 - (1 - s.Z0().real) * Math.exp(-e / op.T1),
+                            Mxy: Complex.magnitude(s.F0()) * Math.exp(-e / op.T2),
+                            phase });
+                    }
+                    op.apply(s); ct += op.tau;
+                } else {
+                    op.apply(s);
+                    if (op instanceof Relaxation) ct += op.tau;
+                }
+            }
+            return { timeline, totalTime: ct, finalState: s };
+        }
+
+        let _enrageHiddenLabels = new Set();
+        let _enrageLastSimData  = null;
+
+        function renderENRAGECharts() {
+            if (!_enrageLastSimData) return;
+            const { activeTissues, winResults, fullSel, fullRes,
+                    totalTrainPulses, totalTime,
+                    readoutPhaseBoxes, fullPhaseBoxes, invertEnable } = _enrageLastSimData;
+
+            const onLegendClick = (label, nowHidden) => {
+                if (nowHidden) _enrageHiddenLabels.add(label);
+                else _enrageHiddenLabels.delete(label);
+                renderENRAGECharts();
+            };
+
+            const mkDatasets = (key) => activeTissues.map(t => ({
+                label: t.label,
+                data: winResults[t.name].map((pt) => {
+                    if (key === 'Mxy') {
+                        const re = pt.MxyRe || 0, im = pt.MxyIm || 0;
+                        return { x: pt.pulseIndex, y: Math.sqrt(re * re + im * im) };
+                    }
+                    return { x: pt.pulseIndex, y: pt[key] };
+                }),
+                color: t.plotColor || t.color,
+                hidden: _enrageHiddenLabels.has(t.label),
+            }));
+
+            D3SeqPlots.createLinePlot(document.getElementById('enrage-mz-chart'), {
+                datasets: mkDatasets('Mz'),
+                xType: 'linear', xMin: 1, xMax: totalTrainPulses,
+                yMin: -1.2, yMax: 1.2,
+                xLabel: 'Echo index', yLabel: 'Mz',
+                phaseBoxes: readoutPhaseBoxes,
+                showLegend: true, onLegendClick,
+            });
+
+            D3SeqPlots.createLinePlot(document.getElementById('enrage-mxy-chart'), {
+                datasets: mkDatasets('Mxy'),
+                xType: 'linear', xMin: 1, xMax: totalTrainPulses,
+                yMin: 0,
+                xLabel: 'Echo index', yLabel: 'Mxy',
+                phaseBoxes: readoutPhaseBoxes,
+                showLegend: true, onLegendClick,
+            });
+
+            const fullDs = (key) => fullSel.map(t => ({
+                label: t.label,
+                data: fullRes[t.name].timeline.map(pt => ({ x: pt.time, y: pt[key] })),
+                color: t.plotColor || t.color,
+                hidden: _enrageHiddenLabels.has(t.label),
+            }));
+
+            D3SeqPlots.createLinePlot(document.getElementById('enrage-fullmz-chart'), {
+                datasets: fullDs('Mz'),
+                xType: 'linear', xMin: 0, xMax: totalTime,
+                yMin: -1.2,
+                xLabel: 'Time (ms)', yLabel: 'Mz',
+                phaseBoxes: fullPhaseBoxes,
+                showLegend: true, onLegendClick,
+            });
+
+            D3SeqPlots.createLinePlot(document.getElementById('enrage-fullmxy-chart'), {
+                datasets: fullDs('Mxy'),
+                xType: 'linear', xMin: 0, xMax: totalTime,
+                yMin: 0,
+                xLabel: 'Time (ms)', yLabel: 'Mxy',
+                phaseBoxes: fullPhaseBoxes,
+                showLegend: true, onLegendClick,
+            });
+
+            // Show/hide inversion legend items
+            ['enrage-legend-inv-mz', 'enrage-legend-inv-mxy'].forEach(id => {
+                const el = document.getElementById(id);
+                if (el) el.style.display = invertEnable ? '' : 'none';
+            });
+        }
+
+        function runENRAGESimulation() {
+            const t0 = performance.now();
+
+            const etl            = window.AppState ? window.AppState.params.etl : 72;
+            const numDummyPulses = parseInt(document.getElementById('enrage-dummy').value);
+            const totalTrainPulses = etl + numDummyPulses;
+            const invertEnable   = document.getElementById('enrage-invert-enable').checked;
+            const numSims        = 4;
+
+            ['enrage-etl-display', 'enrage-etl-display-mz', 'enrage-etl-display-mxy'].forEach(id => {
+                const el = document.getElementById(id); if (el) el.textContent = etl;
+            });
+
+            const p = {
+                TD1:        parseInt(document.getElementById('enrage-td1').value),
+                invertEnable,
+                TD2:        parseInt(document.getElementById('enrage-td2').value),
+                flipAngle:  parseFloat(document.getElementById('enrage-alpha').value),
+                innerTR:    parseFloat(document.getElementById('enrage-tr').value),
+                TE:         parseFloat(document.getElementById('enrage-te').value),
+                numDummyPulses,
+                numPulses:  etl,
+            };
+
+            const activeTissues = window.PhantomState.tissues.filter(t => t.enabled !== false);
+
+            const winResults = {};
+            for (const t of activeTissues)
+                winResults[t.name] = simulateENRAGEBloch(t.T1, t.T2, t.PD, p, numSims).timeline;
+
+            const readoutPhaseBoxes = numDummyPulses > 0 ? [
+                { xStart: 0.5, xEnd: numDummyPulses + 0.5, color: 'rgba(255,180,80,0.14)', label: 'Dummy echoes' },
+            ] : [];
+
+            const fullSel = activeTissues;
+            const fullRes = {};
+            for (const t of fullSel)
+                fullRes[t.name] = simulateENRAGEBlochFull(t.T1, t.T2, t.PD, p, numSims);
+
+            const totalTime = fullRes[fullSel[0].name].totalTime;
+
+            // Phase box boundaries: TD1 recovery, optional inversion+TD2, GRE train
+            const prepDur      = p.TD1;
+            const invDur       = invertEnable ? p.TD2 : 0;
+            const readoutStart = prepDur + invDur;
+            const readoutEnd   = readoutStart + totalTrainPulses * p.innerTR;
+
+            const fullPhaseBoxes = [
+                ...(prepDur > 0 ? [{ xStart: 0, xEnd: prepDur, color: 'rgba(255,180,80,0.12)', label: '90° prep + TD1' }] : []),
+                ...(invertEnable ? [{ xStart: prepDur, xEnd: readoutStart, color: 'rgba(255,100,100,0.12)', label: 'Inversion + TD2' }] : []),
+                ...(numDummyPulses > 0 ? [{ xStart: readoutStart, xEnd: readoutStart + numDummyPulses * p.innerTR, color: 'rgba(255,180,80,0.14)', label: 'Dummy echoes' }] : []),
+                { xStart: readoutStart + numDummyPulses * p.innerTR, xEnd: readoutEnd, color: 'rgba(100,200,255,0.12)', label: 'ENRAGE' },
+            ];
+
+            _enrageLastSimData = { activeTissues, winResults, fullSel, fullRes,
+                                   totalTrainPulses, totalTime,
+                                   readoutPhaseBoxes, fullPhaseBoxes, invertEnable };
+            renderENRAGECharts();
+            console.log(`[ENRAGE] sim in ${(performance.now()-t0).toFixed(0)} ms`);
+        }
+
+        // ── getENRAGESignals: called by brain-sim.js ─────────────────────
+        function getENRAGESignals(appParams) {
+            const etl            = appParams.etl;
+            const numDummyPulses = parseInt(document.getElementById('enrage-dummy').value);
+            const invertEnable   = document.getElementById('enrage-invert-enable').checked;
+            const numSims        = 4;
+            const t0             = performance.now();
+
+            const p = {
+                TD1:        parseInt(document.getElementById('enrage-td1').value),
+                invertEnable,
+                TD2:        parseInt(document.getElementById('enrage-td2').value),
+                flipAngle:  parseFloat(document.getElementById('enrage-alpha').value),
+                innerTR:    parseFloat(document.getElementById('enrage-tr').value),
+                TE:         parseFloat(document.getElementById('enrage-te').value),
+                numDummyPulses,
+                numPulses:  etl,
+            };
+            const result = {};
+            for (const t of window.PhantomState.tissues.filter(t => t.enabled !== false)) {
+                const { timeline } = simulateENRAGEBloch(t.T1, t.T2, t.PD, p, numSims);
+                const MxyComplex = new Float32Array(etl * 2);
+                timeline.filter(pt => !pt.isDummy).forEach((pt, i) => {
+                    if (i < etl) { MxyComplex[i * 2] = pt.MxyRe; MxyComplex[i * 2 + 1] = pt.MxyIm; }
+                });
+                result[t.name] = MxyComplex;
+            }
+            console.log(`[ENRAGEModule] getENRAGESignals ETL=${etl} in ${(performance.now()-t0).toFixed(0)} ms`);
+            return result;
+        }
+
+        // ── ENRAGE slider live-update ────────────────────────────────────
+        function setupENRAGESliders() {
+            [
+                ['enrage-td1',   'enrage-td1-value'],
+                ['enrage-td2',   'enrage-td2-value'],
+                ['enrage-alpha', 'enrage-alpha-value'],
+                ['enrage-tr',    'enrage-tr-value'],
+                ['enrage-te',    'enrage-te-value'],
+                ['enrage-dummy', 'enrage-dummy-value'],
+            ].forEach(([id, valId]) => {
+                const sl = document.getElementById(id);
+                const sp = document.getElementById(valId);
+                if (sl && sp) sl.addEventListener('input', () => {
+                    sp.textContent = sl.value;
+                    runENRAGESimulation();
+                });
+            });
+
+            // Toggle TD2 slider visibility based on inversion checkbox
+            const invertChk = document.getElementById('enrage-invert-enable');
+            const td2Group  = document.getElementById('enrage-td2-group');
+            function updateTD2Visibility() {
+                td2Group.style.display = invertChk.checked ? '' : 'none';
+            }
+            invertChk.addEventListener('change', () => {
+                updateTD2Visibility();
+                runENRAGESimulation();
+            });
+            updateTD2Visibility();
+        }
+
         // ── Expose module ────────────────────────────────────────────────
         window.MPRAGEModule = {
-            get ready() { return _ready; },
+            get ready() { return true; },  // Bloch — always ready
             getMPRAGESignals,
+            runSimulation: runMPRAGESimulation,
         };
         window.RAREModule = {
             get ready() { return _rareReady; },
@@ -2462,6 +2993,11 @@
             get ready() { return _ready; },
             getFSPGRSignals,
             runSimulation: runFSPGRSimulation,
+        };
+        window.ENRAGEModule = {
+            get ready() { return true; },  // Bloch — always ready
+            getENRAGESignals,
+            runSimulation: runENRAGESimulation,
         };
     </script>
 </body>
