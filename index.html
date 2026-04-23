@@ -3,7 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>View order with arbitrary center echoes &amp; MPRAGE Simulator</title>
+    <title>View Order — k-Space &amp; Sequence Simulator</title>
+    <link rel="icon" type="image/svg+xml" href="favicon.svg">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:ital,wght@0,400;0,600;0,700;1,400&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <script src="https://d3js.org/d3.v7.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.js"></script>
     <link rel="stylesheet" href="style.css">
@@ -12,7 +16,7 @@
         if (location.protocol === 'file:') {
             window.addEventListener('DOMContentLoaded', () => {
                 const banner = document.createElement('div');
-                banner.style.cssText = 'position:fixed;top:0;left:0;right:0;background:#ff6b6b;color:white;padding:12px;z-index:10000;font-weight:bold;text-align:center;';
+                banner.style.cssText = 'position:fixed;top:0;left:0;right:0;background:#c8102e;color:white;padding:12px;z-index:10000;font-weight:bold;text-align:center;';
                 banner.innerHTML = '⚠️ MPRAGE simulator requires HTTP/HTTPS (dynamic imports blocked with file:// protocol). Run: <code style="background:rgba(0,0,0,0.3);padding:2px 6px;">npm run dev</code> then visit <a href="http://localhost:8000/dashboard/" style="color:white;text-decoration:underline;">http://localhost:8000/dashboard/</a>';
                 document.body.insertBefore(banner, document.body.firstChild);
             });
@@ -22,13 +26,26 @@
 <body>
     <div id="spinner" class="spinner hidden"></div>
 
+    <header class="site-header">
+        <a class="site-header-logo" href="#">
+            <svg width="22" height="22" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg">
+                <defs><clipPath id="disc"><circle cx="16" cy="16" r="15"></circle></clipPath></defs>
+                <circle cx="16" cy="16" r="15.5" fill="white" stroke="#d8d8d8" stroke-width="0.5"></circle>
+                <polyline points="27,6 10,16 27,26" fill="none" stroke="#111111" stroke-width="2.2" stroke-linejoin="miter" stroke-linecap="round" clip-path="url(#disc)"></polyline>
+                <path d="M 5,28 Q 7,22 10,18 Q 12,15 16,14.5 Q 21,14 26,14.5 Q 29,15 31,16" fill="none" stroke="#c8102e" stroke-width="1.5" stroke-linecap="round" clip-path="url(#disc)"></path>
+            </svg>
+            View Order
+        </a>
+        <span class="site-header-subtitle">k-Space &amp; Sequence Simulator</span>
+    </header>
+
     <div class="container">
         <h1>View order with arbitrary center echoes</h1>
 
         <!-- ── Tab navigation ─────────────────────────────────────────── -->
         <div class="tab-bar">
-            <button class="tab-btn active" onclick="switchTab('view-order')">View order</button>
-            <button class="tab-btn"        onclick="switchTab('mprage')">MPRAGE</button>
+            <button class="tab-btn active" onclick="switchTab('view-order')">① View Order</button>
+            <button class="tab-btn"        onclick="switchTab('mprage')">② MPRAGE</button>
         </div>
 
         <!-- ══ TAB 1: View Order ══════════════════════════════════════ -->
@@ -352,61 +369,46 @@
         <!-- ══ TAB 2: MPRAGE Simulator ════════════════════════════════ -->
         <div id="tab-mprage" class="tab-panel">
             <div class="mprage-params-grid">
-
-                <!-- Sequence parameters -->
                 <div class="mprage-panel">
-                    <h2>Sequence Parameters</h2>
+                    <h2>Parameters</h2>
                     <div class="mprage-etl-note">
-                        ETL = <strong id="mprage-etl-display">72</strong> pulses (set in View order tab)
+                        ETL = <strong id="mprage-etl-display">72</strong> pulses (set in Tab ①)
                     </div>
-                    <div class="control-group">
-                        <label>Inversion time (TI) <span class="value" id="tiValue">400</span> ms</label>
-                        <input type="range" id="ti" min="100" max="1200" value="400" step="50">
-                    </div>
-                    <div class="control-group">
-                        <label>Recovery time <span class="value" id="recoveryValue">1000</span> ms</label>
-                        <input type="range" id="recovery" min="500" max="2000" value="1000" step="100">
-                    </div>
-                    <div class="control-group">
-                        <label>Flip angle <span class="value" id="alphaValue">8</span> °</label>
-                        <input type="range" id="alpha" min="2" max="20" value="8" step="1">
-                    </div>
-                    <div class="control-group">
-                        <label>Inner TR <span class="value" id="trValue">7</span> ms</label>
-                        <input type="range" id="tr" min="3" max="15" value="7" step="0.5">
-                    </div>
-                    <div class="control-group">
-                        <label>TE <span class="value" id="teValue">3.5</span> ms</label>
-                        <input type="range" id="te" min="0" max="10" value="3.5" step="0.5">
-                    </div>
-                    <div class="control-group">
-                        <label>Steady-state cycles <span class="value" id="numSimsValue">4</span></label>
-                        <input type="range" id="numSims" min="1" max="5" value="4" step="1">
+                    <div class="params-fields-grid">
+                        <div class="params-fields-col">
+                            <div class="control-group">
+                                <label>Inversion time (TI) <span class="value" id="tiValue">400</span> ms</label>
+                                <input type="range" id="ti" min="100" max="1200" value="400" step="50" class="slider">
+                            </div>
+                            <div class="control-group">
+                                <label>Recovery time <span class="value" id="recoveryValue">1000</span> ms</label>
+                                <input type="range" id="recovery" min="500" max="2000" value="1000" step="100" class="slider">
+                            </div>
+                            <div class="control-group">
+                                <label>Flip angle <span class="value" id="alphaValue">8</span> °</label>
+                                <input type="range" id="alpha" min="2" max="20" value="8" step="1" class="slider">
+                            </div>
+                        </div>
+                        <div class="params-fields-col">
+                            <div class="control-group">
+                                <label>Inner TR <span class="value" id="trValue">7</span> ms</label>
+                                <input type="range" id="tr" min="3" max="15" value="7" step="0.5" class="slider">
+                            </div>
+                            <div class="control-group">
+                                <label>TE <span class="value" id="teValue">3.5</span> ms</label>
+                                <input type="range" id="te" min="0" max="10" value="3.5" step="0.5" class="slider">
+                            </div>
+                            <div class="control-group">
+                                <label>Steady-state cycles <span class="value" id="numSimsValue">4</span></label>
+                                <input type="range" id="numSims" min="1" max="5" value="4" step="1" class="slider">
+                            </div>
+                        </div>
                     </div>
                     <button class="mprage-btn-simulate" id="mprage-simulate-btn">▶ Simulate MPRAGE</button>
                 </div>
-
-                <!-- Tissue table (read-only) -->
-                <div class="mprage-panel">
-                    <h2>Tissue Parameters (3 T)</h2>
-                    <p style="font-size:0.88em;color:#666;margin-bottom:12px;">
-                        Fixed literature values. All 5 tissues simulated.
-                    </p>
-                    <table style="width:100%;font-size:0.87em;border-collapse:collapse;">
-                        <thead>
-                            <tr style="border-bottom:2px solid #667eea;">
-                                <th style="text-align:left;padding:4px 6px;color:#667eea;">Tissue</th>
-                                <th style="text-align:right;padding:4px 6px;color:#667eea;">T1</th>
-                                <th style="text-align:right;padding:4px 6px;color:#667eea;">T2</th>
-                                <th style="text-align:right;padding:4px 6px;color:#667eea;">PD</th>
-                            </tr>
-                        </thead>
-                        <tbody id="tissue-table-body"></tbody>
-                    </table>
-                </div>
             </div><!-- /mprage-params-grid -->
 
-            <!-- MPRAGE window charts (Mz + Mxy, 5 tissues) -->
+                        <!-- MPRAGE window charts (Mz + Mxy, 5 tissues) -->
             <div class="mprage-plots-row" style="margin-top:22px;">
                 <div class="mprage-plot-panel">
                     <h3>MPRAGE window — Mz per echo</h3>
@@ -458,11 +460,12 @@
             document.getElementById('tab-' + id).classList.add('active');
             const idx = ['view-order', 'mprage'].indexOf(id);
             if (idx >= 0) document.querySelectorAll('.tab-btn')[idx].classList.add('active');
-            // Sync ETL display when switching to MPRAGE tab
+            // Sync ETL display and re-render slider ticks when switching to MPRAGE tab
             if (id === 'mprage') {
                 const etl = window.AppState ? window.AppState.params.etl : 72;
                 const el  = document.getElementById('mprage-etl-display');
                 if (el) el.textContent = etl;
+                requestAnimationFrame(() => { if (window.App) App.renderAllSliderTicks(); });
             }
         }
     </script>
@@ -473,7 +476,12 @@
         let Sequence, StateMatrix, RFPulse, Relaxation, GradientShift, ADC, Spoiler, Complex;
         let _ready = false;
 
-        import('./js-epg/src/index.js')
+        // Resolve path: works for dev (served from root, page at /dashboard/)
+        // and for dist/gh-pages (index.html at root, js-epg/ alongside it)
+        const _epgPath = location.pathname.startsWith('/dashboard/')
+            ? '../js-epg/src/index.js'
+            : './js-epg/src/index.js';
+        import(_epgPath)
             .then(m => {
                 ({ Sequence, StateMatrix, RFPulse, Relaxation,
                    GradientShift, ADC, Spoiler, Complex } = m);
