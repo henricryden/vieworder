@@ -526,8 +526,8 @@
                                     <input type="range" id="rare-dummy-echoes" min="0" max="40" value="0" step="1" class="slider">
                             </div>
                             <div class="control-group">
-                                <label>Steady-state cycles <span class="value" id="rare-numSims-value">2</span></label>
-                                <input type="range" id="rare-numSims" min="1" max="5" value="2" step="1" class="slider">
+                                <label>Steady-state cycles <span class="value" id="rare-numSims-value">20</span></label>
+                                <input type="range" id="rare-numSims" min="1" max="20" value="20" step="1" class="slider">
                             </div>
                             <div class="control-group">
                                 <label for="rare-driven-eq">Driven equilibrium</label>
@@ -577,8 +577,18 @@
                     </div>
                     <div id="rare-scheme-custom" class="rare-scheme-block" style="display:none;">
                         <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;">
-                            <p style="color:#a0a0c0;font-size:0.9em;margin:4px 0;">Drag nodes on the flip angle chart. Linear fit between nodes.</p>
+                            <p style="color:#a0a0c0;font-size:0.9em;margin:4px 0;">Drag nodes on the flip angle chart for the refocusing train. Excitation and driven-equilibrium FA use separate controls.</p>
                             <button id="rare-custom-add-node" class="rare-node-btn">+ Add node</button>
+                        </div>
+                        <div class="rare-custom-meta-grid">
+                            <div class="control-group">
+                                <label>Excitation FA <span class="value" id="rare-custom-exc-fa-value">90</span> °</label>
+                                <input type="range" id="rare-custom-exc-fa" min="0" max="180" value="90" step="5" class="slider">
+                            </div>
+                            <div class="control-group">
+                                <label>Driven equilibrium FA <span class="value" id="rare-custom-de-fa-value">90</span> °</label>
+                                <input type="range" id="rare-custom-de-fa" min="0" max="180" value="90" step="5" class="slider">
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -1307,36 +1317,36 @@
             return faSchedule;
         }
 
-        function defaultCustomNodes(trainLength) {
+        function defaultCustomNodes(pulseCount) {
             return [
-                { echoIndex: 1,                        fa: 180 },
-                { echoIndex: Math.max(1, Math.round(trainLength / 3)),     fa: 160 },
-                { echoIndex: Math.max(1, Math.round(2 * trainLength / 3)), fa: 140 },
-                { echoIndex: trainLength,              fa: 120 },
+                { pulseIndex: 1,                         fa: 180 },
+                { pulseIndex: Math.max(1, Math.round(pulseCount / 3)),     fa: 160 },
+                { pulseIndex: Math.max(1, Math.round(2 * pulseCount / 3)), fa: 140 },
+                { pulseIndex: pulseCount,               fa: 120 },
             ];
         }
 
-        function normalizeCustomNodes(nodes, trainLength) {
-            const byEcho = new Map();
+        function normalizeCustomNodes(nodes, pulseCount) {
+            const byPulse = new Map();
             for (const node of nodes || []) {
-                const echoIndex = Math.max(1, Math.min(trainLength, Math.round(node.echoIndex)));
+                const pulseIndex = Math.max(1, Math.min(pulseCount, Math.round(node.pulseIndex)));
                 const fa = Math.max(0, Math.min(180, node.fa));
-                byEcho.set(echoIndex, { echoIndex, fa });
+                byPulse.set(pulseIndex, { pulseIndex, fa });
             }
-            return [...byEcho.values()].sort((a, b) => a.echoIndex - b.echoIndex);
+            return [...byPulse.values()].sort((a, b) => a.pulseIndex - b.pulseIndex);
         }
 
-        function linearInterpFA(nodes, trainLength) {
-            const sorted = normalizeCustomNodes(nodes, trainLength);
-            if (!sorted.length) return Array(trainLength).fill(180);
+        function linearInterpFA(nodes, pulseCount) {
+            const sorted = normalizeCustomNodes(nodes, pulseCount);
+            if (!sorted.length) return Array(pulseCount).fill(180);
 
             const faSchedule = [];
-            for (let echo = 1; echo <= trainLength; echo++) {
-                if (echo <= sorted[0].echoIndex) {
+            for (let pulse = 1; pulse <= pulseCount; pulse++) {
+                if (pulse <= sorted[0].pulseIndex) {
                     faSchedule.push(sorted[0].fa);
                     continue;
                 }
-                if (echo >= sorted[sorted.length - 1].echoIndex) {
+                if (pulse >= sorted[sorted.length - 1].pulseIndex) {
                     faSchedule.push(sorted[sorted.length - 1].fa);
                     continue;
                 }
@@ -1344,18 +1354,83 @@
                 let left = sorted[0];
                 let right = sorted[sorted.length - 1];
                 for (let i = 0; i < sorted.length - 1; i++) {
-                    if (echo >= sorted[i].echoIndex && echo <= sorted[i + 1].echoIndex) {
+                    if (pulse >= sorted[i].pulseIndex && pulse <= sorted[i + 1].pulseIndex) {
                         left = sorted[i];
                         right = sorted[i + 1];
                         break;
                     }
                 }
 
-                const span = right.echoIndex - left.echoIndex || 1;
-                const t = (echo - left.echoIndex) / span;
+                const span = right.pulseIndex - left.pulseIndex || 1;
+                const t = (pulse - left.pulseIndex) / span;
                 faSchedule.push(left.fa + (right.fa - left.fa) * t);
             }
             return faSchedule.map(v => Math.round(v * 10) / 10);
+        }
+
+        function getRareCustomPulseLabels(etl, numDummyEchoes, drivenEqMode) {
+            return [
+                'EX',
+                ...Array.from({ length: numDummyEchoes }, (_, i) => `D${i + 1}`),
+                ...Array.from({ length: etl }, (_, i) => String(i + 1)),
+                ...(drivenEqMode !== 'off' ? ['DE ref', drivenEqMode === 'anti-driven' ? 'Anti-DE' : 'DE 90'] : []),
+            ];
+        }
+
+        function buildRarePulseSchedule(scheme, params, etl, numDummyEchoes, pssConfig, drivenEqMode) {
+            if (scheme === 'custom') {
+                const pulseLabels = getRareCustomPulseLabels(etl, numDummyEchoes, drivenEqMode);
+                const refocusingPulseCount = etl + numDummyEchoes;
+                const editablePulseCount = refocusingPulseCount + (drivenEqMode !== 'off' ? 1 : 0);
+                const editableSchedule = params.faNodes && params.faNodes.length
+                    ? linearInterpFA(params.faNodes, editablePulseCount)
+                    : Array(editablePulseCount).fill(180);
+                const excitationFA = params.excitationFA ?? 90;
+                const refocusingSchedule = editableSchedule.slice(0, refocusingPulseCount);
+                const drivenEqRefocusingFA = drivenEqMode !== 'off'
+                    ? editableSchedule[editableSchedule.length - 1]
+                    : null;
+                const drivenEqTerminalFA = drivenEqMode !== 'off' ? (params.drivenEqFA ?? 90) : null;
+                const pulseSchedule = [
+                    excitationFA,
+                    ...refocusingSchedule,
+                    ...(drivenEqMode !== 'off' ? [drivenEqRefocusingFA, drivenEqTerminalFA] : []),
+                ];
+                return {
+                    pulseLabels,
+                    pulseSchedule,
+                    excitationFA,
+                    refocusingSchedule,
+                    drivenEqRefocusingFA,
+                    drivenEqTerminalFA,
+                    modifiedCount: 0,
+                };
+            }
+
+            const refocusingResult = buildRefocusingSchedule(scheme, params, etl, numDummyEchoes, pssConfig);
+            const refocusingSchedule = refocusingResult.schedule;
+            const pulseLabels = getRareCustomPulseLabels(etl, numDummyEchoes, drivenEqMode);
+            const pulseSchedule = [
+                90,
+                ...refocusingSchedule,
+                ...(drivenEqMode !== 'off'
+                    ? [
+                        refocusingSchedule.length ? refocusingSchedule[refocusingSchedule.length - 1] : 180,
+                        90,
+                    ]
+                    : []),
+            ];
+            return {
+                pulseLabels,
+                pulseSchedule,
+                excitationFA: 90,
+                refocusingSchedule,
+                drivenEqRefocusingFA: drivenEqMode !== 'off'
+                    ? (refocusingSchedule.length ? refocusingSchedule[refocusingSchedule.length - 1] : 180)
+                    : null,
+                drivenEqTerminalFA: drivenEqMode !== 'off' ? 90 : null,
+                modifiedCount: refocusingResult.modifiedCount,
+            };
         }
 
         function computeFlipAngles(scheme, params, etl) {
@@ -1493,7 +1568,7 @@
         // ── RARE sequence builder (accepts per-echo FA schedule) ─────────
         function buildRARE(p) {
             const seq = new Sequence(20);
-            seq.add(new RFPulse(90, 90));
+            seq.add(new RFPulse(p.excitationFA ?? 90, 90));
             const numPSSEchoes = p.numPSSEchoes || 0;
             const numDummyEchoes = p.numDummyEchoes || 0;
             const totalRefocusingPulses = numDummyEchoes + p.numEchoes;
@@ -1514,15 +1589,17 @@
                 }
             }
             if (p.drivenEqMode && p.drivenEqMode !== 'off') {
-                const terminalRefocusingFA = Array.isArray(p.faSchedule) && p.faSchedule.length
-                    ? p.faSchedule[p.faSchedule.length - 1]
-                    : (p.refFA ?? 180);
+                const terminalRefocusingFA = p.drivenEqRefocusingFA ?? (
+                    Array.isArray(p.faSchedule) && p.faSchedule.length
+                        ? p.faSchedule[p.faSchedule.length - 1]
+                        : (p.refFA ?? 180)
+                );
                 seq.add(new GradientShift(1));
                 seq.add(new Relaxation(p.ESP / 2, 1000, 100));
                 seq.add(new RFPulse(terminalRefocusingFA, 0));
                 seq.add(new Relaxation(p.ESP / 2, 1000, 100));
                 seq.add(new GradientShift(1));
-                seq.add(new RFPulse(90, p.drivenEqMode === 'driven' ? -90 : 90));
+                seq.add(new RFPulse(p.drivenEqTerminalFA ?? 90, p.drivenEqMode === 'driven' ? -90 : 90));
             }
             const drivenEqDuration = p.drivenEqMode && p.drivenEqMode !== 'off' ? p.ESP : 0;
             const recovery = Math.max(0, p.TR - totalRefocusingPulses * p.ESP - drivenEqDuration);
@@ -1653,19 +1730,32 @@
             const numDummyEchoes = parseInt(document.getElementById('rare-dummy-echoes').value);
             const pssConfig = readRarePSSConfig();
             const drivenEqMode = readRareDrivenEqMode();
+            const editableCustomPulseCount = etl + numDummyEchoes + (drivenEqMode !== 'off' ? 1 : 0);
             const numSims = parseInt(document.getElementById('rare-numSims').value);
             const scheme  = document.getElementById('rare-fa-scheme').value;
-            const scheduleResult = buildRefocusingSchedule(
+            const pulsePlan = buildRarePulseSchedule(
                 scheme,
-                readSchemeParams(etl, ESP, etl + numDummyEchoes),
+                readSchemeParams(etl, ESP, editableCustomPulseCount),
                 etl,
                 numDummyEchoes,
-                pssConfig
+                pssConfig,
+                drivenEqMode
             );
-            const faSchedule = scheduleResult.schedule;
-            const numPSSEchoes = scheduleResult.modifiedCount;
+            const faSchedule = pulsePlan.refocusingSchedule;
+            const numPSSEchoes = pulsePlan.modifiedCount;
 
-            const p   = { numEchoes: etl, numDummyEchoes, numPSSEchoes, TR, ESP, faSchedule, drivenEqMode };
+            const p   = {
+                numEchoes: etl,
+                numDummyEchoes,
+                numPSSEchoes,
+                TR,
+                ESP,
+                faSchedule,
+                drivenEqMode,
+                excitationFA: pulsePlan.excitationFA,
+                drivenEqRefocusingFA: pulsePlan.drivenEqRefocusingFA,
+                drivenEqTerminalFA: pulsePlan.drivenEqTerminalFA,
+            };
             const seq = buildRARE(p);
             const result = {};
             for (const t of window.PhantomState.tissues.filter(t => t.enabled !== false)) {
@@ -1713,6 +1803,8 @@
             } else if (scheme === 'custom') {
                 if (!_customNodes) _customNodes = defaultCustomNodes(trainLength);
                 params.faNodes = normalizeCustomNodes(_customNodes, trainLength);
+                params.excitationFA = parseFloat(document.getElementById('rare-custom-exc-fa')?.value || '90');
+                params.drivenEqFA = parseFloat(document.getElementById('rare-custom-de-fa')?.value || '90');
             }
             return params;
         }
@@ -1846,16 +1938,17 @@
             const numSims = parseInt(document.getElementById('rare-numSims').value);
             const scheme  = document.getElementById('rare-fa-scheme').value;
             const postStartupEchoes = etl + numDummyEchoes;
+            const editableCustomPulseCount = postStartupEchoes + (drivenEqMode !== 'off' ? 1 : 0);
 
             // Init custom nodes if needed
             if (scheme === 'custom' && !_customNodes) {
-                _customNodes = defaultCustomNodes(postStartupEchoes);
+                _customNodes = defaultCustomNodes(editableCustomPulseCount);
             }
 
-            const schemeParams = readSchemeParams(etl, ESP, postStartupEchoes);
-            const scheduleResult = buildRefocusingSchedule(scheme, schemeParams, etl, numDummyEchoes, pssConfig);
-            const faSchedule = scheduleResult.schedule;
-            const numStartupEchoes = scheduleResult.modifiedCount;
+            const schemeParams = readSchemeParams(etl, ESP, editableCustomPulseCount);
+            const pulsePlan = buildRarePulseSchedule(scheme, schemeParams, etl, numDummyEchoes, pssConfig, drivenEqMode);
+            const faSchedule = pulsePlan.refocusingSchedule;
+            const numStartupEchoes = pulsePlan.modifiedCount;
             const totalTrainEchoes = etl + numDummyEchoes;
 
             document.getElementById('rare-etl-display').textContent    = etl;
@@ -1882,28 +1975,25 @@
             }
             // Persist custom nodes (they were already mutated via drag; no reset needed)
 
-            const p   = { numEchoes: etl, numDummyEchoes, numPSSEchoes: numStartupEchoes, TR, ESP, faSchedule, drivenEqMode };
+            const p   = {
+                numEchoes: etl,
+                numDummyEchoes,
+                numPSSEchoes: numStartupEchoes,
+                TR,
+                ESP,
+                faSchedule,
+                drivenEqMode,
+                excitationFA: pulsePlan.excitationFA,
+                drivenEqRefocusingFA: pulsePlan.drivenEqRefocusingFA,
+                drivenEqTerminalFA: pulsePlan.drivenEqTerminalFA,
+            };
             const seq = buildRARE(p);
 
             // ── Flip angle bar chart ──────────────────────────────────────
             {
                 const trainTickStep = Math.max(10, Math.ceil(etl / 6 / 10) * 10);
-                const terminalRefocusingFA = faSchedule.length
-                    ? faSchedule[faSchedule.length - 1]
-                    : 180;
-                const drivenEqPulseDefs = drivenEqMode !== 'off'
-                    ? [
-                        { label: 'DE ref', value: terminalRefocusingFA, color: 'rgba(255,120,160,0.72)' },
-                        { label: drivenEqMode === 'anti-driven' ? 'Anti-DE' : 'DE 90', value: 90, color: 'rgba(255,120,160,0.92)' },
-                    ]
-                    : [];
-                const faLabels = [
-                    'EX',
-                    ...Array.from({ length: numDummyEchoes }, (_, i) => `D${i + 1}`),
-                    ...Array.from({ length: etl }, (_, i) => String(i + 1)),
-                    ...drivenEqPulseDefs.map((pulse) => pulse.label),
-                ];
-                const faValues = [90, ...faSchedule, ...drivenEqPulseDefs.map((pulse) => pulse.value)];
+                const faLabels = pulsePlan.pulseLabels;
+                const faValues = pulsePlan.pulseSchedule;
                 const faColors = [
                     'rgba(100,160,255,0.85)',
                     ...Array.from({ length: totalTrainEchoes }, (_, i) => {
@@ -1911,7 +2001,7 @@
                         if (i < numDummyEchoes) return 'rgba(255,180,80,0.80)';
                         return 'rgba(160,100,255,0.80)';
                     }),
-                    ...drivenEqPulseDefs.map((pulse) => pulse.color),
+                    ...(drivenEqMode !== 'off' ? ['rgba(255,120,160,0.72)', 'rgba(255,120,160,0.92)'] : []),
                 ];
                 const faTickValues = [
                     'EX',
@@ -1934,22 +2024,23 @@
                     '<div class="rare-fa-legend-item"><span class="rare-fa-swatch" style="background:rgba(100,160,255,0.85)"></span>Excitation</div>',
                     ...(numStartupEchoes > 0 ? ['<div class="rare-fa-legend-item"><span class="rare-fa-swatch" style="background:rgba(80,210,160,0.82)"></span>PSS startup</div>'] : []),
                     ...(numDummyEchoes > 0 ? ['<div class="rare-fa-legend-item"><span class="rare-fa-swatch" style="background:rgba(255,180,80,0.80)"></span>Dummy echoes</div>'] : []),
-                    '<div class="rare-fa-legend-item"><span class="rare-fa-swatch" style="background:rgba(160,100,255,0.80)"></span>RARE train</div>',
+                    '<div class="rare-fa-legend-item"><span class="rare-fa-swatch" style="background:rgba(160,100,255,0.80)"></span>Refocusing train</div>',
                     ...(drivenEqMode !== 'off' ? ['<div class="rare-fa-legend-item"><span class="rare-fa-swatch" style="background:rgba(255,120,160,0.92)"></span>Driven equilibrium RF</div>'] : []),
                 ].join('');
 
                 const svgEl = document.querySelector('#rare-fa-chart svg');
                 if (svgEl && scheme === 'custom') {
+                    const customPulseCount = totalTrainEchoes + (drivenEqMode !== 'off' ? 1 : 0);
                     _faCtrlPtHandle = D3SeqPlots.addFAControlPoints(svgEl, {
                         xScale: faPlot.xScale,
                         yScale: faPlot.yScale,
-                        etl: postStartupEchoes,
-                        xOffset: 0,
+                        pulseCount: customPulseCount,
+                        xOffset: 1,
                         yMin: 0,
                         yMax: 180,
-                        points: normalizeCustomNodes(_customNodes, postStartupEchoes),
+                        points: normalizeCustomNodes(_customNodes, customPulseCount),
                         onDragEnd: (newPts) => {
-                            _customNodes = normalizeCustomNodes(newPts, postStartupEchoes);
+                            _customNodes = normalizeCustomNodes(newPts, customPulseCount);
                             requestRARESimulation(0);
                         },
                     });
@@ -2064,8 +2155,17 @@
                 if (note) note.style.opacity = pssDisabled ? '0.55' : '';
             }
 
+            function syncRareCustomPulseControls() {
+                const deSlider = document.getElementById('rare-custom-de-fa');
+                const deValue = document.getElementById('rare-custom-de-fa-value');
+                const enabled = readRareDrivenEqMode() !== 'off';
+                if (deSlider) deSlider.disabled = !enabled;
+                if (deValue) deValue.style.opacity = enabled ? '' : '0.55';
+            }
+
             setupRareDrivenEqControl();
             syncRareTRControl();
+            syncRareCustomPulseControls();
 
             document.getElementById('rare-fa-scheme').addEventListener('change', function () {
                 applySchemeVisibility(this.value);
@@ -2073,6 +2173,7 @@
                 if (this.value === 'custom')    _customNodes = null;
                 if (this.value === 't2optimal') _mxyCtrlPts  = null;
                 syncRarePSSControls();
+                syncRareCustomPulseControls();
                 requestRARESimulation(0);
             });
 
@@ -2084,22 +2185,32 @@
             document.getElementById('rare-custom-add-node').addEventListener('click', function () {
                 const etl = window.AppState ? window.AppState.params.etl : 72;
                 const numDummyEchoes = parseInt(document.getElementById('rare-dummy-echoes').value);
-                const postStartupEchoes = etl + numDummyEchoes;
-                if (!_customNodes) { _customNodes = defaultCustomNodes(postStartupEchoes); }
-                const sorted = [..._customNodes].sort((a, b) => a.echoIndex - b.echoIndex);
+                const drivenEqMode = readRareDrivenEqMode();
+                const pulseCount = etl + numDummyEchoes + (drivenEqMode !== 'off' ? 1 : 0);
+                if (!_customNodes) { _customNodes = defaultCustomNodes(pulseCount); }
+                const sorted = [..._customNodes].sort((a, b) => a.pulseIndex - b.pulseIndex);
+                if (drivenEqMode !== 'off' && !sorted.some((node) => node.pulseIndex === pulseCount)) {
+                    const lastNode = sorted[sorted.length - 1] || { fa: 180 };
+                    _customNodes = normalizeCustomNodes([
+                        ..._customNodes,
+                        { pulseIndex: pulseCount, fa: lastNode.fa },
+                    ], pulseCount);
+                    requestRARESimulation(0);
+                    return;
+                }
                 // Find the largest gap between adjacent nodes (or edges)
                 const gaps = [];
-                if (sorted[0].echoIndex > 1)
-                    gaps.push({ lo: 1, hi: sorted[0].echoIndex, loFA: sorted[0].fa, hiFA: sorted[0].fa });
+                if (sorted[0].pulseIndex > 1)
+                    gaps.push({ lo: 1, hi: sorted[0].pulseIndex, loFA: sorted[0].fa, hiFA: sorted[0].fa });
                 for (let i = 0; i < sorted.length - 1; i++)
-                    gaps.push({ lo: sorted[i].echoIndex, hi: sorted[i + 1].echoIndex, loFA: sorted[i].fa, hiFA: sorted[i + 1].fa });
-                if (sorted[sorted.length - 1].echoIndex < postStartupEchoes)
-                    gaps.push({ lo: sorted[sorted.length - 1].echoIndex, hi: postStartupEchoes, loFA: sorted[sorted.length - 1].fa, hiFA: sorted[sorted.length - 1].fa });
+                    gaps.push({ lo: sorted[i].pulseIndex, hi: sorted[i + 1].pulseIndex, loFA: sorted[i].fa, hiFA: sorted[i + 1].fa });
+                if (sorted[sorted.length - 1].pulseIndex < pulseCount)
+                    gaps.push({ lo: sorted[sorted.length - 1].pulseIndex, hi: pulseCount, loFA: sorted[sorted.length - 1].fa, hiFA: sorted[sorted.length - 1].fa });
                 gaps.sort((a, b) => (b.hi - b.lo) - (a.hi - a.lo));
                 const best = gaps[0];
-                const midEcho = Math.round((best.lo + best.hi) / 2);
+                const midPulse = Math.round((best.lo + best.hi) / 2);
                 const midFA   = (best.loFA + best.hiFA) / 2;
-                _customNodes = normalizeCustomNodes([..._customNodes, { echoIndex: midEcho, fa: midFA }], postStartupEchoes);
+                _customNodes = normalizeCustomNodes([..._customNodes, { pulseIndex: midPulse, fa: midFA }], pulseCount);
                 requestRARESimulation(0);
             });
 
@@ -2113,6 +2224,8 @@
                 ['rare-fa-start', 'rare-fa-start-value'],
                 ['rare-fa-end',   'rare-fa-end-value'],
                 ['rare-numSims',  'rare-numSims-value'],
+                ['rare-custom-exc-fa', 'rare-custom-exc-fa-value'],
+                ['rare-custom-de-fa', 'rare-custom-de-fa-value'],
             ].forEach(([id, valId]) => {
                 const sl = document.getElementById(id);
                 const sp = document.getElementById(valId);
@@ -2125,10 +2238,12 @@
 
             document.getElementById('rare-driven-eq')?.addEventListener('change', () => {
                 syncRareTRControl();
+                syncRareCustomPulseControls();
                 requestRARESimulation(0);
             });
 
             syncRarePSSControls();
+            syncRareCustomPulseControls();
 
             if (document.getElementById('tab-rare')?.classList.contains('active')) {
                 requestRARESimulation(0);

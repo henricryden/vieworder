@@ -515,8 +515,8 @@
     // ─── addFAControlPoints ──────────────────────────────────────────────────────
 
     /**
-     * Overlay draggable FA control nodes on a bar-plot SVG.
-     * Nodes move freely in x (snaps to echo index) and y (flip angle).
+    * Overlay draggable FA control nodes on a bar-plot SVG.
+    * Nodes move freely in x (snaps to RF pulse index) and y (flip angle).
      * Linear interpolation between nodes is shown as a connecting line.
      *
      * @param {SVGSVGElement} svgEl
@@ -524,11 +524,11 @@
      *   xScale,       // d3 band scale (from createBarPlot) — used to position nodes at band centres
      *   yScale,       // d3 linear scale  (flip angle)
      *   margin?,
-     *   etl,          // number of echoes (x snap range 1..etl)
-    *   xOffset?,     // optional number of prefixed non-acquired bars before echo 1
+    *   pulseCount,   // number of editable RF pulses (x snap range 1..pulseCount)
+     *   xOffset?,     // number of prefixed bars before pulseIndex 1
     *   yMin?,        // default 0
      *   yMax?,        // default 180
-     *   points,       // [{echoIndex, fa}]
+    *   points,       // [{pulseIndex, fa}]
      *   onDragEnd,    // callback(newPoints[])
      * }}
      * @returns {{ update(points), remove() }}
@@ -541,16 +541,13 @@
         const yMax = opts.yMax ?? 180;
         let points = opts.points.map(p => ({ ...p }));
 
-        // Map echo index (1-based) to pixel x using the band scale's band centres
-        function echoToPx(echo) {
+        // Map RF pulse index (1-based) to pixel x using the band scale's band centres.
+        function pulseToPx(pulseIndex) {
             const domain = xScale.domain ? xScale.domain() : [];
-            const label = domain[1 + xOffset + (echo - 1)] ?? String(echo);
+            const label = domain[xOffset + pulseIndex - 1] ?? String(pulseIndex);
             const x = xScale(label);
-            // xScale might be a band scale (labels = ['EX','D1','1','2',...])
-            // or a linear scale — handle both
             if (x === undefined) {
-                // fall back: treat as linear
-                return xScale(echo + xOffset) ?? 0;
+                return xScale(xOffset + pulseIndex) ?? 0;
             }
             return x + (xScale.bandwidth ? xScale.bandwidth() / 2 : 0);
         }
@@ -562,15 +559,15 @@
 
         function draw(pts) {
             g.selectAll('*').remove();
-            const sorted = [...pts].sort((a, b) => a.echoIndex - b.echoIndex);
+            const sorted = [...pts].sort((a, b) => a.pulseIndex - b.pulseIndex);
 
             // Linear interpolation preview line through all nodes
             if (sorted.length > 1) {
                 for (let i = 0; i < sorted.length - 1; i++) {
                     g.append('line').attr('class', 'fa-ctrl-line')
-                        .attr('x1', echoToPx(sorted[i].echoIndex))
+                        .attr('x1', pulseToPx(sorted[i].pulseIndex))
                         .attr('y1', yScale(sorted[i].fa))
-                        .attr('x2', echoToPx(sorted[i + 1].echoIndex))
+                        .attr('x2', pulseToPx(sorted[i + 1].pulseIndex))
                         .attr('y2', yScale(sorted[i + 1].fa))
                         .attr('stroke', 'rgba(255,180,50,0.8)')
                         .attr('stroke-width', 2)
@@ -581,7 +578,7 @@
 
             g.selectAll('circle.fa-ctrl-pt').data(pts)
                 .enter().append('circle').attr('class', 'fa-ctrl-pt')
-                .attr('cx', d => echoToPx(d.echoIndex))
+                .attr('cx', d => pulseToPx(d.pulseIndex))
                 .attr('cy', d => yScale(d.fa))
                 .attr('r', 9)
                 .attr('fill', 'rgba(255,180,50,0.9)')
@@ -592,22 +589,21 @@
                     .on('drag', function (event, d) {
                         const i = pts.indexOf(d);
                         if (i < 0) return;
-                        // x: snap to nearest echo index in [1, etl]
-                        // Invert from band scale: find closest label
-                        let bestEcho = d.echoIndex;
+                        // x: snap to nearest RF pulse index in [1, pulseCount]
+                        let bestPulse = d.pulseIndex;
                         let bestDist = Infinity;
-                        for (let e = 1; e <= opts.etl; e++) {
-                            const px = echoToPx(e);
+                        for (let pulseIndex = 1; pulseIndex <= opts.pulseCount; pulseIndex++) {
+                            const px = pulseToPx(pulseIndex);
                             const dist = Math.abs(event.x - px);
-                            if (dist < bestDist) { bestDist = dist; bestEcho = e; }
+                            if (dist < bestDist) { bestDist = dist; bestPulse = pulseIndex; }
                         }
-                        d.echoIndex = bestEcho;
+                        d.pulseIndex = bestPulse;
                         // y: clamp to [yMin, yMax]
                         d.fa = Math.max(yMin, Math.min(yMax, yScale.invert(event.y)));
                         draw(pts);
                     })
                     .on('end', function () {
-                        pts.sort((a, b) => a.echoIndex - b.echoIndex);
+                        pts.sort((a, b) => a.pulseIndex - b.pulseIndex);
                         if (opts.onDragEnd) opts.onDragEnd(pts.map(p => ({ ...p })));
                     })
                 );
