@@ -541,8 +541,8 @@
                                 <input type="hidden" id="rare-driven-eq" value="off">
                                 <div class="rare-driven-eq-group" role="group" aria-label="Driven equilibrium mode">
                                     <button type="button" class="rare-driven-eq-btn active" data-mode="off" aria-pressed="true">Off</button>
-                                    <button type="button" class="rare-driven-eq-btn" data-mode="driven" aria-pressed="false">Driven equilibrium</button>
-                                    <button type="button" class="rare-driven-eq-btn" data-mode="anti-driven" aria-pressed="false">Anti-driven equilibrium</button>
+                                    <button type="button" class="rare-driven-eq-btn" data-mode="driven" aria-pressed="false">Tip up</button>
+                                    <button type="button" class="rare-driven-eq-btn" data-mode="anti-driven" aria-pressed="false">Tip down</button>
                                 </div>
                             </div>
                         </div>
@@ -1348,10 +1348,12 @@
         }
 
         function simulate1Echo(stateClone, alpha_deg, ESP) {
-            // Starting from the pre-RF state, sample at the echo center after the
-            // second half-echo relaxation and before the final rephasing shift.
+            // Starting from the pre-RF state, sample after the final rephasing
+            // shift to match the RARE readout path used by the simulator.
             new RFPulse(alpha_deg, 0).apply(stateClone);
+            new GradientShift(1).apply(stateClone);
             new Relaxation(ESP / 2, 1000, 100).apply(stateClone);
+            new GradientShift(1).apply(stateClone);
             return Complex.magnitude(stateClone.F0());
         }
 
@@ -1383,7 +1385,7 @@
 
                 const target = Math.max(0.01, Math.min(1.05, mxyTargets[n]));
                 // Bisection: state is now pre-RF; simulate1Echo samples the same
-                // echo-center signal that buildRARE records.
+                // post-rephasing signal that buildRARE records.
                 let lo = 0, hi = 180, alpha = 90;
                 for (let iter = 0; iter < 25; iter++) {
                     alpha = (lo + hi) / 2;
@@ -1394,8 +1396,9 @@
                 }
                 faSchedule.push(Math.round(alpha * 2) / 2); // round to 0.5°
                 // Advance real state from pre-RF to the post-ADC position:
-                // RF(alpha) → Relax(ESP/2) → GradientShift(1)
+                // RF(alpha) → GradientShift(1) → Relax(ESP/2) → GradientShift(1)
                 new RFPulse(alpha, 0).apply(s);
+                new GradientShift(1).apply(s);
                 new Relaxation(ESP / 2, T1, T2).apply(s);
                 new GradientShift(1).apply(s);
             }
@@ -1584,6 +1587,12 @@
             }
         }
 
+        function getRareDrivenEqModeLabel(mode, shortLabel = false) {
+            if (mode === 'driven') return shortLabel ? 'Tip up' : 'Tip up';
+            if (mode === 'anti-driven') return shortLabel ? 'Tip down' : 'Tip down';
+            return 'Off';
+        }
+
         function setupRareDrivenEqControl() {
             const input = document.getElementById('rare-driven-eq');
             if (!input || input.dataset.bound === 'true') return;
@@ -1690,6 +1699,7 @@
                 const fa = Array.isArray(p.faSchedule) ? p.faSchedule[i] : p.refFA;
                 seq.add(new RFPulse(fa, 0));
                 seq.add(new Relaxation(p.ESP / 2, 1000, 100));
+                seq.add(new GradientShift(1));
                 const isPSS = i < numPSSEchoes;
                 const isDummy = i < numDummyEchoes;
                 const acquiredIndex = isDummy ? null : i - numDummyEchoes + 1;
@@ -1698,7 +1708,6 @@
                 if (acquiredIndex != null) {
                     seq.add(new ADC(`echo_${acquiredIndex}`));
                 }
-                seq.add(new GradientShift(1));
             }
             if (p.drivenEqMode && p.drivenEqMode !== 'off') {
                 const terminalRefocusingFA = p.drivenEqRefocusingFA ?? (
@@ -2200,8 +2209,8 @@
             document.getElementById('rare-legend-pss-mxy').style.display = numStartupEchoes > 0 ? '' : 'none';
             document.getElementById('rare-legend-dummy-mz').style.display = numDummyEchoes > 0 ? '' : 'none';
             document.getElementById('rare-legend-dummy-mxy').style.display = numDummyEchoes > 0 ? '' : 'none';
-            document.getElementById('rare-driven-eq-label-mz').textContent = drivenEqMode === 'anti-driven' ? 'Anti-driven equilibrium' : 'Driven equilibrium';
-            document.getElementById('rare-driven-eq-label-mxy').textContent = drivenEqMode === 'anti-driven' ? 'Anti-driven equilibrium' : 'Driven equilibrium';
+            document.getElementById('rare-driven-eq-label-mz').textContent = getRareDrivenEqModeLabel(drivenEqMode);
+            document.getElementById('rare-driven-eq-label-mxy').textContent = getRareDrivenEqModeLabel(drivenEqMode);
             document.getElementById('rare-legend-driven-eq-mz').style.display = drivenEqMode !== 'off' ? '' : 'none';
             document.getElementById('rare-legend-driven-eq-mxy').style.display = drivenEqMode !== 'off' ? '' : 'none';
 
@@ -2381,7 +2390,7 @@
                 ...(numStartupEchoes > 0 ? [{ xStart: 0, xEnd: pssEnd, color: 'rgba(80,210,160,0.12)', label: 'PSS startup' }] : []),
                 ...(numDummyEchoes > 0 ? [{ xStart: 0, xEnd: dummyEnd, color: 'rgba(255,180,80,0.12)', label: 'Dummy echoes' }] : []),
                 { xStart: dummyEnd, xEnd: trainEnd, color: 'rgba(100,200,255,0.12)', label: 'RARE acquired' },
-                ...(drivenEqMode !== 'off' ? [{ xStart: trainEnd, xEnd: drivenEqEnd, color: 'rgba(255,120,160,0.12)', label: drivenEqMode === 'anti-driven' ? 'Anti-driven eq' : 'Driven eq' }] : []),
+                ...(drivenEqMode !== 'off' ? [{ xStart: trainEnd, xEnd: drivenEqEnd, color: 'rgba(255,120,160,0.12)', label: getRareDrivenEqModeLabel(drivenEqMode) }] : []),
                 { xStart: drivenEqMode !== 'off' ? drivenEqEnd : trainEnd, xEnd: totalTime, color: 'rgba(100,255,100,0.12)', label: 'Recovery' },
             ];
 
