@@ -357,6 +357,30 @@ select:focus { outline: none; border-color: var(--red); }
   color: var(--red);
 }
 
+.rare-steady-state-progress-control {
+  gap: 6px;
+}
+
+.rare-steady-state-progress-track {
+  height: 4px;
+  background: var(--rule);
+  position: relative;
+  overflow: hidden;
+}
+
+.rare-steady-state-progress-bar {
+  height: 100%;
+  width: 0%;
+  background: var(--red);
+  transition: width 0.12s linear;
+}
+
+.rare-steady-state-progress-label {
+  font-size: 11px;
+  color: var(--ink-light);
+  min-height: 16px;
+}
+
 .plot-controls {
   display: grid;
   grid-template-columns: repeat(2, 1fr);

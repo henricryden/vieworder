@@ -498,7 +498,7 @@
                         <div class="params-fields-col">
                             <div class="control-group">
                                 <label>TR <span class="value" id="rare-tr-value">3000</span> ms</label>
-                                <input type="range" id="rare-tr" min="1000" max="8000" value="3000" step="500" class="slider">
+                                <input type="range" id="rare-tr" min="1000" max="8000" value="3000" step="10" class="slider">
                             </div>
                             <div class="control-group">
                                     <label>Echo spacing (ESP) <span class="value" id="rare-esp-value">5</span> ms</label>
@@ -525,9 +525,16 @@
                                 <label>Dummy echoes <span class="value" id="rare-dummy-echoes-value">0</span></label>
                                     <input type="range" id="rare-dummy-echoes" min="0" max="40" value="0" step="1" class="slider">
                             </div>
-                            <div class="control-group">
+                            <div class="control-group" id="rare-numSims-control">
                                 <label>Steady-state cycles <span class="value" id="rare-numSims-value">4</span></label>
                                 <input type="range" id="rare-numSims" min="1" max="20" value="4" step="1" class="slider">
+                            </div>
+                            <div class="control-group rare-steady-state-progress-control" id="rare-steady-state-progress-control" style="display:none;">
+                                <label>Steady-state convergence <span class="value" id="rare-steady-state-progress-value">Auto</span></label>
+                                <div class="rare-steady-state-progress-track">
+                                    <div class="rare-steady-state-progress-bar" id="rare-steady-state-progress-bar"></div>
+                                </div>
+                                <div class="rare-steady-state-progress-label" id="rare-steady-state-progress-label">Driven equilibrium uses automatic steady-state detection.</div>
                             </div>
                             <div class="control-group">
                                 <label for="rare-driven-eq">Driven equilibrium</label>
@@ -1341,12 +1348,10 @@
         }
 
         function simulate1Echo(stateClone, alpha_deg, ESP) {
-            // Apply RF → dephase → relax ESP/2 → rephase → relax ESP/2 (simplified)
-            // Returns magnitude of F0
+            // Starting from the pre-RF state, sample at the echo center after the
+            // second half-echo relaxation and before the final rephasing shift.
             new RFPulse(alpha_deg, 0).apply(stateClone);
-            new GradientShift(1).apply(stateClone);
             new Relaxation(ESP / 2, 1000, 100).apply(stateClone);
-            new GradientShift(1).apply(stateClone);
             return Complex.magnitude(stateClone.F0());
         }
 
@@ -1377,7 +1382,8 @@
                 new Relaxation(ESP / 2, T1, T2).apply(s);
 
                 const target = Math.max(0.01, Math.min(1.05, mxyTargets[n]));
-                // Bisection: state is now pre-RF; simulate1Echo applies RF → GradSh → Relax → GradSh
+                // Bisection: state is now pre-RF; simulate1Echo samples the same
+                // echo-center signal that buildRARE records.
                 let lo = 0, hi = 180, alpha = 90;
                 for (let iter = 0; iter < 25; iter++) {
                     alpha = (lo + hi) / 2;
@@ -1387,8 +1393,8 @@
                     if (hi - lo < 0.5) break;
                 }
                 faSchedule.push(Math.round(alpha * 2) / 2); // round to 0.5°
-                // Advance real state from pre-RF to post-ADC position:
-                // RF(alpha) → GradientShift(1) → Relax(ESP/2) → GradientShift(1)
+                // Advance real state from pre-RF to the post-ADC position:
+                // RF(alpha) → Relax(ESP/2) → GradientShift(1)
                 new RFPulse(alpha, 0).apply(s);
                 new Relaxation(ESP / 2, T1, T2).apply(s);
                 new GradientShift(1).apply(s);
@@ -1622,6 +1628,33 @@
             return minTR;
         }
 
+        function syncRareSteadyStateCyclesControl() {
+            const numSimsControl = document.getElementById('rare-numSims-control');
+            const progressControl = document.getElementById('rare-steady-state-progress-control');
+            const numSimsInput = document.getElementById('rare-numSims');
+            const numSimsValue = document.getElementById('rare-numSims-value');
+            if (!numSimsInput) return;
+
+            const drivenEqMode = readRareDrivenEqMode();
+            const manualMode = drivenEqMode === 'off';
+            const targetMax = 20;
+            const currentValue = parseInt(numSimsInput.value || '4', 10);
+            const targetValue = String(Math.max(1, Math.min(targetMax, Number.isFinite(currentValue) ? currentValue : 4)));
+            const prevMax = parseInt(numSimsInput.max || '0', 10);
+
+            numSimsInput.max = String(targetMax);
+            numSimsInput.value = targetValue;
+            if (numSimsValue) numSimsValue.textContent = targetValue;
+            if (numSimsControl) numSimsControl.style.display = manualMode ? '' : 'none';
+            if (progressControl) progressControl.style.display = manualMode ? 'none' : '';
+
+            resetRareSteadyStateProgress();
+
+            if (prevMax !== targetMax) {
+                window.App?.renderAllSliderTicks?.();
+            }
+        }
+
         function buildPSSSchedule(pssConfig, plateauFA) {
             if (!pssConfig || !pssConfig.enabled || pssConfig.count <= 0) return [];
             const startFA = pssConfig.startFA;
@@ -1657,7 +1690,6 @@
                 const fa = Array.isArray(p.faSchedule) ? p.faSchedule[i] : p.refFA;
                 seq.add(new RFPulse(fa, 0));
                 seq.add(new Relaxation(p.ESP / 2, 1000, 100));
-                seq.add(new GradientShift(1));
                 const isPSS = i < numPSSEchoes;
                 const isDummy = i < numDummyEchoes;
                 const acquiredIndex = isDummy ? null : i - numDummyEchoes + 1;
@@ -1666,6 +1698,7 @@
                 if (acquiredIndex != null) {
                     seq.add(new ADC(`echo_${acquiredIndex}`));
                 }
+                seq.add(new GradientShift(1));
             }
             if (p.drivenEqMode && p.drivenEqMode !== 'off') {
                 const terminalRefocusingFA = p.drivenEqRefocusingFA ?? (
@@ -1709,9 +1742,8 @@
             return n;
         }
 
-        function simulateRAREEchoTrain(seq, T1, T2, initState, PD) {
-            const ts = cloneWithTissueRARE(seq, T1, T2);
-            const s  = initState || new StateMatrix(20);
+        function createRareInitialState(initState, PD) {
+            const s = initState || new StateMatrix(20);
             if (!initState && PD !== 1.0) {
                 for (const st of s.states()) {
                     st[0].real *= PD; st[0].imag *= PD;
@@ -1719,9 +1751,125 @@
                     st[2].real *= PD; st[2].imag *= PD;
                 }
             }
+            return s;
+        }
+
+        const RARE_STEADY_STATE_TOLERANCE = 1.5e-3;
+        const RARE_STEADY_STATE_MAX_CYCLES = 24;
+        let _rareSteadyStateSummary = null;
+
+        function getRareSteadyStateReferenceTissue(tissues) {
+            return tissues.find((t) => String(t.name).toLowerCase() === 'csf') || tissues[0] || null;
+        }
+
+        function computeRareStateDelta(a, b) {
+            if (!a || !b) return Infinity;
+            let maxDelta = Math.max(
+                Math.abs(a.Z0().real - b.Z0().real),
+                Math.abs(Complex.magnitude(a.F0()) - Complex.magnitude(b.F0()))
+            );
+
+            for (const offset of [1, 2]) {
+                const aState = a.getState(offset);
+                const bState = b.getState(offset);
+                if (!aState || !bState) continue;
+
+                maxDelta = Math.max(
+                    maxDelta,
+                    Math.abs(Complex.magnitude(aState[0]) - Complex.magnitude(bState[0])),
+                    Math.abs(Complex.magnitude(aState[1]) - Complex.magnitude(bState[1])),
+                    Math.abs(aState[2].real - bState[2].real)
+                );
+            }
+
+            return maxDelta;
+        }
+
+        function setRareSteadyStateProgress({ fraction = 0, label = 'Auto', detail = '' } = {}) {
+            const bar = document.getElementById('rare-steady-state-progress-bar');
+            const value = document.getElementById('rare-steady-state-progress-value');
+            const detailLabel = document.getElementById('rare-steady-state-progress-label');
+            if (bar) bar.style.width = `${Math.max(0, Math.min(1, fraction)) * 100}%`;
+            if (value) value.textContent = label;
+            if (detailLabel && detail) detailLabel.textContent = detail;
+        }
+
+        function resetRareSteadyStateProgress() {
+            const drivenEqMode = readRareDrivenEqMode();
+            if (drivenEqMode === 'off') {
+                setRareSteadyStateProgress({
+                    fraction: 0,
+                    label: 'Manual',
+                    detail: 'Set steady-state cycles manually when driven equilibrium is off.',
+                });
+                return;
+            }
+
+            if (_rareSteadyStateSummary) {
+                const cycleText = _rareSteadyStateSummary.minCycles === _rareSteadyStateSummary.maxCycles
+                    ? `${_rareSteadyStateSummary.maxCycles} cycles`
+                    : `${_rareSteadyStateSummary.minCycles}-${_rareSteadyStateSummary.maxCycles} cycles`;
+                setRareSteadyStateProgress({
+                    fraction: 1,
+                    label: cycleText,
+                    detail: _rareSteadyStateSummary.converged
+                        ? `Auto steady state found from ${_rareSteadyStateSummary.referenceLabel}.`
+                        : `Used the ${RARE_STEADY_STATE_MAX_CYCLES}-cycle cap for ${_rareSteadyStateSummary.referenceLabel}.`,
+                });
+                return;
+            }
+
+            setRareSteadyStateProgress({
+                fraction: 0,
+                label: 'Auto',
+                detail: 'Driven equilibrium uses automatic steady-state detection.',
+            });
+        }
+
+        async function findRareSteadyStateAsync(tissueSeq, PD, progressCallback) {
+            let previousState = null;
+            let currentState = null;
+            let delta = Infinity;
+
+            for (let cycle = 1; cycle <= RARE_STEADY_STATE_MAX_CYCLES; cycle++) {
+                currentState = simulateRAREStateWithTissueSeq(tissueSeq, currentState ? currentState.clone() : null, PD);
+                delta = previousState ? computeRareStateDelta(currentState, previousState) : Infinity;
+                const converged = cycle > 1 && delta <= RARE_STEADY_STATE_TOLERANCE;
+                if (progressCallback) {
+                    progressCallback({ cycle, maxCycles: RARE_STEADY_STATE_MAX_CYCLES, delta, converged });
+                }
+                if (converged) {
+                    return { state: currentState, cycles: cycle, delta, converged: true };
+                }
+                previousState = currentState.clone();
+                await new Promise((resolve) => requestAnimationFrame(resolve));
+            }
+
+            return { state: currentState, cycles: RARE_STEADY_STATE_MAX_CYCLES, delta, converged: false };
+        }
+
+        function findRareSteadyStateSync(tissueSeq, PD) {
+            let previousState = null;
+            let currentState = null;
+            let delta = Infinity;
+
+            for (let cycle = 1; cycle <= RARE_STEADY_STATE_MAX_CYCLES; cycle++) {
+                currentState = simulateRAREStateWithTissueSeq(tissueSeq, currentState ? currentState.clone() : null, PD);
+                delta = previousState ? computeRareStateDelta(currentState, previousState) : Infinity;
+                if (cycle > 1 && delta <= RARE_STEADY_STATE_TOLERANCE) {
+                    return { state: currentState, cycles: cycle, delta, converged: true };
+                }
+                previousState = currentState.clone();
+            }
+
+            return { state: currentState, cycles: RARE_STEADY_STATE_MAX_CYCLES, delta, converged: false };
+        }
+
+        function simulateRAREEchoTrainWithTissueSeq(tissueSeq, initState, PD) {
+            const s = createRareInitialState(initState, PD);
             const timeline = [];
             let t = 0;
-            for (const op of ts.operators) {
+            for (const op of tissueSeq.operators) {
                 if (op instanceof RareEchoSampleMarker) {
                     const f0 = s.F0();
                     timeline.push({
@@ -1736,31 +1884,29 @@
                         MxyIm: f0.imag,
                     });
                 }
-                if (op instanceof ADC) {
-                    // ADCs are still used for acquired-only consumers elsewhere, but plotting
-                    // samples come from RareEchoSampleMarker so dummy echoes can be shown too.
-                }
                 op.apply(s);
                 if (op instanceof Relaxation) t += op.tau;
             }
             return { timeline, finalState: s };
         }
 
-        function simulateFullSequenceRAREWithState(seq, T1, T2, initState, PD) {
-            const ts = cloneWithTissueRARE(seq, T1, T2);
-            const s  = initState || new StateMatrix(20);
-            if (!initState && PD !== 1.0) {
-                for (const st of s.states()) {
-                    st[0].real *= PD; st[0].imag *= PD;
-                    st[1].real *= PD; st[1].imag *= PD;
-                    st[2].real *= PD; st[2].imag *= PD;
-                }
-            }
+        function simulateRAREStateWithTissueSeq(tissueSeq, initState, PD) {
+            const s = createRareInitialState(initState, PD);
+            for (const op of tissueSeq.operators) op.apply(s);
+            return s;
+        }
+
+        function simulateRAREEchoTrain(seq, T1, T2, initState, PD) {
+            return simulateRAREEchoTrainWithTissueSeq(cloneWithTissueRARE(seq, T1, T2), initState, PD);
+        }
+
+        function simulateFullSequenceRAREWithTissueSeq(tissueSeq, initState, PD) {
+            const s = createRareInitialState(initState, PD);
             const timeline = [];
             let ct = 0;
             let phase = 'prep';
 
-            for (const op of ts.operators) {
+            for (const op of tissueSeq.operators) {
                 if (op instanceof RareEchoSampleMarker) {
                     timeline.push({
                         time: ct,
@@ -1773,10 +1919,6 @@
                         acquiredIndex: op.acquiredIndex,
                     });
                 }
-                if (op instanceof ADC) {
-                    // Keep ADCs in the sequence for acquisition semantics, but full-train plotting
-                    // is driven by RareEchoSampleMarker so dummy echoes are visible.
-                }
                 if (op instanceof Relaxation && op.tau > 100) {
                     const t0  = ct;
                     const Mz0 = s.Z0().real;
@@ -1785,7 +1927,7 @@
                     for (let dt = 0; dt <= op.tau; dt += step) {
                         timeline.push({
                             time: t0 + dt,
-                            Mz:  1 - (1 - Mz0) * Math.exp(-dt / T1),
+                            Mz:  1 - (1 - Mz0) * Math.exp(-dt / op.T1),
                             Mxy: 0,
                             phase: 'recovery',
                         });
@@ -1798,6 +1940,10 @@
                 }
             }
             return { timeline, totalTime: ct, finalState: s };
+        }
+
+        function simulateFullSequenceRAREWithState(seq, T1, T2, initState, PD) {
+            return simulateFullSequenceRAREWithTissueSeq(cloneWithTissueRARE(seq, T1, T2), initState, PD);
         }
 
         function getRARESignals(appParams) {
@@ -1836,11 +1982,24 @@
                 drivenEqTerminalFA: pulsePlan.drivenEqTerminalFA,
             };
             const seq = buildRARE(p);
+            const activeTissues = window.PhantomState.tissues.filter(t => t.enabled !== false);
+            const tissueSeqs = Object.fromEntries(activeTissues.map((t) => [
+                t.name,
+                cloneWithTissueRARE(seq, t.T1, t.T2),
+            ]));
+            let burnInCycles = Math.max(0, numSims - 1);
+            if (drivenEqMode !== 'off') {
+                const referenceTissue = getRareSteadyStateReferenceTissue(activeTissues);
+                const referenceResult = findRareSteadyStateSync(tissueSeqs[referenceTissue.name], referenceTissue.PD);
+                burnInCycles = Math.max(0, referenceResult.cycles - 1);
+            }
             const result = {};
-            for (const t of window.PhantomState.tissues.filter(t => t.enabled !== false)) {
-                let st = null;
-                for (let i = 0; i < numSims; i++)
-                    st = simulateRAREEchoTrain(seq, t.T1, t.T2, st ? st.finalState : null, t.PD);
+            for (const t of activeTissues) {
+                let steadyState = null;
+                for (let i = 0; i < burnInCycles; i++) {
+                    steadyState = simulateRAREStateWithTissueSeq(tissueSeqs[t.name], steadyState, t.PD);
+                }
+                const st = simulateRAREEchoTrainWithTissueSeq(tissueSeqs[t.name], steadyState ? steadyState.clone() : null, t.PD);
                 const MxyComplex = new Float32Array(etl * 2);
                 st.timeline.filter(pt => pt.acquiredIndex != null).forEach((pt) => {
                     const idx = pt.acquiredIndex - 1;
@@ -2067,6 +2226,13 @@
                 drivenEqTerminalFA: pulsePlan.drivenEqTerminalFA,
             };
             const seq = buildRARE(p);
+            const rareActiveTissues = window.PhantomState.tissues.filter(t => t.enabled !== false);
+            const tissueSeqs = Object.fromEntries(rareActiveTissues.map((t) => [
+                t.name,
+                cloneWithTissueRARE(seq, t.T1, t.T2),
+            ]));
+            _rareSteadyStateSummary = null;
+            resetRareSteadyStateProgress();
 
             // ── Flip angle bar chart ──────────────────────────────────────
             {
@@ -2127,12 +2293,53 @@
             }
 
             // ── Echo train for enabled tissues ────────────────────────────
-            const rareActiveTissues = window.PhantomState.tissues.filter(t => t.enabled !== false);
+            const steadyStates = {};
+            if (drivenEqMode === 'off') {
+                for (const t of rareActiveTissues) {
+                    let steadyState = null;
+                    for (let i = 0; i < Math.max(0, numSims - 1); i++) {
+                        steadyState = simulateRAREStateWithTissueSeq(tissueSeqs[t.name], steadyState, t.PD);
+                    }
+                    steadyStates[t.name] = steadyState;
+                }
+            } else {
+                const referenceTissue = getRareSteadyStateReferenceTissue(rareActiveTissues);
+                const referenceResult = await findRareSteadyStateAsync(
+                    tissueSeqs[referenceTissue.name],
+                    referenceTissue.PD,
+                    ({ cycle, maxCycles }) => {
+                        setRareSteadyStateProgress({
+                            fraction: cycle / maxCycles,
+                            label: `${cycle}/${maxCycles}`,
+                            detail: `Finding steady state for ${referenceTissue.label}...`,
+                        });
+                    }
+                );
+                const burnInCycles = Math.max(0, referenceResult.cycles - 1);
+                for (const t of rareActiveTissues) {
+                    let steadyState = null;
+                    for (let i = 0; i < burnInCycles; i++) {
+                        steadyState = simulateRAREStateWithTissueSeq(tissueSeqs[t.name], steadyState, t.PD);
+                    }
+                    steadyStates[t.name] = steadyState;
+                }
+                _rareSteadyStateSummary = {
+                    tissueCount: rareActiveTissues.length,
+                    minCycles: referenceResult.cycles,
+                    maxCycles: referenceResult.cycles,
+                    converged: referenceResult.converged,
+                    referenceLabel: referenceTissue.label,
+                };
+                resetRareSteadyStateProgress();
+            }
+
             const echoResults = {};
             for (const t of rareActiveTissues) {
-                let st = null;
-                for (let i = 0; i < numSims; i++)
-                    st = simulateRAREEchoTrain(seq, t.T1, t.T2, st ? st.finalState : null, t.PD);
+                const st = simulateRAREEchoTrainWithTissueSeq(
+                    tissueSeqs[t.name],
+                    steadyStates[t.name] ? steadyStates[t.name].clone() : null,
+                    t.PD
+                );
                 echoResults[t.name] = st.timeline;
                 await new Promise(r => setTimeout(r, 0)); // yield to browser between tissues
             }
@@ -2156,10 +2363,11 @@
             const fullSel = rareActiveTissues;
             const fullRes = {};
             for (const t of fullSel) {
-                let st = null;
-                for (let i = 0; i < numSims; i++)
-                    st = simulateFullSequenceRAREWithState(seq, t.T1, t.T2, st ? st.finalState : null, t.PD);
-                fullRes[t.name] = st;
+                fullRes[t.name] = simulateFullSequenceRAREWithTissueSeq(
+                    tissueSeqs[t.name],
+                    steadyStates[t.name] ? steadyStates[t.name].clone() : null,
+                    t.PD
+                );
                 await new Promise(r => setTimeout(r, 0)); // yield to browser between tissues
             }
             console.log(`[RARE] full seq sim in ${(performance.now() - t1).toFixed(0)} ms`);
@@ -2246,6 +2454,7 @@
 
             setupRareDrivenEqControl();
             syncRareTRControl();
+            syncRareSteadyStateCyclesControl();
             syncRareCustomPulseControls();
 
             document.getElementById('rare-fa-scheme').addEventListener('change', function () {
@@ -2310,15 +2519,28 @@
             ].forEach(([id, valId]) => {
                 const sl = document.getElementById(id);
                 const sp = document.getElementById(valId);
-                if (sl && sp) sl.addEventListener('input', () => {
+                if (!sl || !sp) return;
+
+                sl.addEventListener('input', () => {
                     syncRareTRControl();
                     sp.textContent = sl.value;
-                    requestRARESimulation();
+                    if (id !== 'rare-tr') {
+                        requestRARESimulation();
+                    }
                 });
+
+                if (id === 'rare-tr') {
+                    sl.addEventListener('change', () => {
+                        syncRareTRControl();
+                        sp.textContent = sl.value;
+                        requestRARESimulation(0);
+                    });
+                }
             });
 
             document.getElementById('rare-driven-eq')?.addEventListener('change', () => {
                 syncRareTRControl();
+                syncRareSteadyStateCyclesControl();
                 syncRareCustomPulseControls();
                 requestRARESimulation(0);
             });
