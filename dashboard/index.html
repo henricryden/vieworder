@@ -526,8 +526,8 @@
                                     <input type="range" id="rare-dummy-echoes" min="0" max="40" value="0" step="1" class="slider">
                             </div>
                             <div class="control-group">
-                                <label>Steady-state cycles <span class="value" id="rare-numSims-value">20</span></label>
-                                <input type="range" id="rare-numSims" min="1" max="20" value="20" step="1" class="slider">
+                                <label>Steady-state cycles <span class="value" id="rare-numSims-value">4</span></label>
+                                <input type="range" id="rare-numSims" min="1" max="20" value="4" step="1" class="slider">
                             </div>
                             <div class="control-group">
                                 <label for="rare-driven-eq">Driven equilibrium</label>
@@ -2134,6 +2134,7 @@
                 for (let i = 0; i < numSims; i++)
                     st = simulateRAREEchoTrain(seq, t.T1, t.T2, st ? st.finalState : null, t.PD);
                 echoResults[t.name] = st.timeline;
+                await new Promise(r => setTimeout(r, 0)); // yield to browser between tissues
             }
             console.log(`[RARE] echo train sim in ${(performance.now() - t0).toFixed(0)} ms`);
 
@@ -2159,6 +2160,7 @@
                 for (let i = 0; i < numSims; i++)
                     st = simulateFullSequenceRAREWithState(seq, t.T1, t.T2, st ? st.finalState : null, t.PD);
                 fullRes[t.name] = st;
+                await new Promise(r => setTimeout(r, 0)); // yield to browser between tissues
             }
             console.log(`[RARE] full seq sim in ${(performance.now() - t1).toFixed(0)} ms`);
 
