@@ -562,11 +562,11 @@ const App = (() => {
      * Update all plots based on current parameters
      */
     function updatePlots() {
-        // Render immediately (spinner disabled for fast updates)
         // Use setTimeout to yield to browser briefly for UI updates
         setTimeout(() => {
-            // Generate coordinates with new parameters
-            // Use separate Ry and Rz for ky and kz acceleration
+            const t0 = performance.now();
+
+            // Generate coordinates
             currentCoords = KSpaceUtils.generateCoordinates(
                 currentParams.ky,
                 currentParams.kz,
@@ -577,7 +577,8 @@ const App = (() => {
                 currentParams.calibrationSize,
                 currentParams.kzPF
             );
-            
+            const t1 = performance.now();
+
             // Assign view ordering
             currentCoords = KSpaceUtils.assignViewOrdering(
                 currentCoords,
@@ -587,6 +588,7 @@ const App = (() => {
                 currentParams.mtfDirection,
                 currentParams.shotOrder
             );
+            const t2 = performance.now();
 
             // If Sequential mode, derive the center echo from the centermost coordinate
             if (currentParams.ordering === 'sequential' && currentCoords.length > 0) {
@@ -613,18 +615,48 @@ const App = (() => {
                     }
                 }
             }
-            
-            // Update plots
+
+            // Render plots
             D3Plots.plotByShotNumber(currentCoords);
+            const t3 = performance.now();
+
             D3Plots.plotByEchoNumber(currentCoords);
+            const t4 = performance.now();
+
             // Redraw highlights on top according to current selection
             D3Plots.drawHighlights();
-            
+
             // Update info panel
             updateInfoPanel();
-            
-            // spinner disabled
+
+            // Update perf panel
+            updatePerfPanel({
+                gen:    t1 - t0,
+                assign: t2 - t1,
+                shot:   t3 - t2,
+                echo:   t4 - t3,
+            });
         }, 0);
+    }
+
+    /**
+     * Display per-stage timing in the performance panel
+     */
+    function updatePerfPanel(times) {
+        const total = times.gen + times.assign + times.shot + times.echo;
+        const fmt = (ms) => ms.toFixed(1);
+        const pct = (ms) => total > 0 ? (ms / total * 100).toFixed(0) + '%' : '—';
+
+        const set = (id, val) => { const el = document.getElementById(id); if (el) el.textContent = val; };
+        set('perf-gen',        fmt(times.gen));
+        set('perf-gen-pct',    pct(times.gen));
+        set('perf-assign',     fmt(times.assign));
+        set('perf-assign-pct', pct(times.assign));
+        set('perf-shot',       fmt(times.shot));
+        set('perf-shot-pct',   pct(times.shot));
+        set('perf-echo',       fmt(times.echo));
+        set('perf-echo-pct',   pct(times.echo));
+        set('perf-total',      fmt(total));
     }
     
     /**

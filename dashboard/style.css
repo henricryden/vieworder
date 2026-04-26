@@ -471,6 +471,44 @@ select:focus { outline: none; border-color: var(--red); }
   font-size: 13px;
 }
 
+/* ── Performance panel ─────────────────────────────────────── */
+.perf-panel {
+  background: #1a1a1a;
+  color: #ccc;
+  padding: 10px 16px;
+  margin-top: 2px;
+  font-family: var(--mono);
+  font-size: 12px;
+}
+.perf-panel summary {
+  cursor: pointer;
+  color: #aaa;
+  user-select: none;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+.perf-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 6px;
+}
+.perf-table th {
+  text-align: left;
+  color: #888;
+  font-weight: normal;
+  padding: 1px 8px 1px 0;
+  border-bottom: 1px solid #333;
+  font-size: 11px;
+}
+.perf-table td {
+  padding: 2px 8px 2px 0;
+  min-width: 60px;
+}
+.perf-table tr:nth-child(even) td { color: #ddd; }
+.perf-table tr.perf-total td { border-top: 1px solid #444; color: #fff; padding-top: 4px; }
+/* bar encoded via inline background on the ms cell */
+
 .spinner {
   position: fixed;
   top: 0;

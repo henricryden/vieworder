@@ -290,12 +290,7 @@ const D3Plots = (() => {
      * Draw title and axes on canvas
      */
     function drawAxes(ctx, xScale, yScale, title) {
-        // Clear canvas
-        ctx.clearRect(0, 0, totalWidth, totalHeight);
-        
-        // Set background (neutral gray)
-        ctx.fillStyle = '#f3f3f3';
-        ctx.fillRect(0, 0, totalWidth, totalHeight);
+        // Background is already set by drawPointsAsImage (or cleared for axes-only call)
         
         // Draw title
         ctx.fillStyle = 'black';
@@ -386,6 +381,62 @@ const D3Plots = (() => {
     }
     
     /**
+     * Build a Uint8Array color LUT: index -> [r, g, b], size (maxVal+1)*3
+     */
+    function buildColorLUT(colorScale, maxVal) {
+        const lut = new Uint8Array((maxVal + 1) * 3);
+        for (let i = 0; i <= maxVal; i++) {
+            const c = d3.color(colorScale(i));
+            lut[i * 3]     = c.r;
+            lut[i * 3 + 1] = c.g;
+            lut[i * 3 + 2] = c.b;
+        }
+        return lut;
+    }
+
+    /**
+     * Draw coords into ctx using an ImageData pixel buffer (fast path).
+     * Axes must be drawn AFTER this call as putImageData overwrites everything.
+     */
+    function drawPointsAsImage(ctx, coords, xScale, yScale, lut, valueKey) {
+        const imgData = ctx.createImageData(totalWidth, totalHeight);
+        const data = imgData.data;
+
+        // Fill background (#f3f3f3 = 243,243,243)
+        for (let i = 0; i < data.length; i += 4) {
+            data[i] = 243; data[i+1] = 243; data[i+2] = 243; data[i+3] = 255;
+        }
+
+        const bw = Math.max(1, Math.round(blockWidth));
+        const bh = Math.max(1, Math.round(blockHeight));
+        const halfBw = bw >> 1;
+        const halfBh = bh >> 1;
+
+        for (let ci = 0; ci < coords.length; ci++) {
+            const coord = coords[ci];
+            const cx = (xScale(coord.ky) + margin.left + 0.5 | 0) - halfBw;
+            const cy = (yScale(coord.kz) + margin.top  + 0.5 | 0) - halfBh;
+            const val = coord[valueKey] || 0;
+            const li = val * 3;
+            const r = lut[li], g = lut[li + 1], b = lut[li + 2];
+
+            for (let py = cy; py < cy + bh; py++) {
+                if (py < 0 || py >= totalHeight) continue;
+                let idx = (py * totalWidth + cx) * 4;
+                for (let px = cx; px < cx + bw; px++, idx += 4) {
+                    if (px < 0 || px >= totalWidth) continue;
+                    data[idx]   = r;
+                    data[idx+1] = g;
+                    data[idx+2] = b;
+                    // data[idx+3] already 255
+                }
+            }
+        }
+
+        ctx.putImageData(imgData, 0, 0);
+    }
+
+    /**
      * Plot phase encodes by shot number
      */
     function plotByShotNumber(coords) {
@@ -415,29 +466,17 @@ const D3Plots = (() => {
         // Calculate block size
         blockWidth = Math.abs(shotXScale(1) - shotXScale(0));
         blockHeight = Math.abs(shotYScale(1) - shotYScale(0));
-        
-        // Draw axes
+
+        // Build LUT and draw all points via ImageData (fast path)
+        const shotLUT = buildColorLUT(shotColorScale, maxShot);
+        drawPointsAsImage(shotCtx, coords, shotXScale, shotYScale, shotLUT, 'shot');
+
+        // Draw axes on top of pixel data
         drawAxes(shotCtx, shotXScale, shotYScale, 'Phase Encoding Plan - Shot View');
-        
-        // Draw points
-        shotCtx.save();
-        shotCtx.translate(margin.left, margin.top);
-        
-        for (const coord of coords) {
-            const x = shotXScale(coord.ky) - blockWidth / 2;
-            const y = shotYScale(coord.kz) - blockHeight / 2;
-            const color = shotColorScale(coord.shot || 0);
-            
-            shotCtx.fillStyle = color;
-            shotCtx.globalAlpha = 1.0;
-            shotCtx.fillRect(x, y, blockWidth, blockHeight);
-        }
-        
-        shotCtx.restore();
-        
+
         // Draw colorbar
         drawColorbar(shotColorbarCtx, shotColorScale, 'start of scan', 'end of scan', selectedShotIndex);
-        
+
         console.log('Shot plot rendered:', coords.length, 'points (Canvas)');
     }
     
@@ -471,29 +510,17 @@ const D3Plots = (() => {
         // Calculate block size
         blockWidth = Math.abs(echoXScale(1) - echoXScale(0));
         blockHeight = Math.abs(echoYScale(1) - echoYScale(0));
-        
-        // Draw axes
+
+        // Build LUT and draw all points via ImageData (fast path)
+        const echoLUT = buildColorLUT(echoColorScale, maxEcho);
+        drawPointsAsImage(echoCtx, coords, echoXScale, echoYScale, echoLUT, 'echo');
+
+        // Draw axes on top of pixel data
         drawAxes(echoCtx, echoXScale, echoYScale, 'Phase Encoding Plan - Echo View');
-        
-        // Draw points
-        echoCtx.save();
-        echoCtx.translate(margin.left, margin.top);
-        
-        for (const coord of coords) {
-            const x = echoXScale(coord.ky) - blockWidth / 2;
-            const y = echoYScale(coord.kz) - blockHeight / 2;
-            const color = echoColorScale(coord.echo || 0);
-            
-            echoCtx.fillStyle = color;
-            echoCtx.globalAlpha = 1.0;
-            echoCtx.fillRect(x, y, blockWidth, blockHeight);
-        }
-        
-        echoCtx.restore();
-        
+
         // Draw colorbar with echo position indicator
         drawColorbar(echoColorbarCtx, echoColorScale, 'start of shot', 'end of shot', selectedEchoIndex);
-        
+
         console.log('Echo plot rendered:', coords.length, 'points (Canvas)');
     }
 

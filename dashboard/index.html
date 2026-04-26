@@ -367,6 +367,22 @@
             <p>Total phase encodes: <span id="info-total">0</span></p>
             <p>Number of shots: <span id="info-acceleration">1</span></p>
         </div>
+
+        <div class="perf-panel" id="perf-panel">
+            <details>
+                <summary>Timing breakdown</summary>
+                <table class="perf-table">
+                    <thead><tr><th>Stage</th><th>ms</th><th>%</th></tr></thead>
+                    <tbody>
+                        <tr><td>generateCoordinates</td><td id="perf-gen">—</td><td id="perf-gen-pct">—</td></tr>
+                        <tr><td>assignViewOrdering</td><td id="perf-assign">—</td><td id="perf-assign-pct">—</td></tr>
+                        <tr><td>plotByShotNumber</td><td id="perf-shot">—</td><td id="perf-shot-pct">—</td></tr>
+                        <tr><td>plotByEchoNumber</td><td id="perf-echo">—</td><td id="perf-echo-pct">—</td></tr>
+                        <tr class="perf-total"><td><strong>Total</strong></td><td id="perf-total">—</td><td>100%</td></tr>
+                    </tbody>
+                </table>
+            </details>
+        </div>
         </div><!-- /tab-view-order -->
 
         <!-- ══ TAB 2: Phantom ═════════════════════════════════════════ -->

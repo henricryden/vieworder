@@ -249,24 +249,24 @@ const KSpaceUtils = (() => {
     
     // Assign shots where each shot gets one coordinate from each echo
     function assignShotsPerEcho(coords, indices, numShots) {
-        const echoGroups = {};
+        // First pass: find maxEcho without spread operator
+        let maxEcho = 0;
+        for (let i = 0; i < indices.length; i++) {
+            const echo = coords[indices[i]].echo;
+            if (echo > maxEcho) maxEcho = echo;
+        }
+        if (maxEcho === 0) return; // Safety check
+
+        // Use plain arrays instead of plain objects for faster indexed access
+        const echoGroups = new Array(maxEcho + 1).fill(null);
         for (let i = 0; i < indices.length; i++) {
             const idx = indices[i];
             const echo = coords[idx].echo;
-            if (!echoGroups[echo]) {
-                echoGroups[echo] = [];
-            }
+            if (!echoGroups[echo]) echoGroups[echo] = [];
             echoGroups[echo].push(idx);
         }
-        
-        const echoKeys = Object.keys(echoGroups).map(Number);
-        if (echoKeys.length === 0) return; // Safety check
-        
-        const maxEcho = Math.max(...echoKeys);
-        const echoPointers = {};
-        for (let e = 1; e <= maxEcho; e++) {
-            echoPointers[e] = 0;
-        }
+
+        const echoPointers = new Int32Array(maxEcho + 1); // zero-initialised
         // Cycle through shots and echoes repeatedly until all coords are assigned.
         // This handles uneven echo-group sizes and ensures no coordinate remains unassigned.
         let remaining = 0;
@@ -338,149 +338,110 @@ const KSpaceUtils = (() => {
         const indices = Array.from({length: numCoords}, (_, i) => i);
         
         // Ellipse origin parameters - at the edge of k-space in ky direction
-        // This is what allows axis_ratio to shift which coordinate appears central
-        const maxKy = Math.max(...coords.map(c => Math.abs(c.ky)));
+        let maxKy = 0;
+        for (let i = 0; i < numCoords; i++) {
+            const a = Math.abs(coords[i].ky);
+            if (a > maxKy) maxKy = a;
+        }
         const y0 = maxKy;  // Edge of k-space in ky direction
-        const z0 = 0;     // Center in kz direction
-        
-        // Helper function: calculate chevron ellipse radius
+        const z0 = 0;      // Center in kz direction
+
+        // Pre-compute theta once — depends only on static ky/kz, not on axisRatio
+        for (let i = 0; i < numCoords; i++) {
+            let theta = Math.atan2(coords[i].ky - y0, coords[i].kz - z0);
+            if (theta < 0) theta += 2 * Math.PI;
+            coords[i].theta = theta;
+        }
+
+        // Pre-compute nearest-to-origin index — invariant across binary search
+        let nearestIdx = 0;
+        let minOriginSq = coords[0].ky * coords[0].ky + coords[0].kz * coords[0].kz;
+        for (let i = 1; i < numCoords; i++) {
+            const sq = coords[i].ky * coords[i].ky + coords[i].kz * coords[i].kz;
+            if (sq < minOriginSq) { minOriginSq = sq; nearestIdx = i; }
+        }
+
+        // Pre-compute per-coord constants for setChevronRadius (avoids repeated Math.abs + property access)
+        const kyDistFromY0 = new Float64Array(numCoords);
+        const absKzArr     = new Float64Array(numCoords);
+        for (let i = 0; i < numCoords; i++) {
+            kyDistFromY0[i] = Math.abs(coords[i].ky - y0);
+            absKzArr[i]     = Math.abs(coords[i].kz); // z0 = 0
+        }
+
+        // Only update ellipDist per iteration (theta is precomputed above)
         function setChevronRadius(axisRatio) {
-            // Calculate theta for each coordinate relative to ellipse origin (y0, z0)
-            // Normalize to [0, 2π] for continuous sweep without wrapping
             for (let i = 0; i < numCoords; i++) {
-                const ky_dist = coords[i].ky - y0;
-                const kz_dist = coords[i].kz - z0;
-                // Match C implementation: theta = atan2(y_dist, z_dist)
-                let theta = Math.atan2(ky_dist, kz_dist);
-                // Convert from [-π, π] to [0, 2π]
-                if (theta < 0) theta += 2 * Math.PI;
-                coords[i].theta = theta;
-            }
-            
-            // Calculate chevron radius using Manhattan-like metric to match C:
-            // user1 = |y - y0| + |z - z0| * axisRatio
-            for (let i = 0; i < numCoords; i++) {
-                const ky_dist = coords[i].ky - y0;
-                const kz_dist = coords[i].kz - z0;
-                coords[i].ellipDist = Math.abs(ky_dist) + Math.abs(kz_dist) * axisRatio;
+                coords[i].ellipDist = kyDistFromY0[i] + absKzArr[i] * axisRatio;
             }
         }
-        
-        // Helper function: find center echo at origin
-        function findCenterEcho() {
-            let minDist = Infinity;
-            let centerEchoFound = -1;
+
+        // O(n) rank scan — no sort needed during binary search.
+        // Returns the echo that nearestIdx would be assigned at the current ellipDist values.
+        function echoOfNearestNoSort() {
+            const nearestDist = coords[nearestIdx].ellipDist;
+            let rank = 0;
             for (let i = 0; i < numCoords; i++) {
-                const dist = Math.sqrt(coords[i].ky * coords[i].ky + coords[i].kz * coords[i].kz);
-                if (dist < minDist) {
-                    minDist = dist;
-                    centerEchoFound = coords[i].echo;
-                }
+                if (coords[i].ellipDist < nearestDist) rank++;
             }
-            return centerEchoFound;
+            return (rank / numShots | 0) + 1;
         }
-        
-        // Binary search for axis ratio
+
+        // Binary search for axis ratio — O(n) per iteration instead of O(n log n)
         let leftRatio = 0.005;
-        let rightRatio = 100;  // Reduced from 500 to search more reasonable range
+        let rightRatio = 100;
         let axisRatio = 1.0;
         let curCenterEcho = -1;
         let foundCenter = false;
-        const maxIter = 20;
-        
+        const maxIter = 60; // cheap to run more iterations now
+
         console.log(`Chevron: Desired center echo ${centerEcho}`);
-        
+
+        // Better first candidate: axisRatio ≈ 2π * centerEcho / etl
+        axisRatio = 2 * Math.PI * centerEcho / etl;
+        setChevronRadius(axisRatio);
+        curCenterEcho = echoOfNearestNoSort();
+        console.log(`Chevron first candidate: axisRatio=${axisRatio.toFixed(3)}, centerEcho=${curCenterEcho}, want=${centerEcho}`);
+        if (curCenterEcho === centerEcho) {
+            foundCenter = true;
+        } else if (curCenterEcho > centerEcho) {
+            leftRatio = axisRatio;
+        } else {
+            rightRatio = axisRatio;
+        }
+
         for (let iter = 0; iter < maxIter && !foundCenter; iter++) {
             axisRatio = (leftRatio + rightRatio) / 2;
-            
-            // Set ellipse radius
             setChevronRadius(axisRatio);
-            
-            // Sort by ellipse radius
-            indices.sort((a, b) => coords[a].ellipDist - coords[b].ellipDist);
-            
-            // Assign echoes - use numShots (like C implementation) for proper grouping
-            for (let i = 0; i < numCoords; i++) {
-                const idx = indices[i];
-                coords[idx].echo = ((i / numShots) | 0) + 1;
-            }
-            
-            // Find center echo
-            curCenterEcho = findCenterEcho();
-            
+            curCenterEcho = echoOfNearestNoSort();
+
             console.log(`Chevron iter ${iter}: axisRatio=${axisRatio.toFixed(3)}, centerEcho=${curCenterEcho}, want=${centerEcho}`);
-            
+
             if (curCenterEcho === centerEcho) {
                 foundCenter = true;
             } else if (curCenterEcho > centerEcho) {
-                // Center echo too high - follow C implementation: move left bound up
                 leftRatio = axisRatio;
             } else {
-                // Center echo too low - move right bound down
                 rightRatio = axisRatio;
             }
         }
-        
-        // Fine-tuning: if binary search found exact match, increment slightly
-        if (foundCenter && axisRatio < 10) {
-            let axisRatioFineTune = axisRatio;
-            for (let fineIter = 0; fineIter < 100; fineIter++) {
-                axisRatioFineTune *= 1.01;  // Incrementally increase by 1%
-                
-                setChevronRadius(axisRatioFineTune);
-                
-                // Sort by ellipse radius
-                indices.sort((a, b) => coords[a].ellipDist - coords[b].ellipDist);
-                
-                // Assign echoes - use numShots
-                for (let i = 0; i < numCoords; i++) {
-                    const idx = indices[i];
-                    coords[idx].echo = ((i / numShots) | 0) + 1;
-                }
-                
-                curCenterEcho = findCenterEcho();
-                
-                if (curCenterEcho === centerEcho) {
-                    axisRatio = axisRatioFineTune;
-                } else {
-                    break;
-                }
-            }
-        }
-        
-        // Final assignment with best axis ratio
-        setChevronRadius(axisRatio);
-        indices.sort((a, b) => coords[a].ellipDist - coords[b].ellipDist);
-        
-        for (let i = 0; i < numCoords; i++) {
-            const idx = indices[i];
-            coords[idx].echo = ((i / numShots) | 0) + 1;
-        }
-        
-        curCenterEcho = findCenterEcho();
-        console.log(`Chevron final: axisRatio=${axisRatio.toFixed(3)}, centerEcho=${curCenterEcho}`);
-        // If we couldn't find an exact center (foundCenter == false), try reversed center
+
+        // If we couldn't find an exact center, try reversed center
         if (!foundCenter) {
-            const reversedCenterEcho = etl + 1 - centerEcho; // 1-based reversed center
+            const reversedCenterEcho = etl + 1 - centerEcho;
             console.log(`Chevron: trying reversed center echo ${reversedCenterEcho}`);
-            // Binary search for reversed target
             let leftR = 0.005;
             let rightR = 100;
             let axisR = axisRatio;
             let reversedFound = false;
-            let curRevCenter = -1;
             for (let iter = 0; iter < maxIter && !reversedFound; iter++) {
                 axisR = (leftR + rightR) / 2;
                 setChevronRadius(axisR);
-                indices.sort((a, b) => coords[a].ellipDist - coords[b].ellipDist);
-                for (let i = 0; i < numCoords; i++) {
-                    const idx = indices[i];
-                    coords[idx].echo = ((i / numShots) | 0) + 1;
-                }
-                curRevCenter = findCenterEcho();
+                const curRevCenter = echoOfNearestNoSort();
                 console.log(`Chevron rev iter ${iter}: axisRatio=${axisR.toFixed(3)}, centerEcho=${curRevCenter}, want=${reversedCenterEcho}`);
                 if (curRevCenter === reversedCenterEcho) {
                     reversedFound = true;
+                    axisRatio = axisR;
                 } else if (curRevCenter > reversedCenterEcho) {
                     leftR = axisR;
                 } else {
@@ -489,14 +450,30 @@ const KSpaceUtils = (() => {
             }
 
             if (reversedFound) {
-                // We found a reversed solution: reverse all echo assignments
-                console.log(`Chevron: reversing echo assignments for reversed center ${reversedCenterEcho}`);
+                // Do the single final sort + echo assignment, then reverse
+                setChevronRadius(axisRatio);
+                indices.sort((a, b) => coords[a].ellipDist - coords[b].ellipDist);
+                for (let i = 0; i < numCoords; i++) {
+                    coords[indices[i]].echo = ((i / numShots) | 0) + 1;
+                }
                 for (let i = 0; i < numCoords; i++) {
                     coords[i].echo = etl + 1 - coords[i].echo;
                 }
-                foundCenter = true; // behave as if we found a solution
+                console.log(`Chevron: reversed echo assignments for center ${reversedCenterEcho}`);
+                foundCenter = true;
             }
         }
+
+        // Final sort + echo assignment (skipped above only when reversedFound handled it)
+        if (!foundCenter || coords[nearestIdx].echo === -1) {
+            setChevronRadius(axisRatio);
+            indices.sort((a, b) => coords[a].ellipDist - coords[b].ellipDist);
+            for (let i = 0; i < numCoords; i++) {
+                coords[indices[i]].echo = ((i / numShots) | 0) + 1;
+            }
+        }
+
+        console.log(`Chevron final: axisRatio=${axisRatio.toFixed(3)}, centerEcho=${coords[nearestIdx].echo}`);
 
         // Step 3: Sort by echo first, then theta (azimuthal angle) for radar sweep
         sortIndicesByEchoThen(indices, coords, (a, b) => coords[a].theta - coords[b].theta);
@@ -719,8 +696,14 @@ const KSpaceUtils = (() => {
         let endKy = 0, endKz = 0;
         
         // Set end point at edge based on sector direction
-        const maxKy = Math.max(...coords.map(c => Math.abs(c.ky)));
-        const maxKz = Math.max(...coords.map(c => Math.abs(c.kz)));
+        let maxKy = 0;
+        let maxKz = 0;
+        for (let i = 0; i < numCoords; i++) {
+            const ak = Math.abs(coords[i].ky);
+            const az = Math.abs(coords[i].kz);
+            if (ak > maxKy) maxKy = ak;
+            if (az > maxKz) maxKz = az;
+        }
         
         if (largestSector === NORTH) endKy = maxKy;       // NORTH: positive ky
         else if (largestSector === EAST) endKz = maxKz;   // EAST: positive kz
@@ -730,172 +713,156 @@ const KSpaceUtils = (() => {
         // Normalization constants
         const normKy = maxKy || 1;
         const normKz = maxKz || 1;
-        
-        // Helper function to test a center position with given aspect ratio
-        function tryCenter(offsetKy, offsetKz, kyRatio, kzRatio) {
-            // Calculate elliptical distance from offset center (normalized)
-            for (let i = 0; i < numCoords; i++) {
-                const ky_dist = Math.abs(coords[i].ky - offsetKy) / normKy;
-                const kz_dist = Math.abs(coords[i].kz - offsetKz) / normKz;
-                coords[i].ellipDist = Math.sqrt(ky_dist * ky_dist * kyRatio * kyRatio + kz_dist * kz_dist * kzRatio * kzRatio);
-            }
-            
-            // Sort by elliptical distance
-            indices.sort((a, b) => coords[a].ellipDist - coords[b].ellipDist);
-            
-            // Assign echoes based on sorted position
-            for (let i = 0; i < numCoords; i++) {
-                const idx = indices[i];
-                coords[idx].echo = ((i / numShots) | 0) + 1;
-            }
-            
-            // Find which echo contains k-space center (ky=0, kz=0)
-            let minDistToOrigin = Infinity;
-            let centerEchoFound = -1;
-            for (let i = 0; i < numCoords; i++) {
-                const dist = Math.sqrt(coords[i].ky * coords[i].ky + coords[i].kz * coords[i].kz);
-                if (dist < minDistToOrigin) {
-                    minDistToOrigin = dist;
-                    centerEchoFound = coords[i].echo;
-                }
-            }
-            
-            return centerEchoFound;
+
+        // Pre-compute nearest-to-origin index — invariant across all search calls
+        let nearestCrocIdx = 0;
+        let minCrocSq = coords[0].ky * coords[0].ky + coords[0].kz * coords[0].kz;
+        for (let i = 1; i < numCoords; i++) {
+            const sq = coords[i].ky * coords[i].ky + coords[i].kz * coords[i].kz;
+            if (sq < minCrocSq) { minCrocSq = sq; nearestCrocIdx = i; }
         }
-        
-        // Binary search along the line from origin to edge
+
+        // Pre-compute normalised coords as typed arrays — avoids repeated division + property lookup
+        const kyN = new Float64Array(numCoords);
+        const kzN = new Float64Array(numCoords);
+        for (let i = 0; i < numCoords; i++) {
+            kyN[i] = coords[i].ky / normKy;
+            kzN[i] = coords[i].kz / normKz;
+        }
+        // Pre-compute nearest-to-origin normalised values for rank scan
+        const nearestKyN = kyN[nearestCrocIdx];
+        const nearestKzN = kzN[nearestCrocIdx];
+
+        // O(n) rank scan — no sort needed during search.
+        // Uses squared distance (monotone w.r.t. sqrt) to avoid Math.sqrt.
+        function rankOfNearest(offsetKyN, offsetKzN, kyRatio, kzRatio) {
+            const dky = nearestKyN - offsetKyN;
+            const dkz = nearestKzN - offsetKzN;
+            const nearestSq = dky * dky * kyRatio * kyRatio + dkz * dkz * kzRatio * kzRatio;
+            let rank = 0;
+            for (let i = 0; i < numCoords; i++) {
+                const dk = kyN[i] - offsetKyN;
+                const dz = kzN[i] - offsetKzN;
+                if (dk * dk * kyRatio * kyRatio + dz * dz * kzRatio * kzRatio < nearestSq) rank++;
+            }
+            return (rank / numShots | 0) + 1;
+        }
+
+        // Called once at the end: writes ellipDist, sorts, assigns echo
+        function finalize(offsetKy, offsetKz, kyRatio, kzRatio) {
+            const offsetKyN = offsetKy / normKy;
+            const offsetKzN = offsetKz / normKz;
+            for (let i = 0; i < numCoords; i++) {
+                const dk = kyN[i] - offsetKyN;
+                const dz = kzN[i] - offsetKzN;
+                coords[i].ellipDist = dk * dk * kyRatio * kyRatio + dz * dz * kzRatio * kzRatio;
+            }
+            indices.sort((a, b) => coords[a].ellipDist - coords[b].ellipDist);
+            for (let i = 0; i < numCoords; i++) {
+                coords[indices[i]].echo = ((i / numShots) | 0) + 1;
+            }
+        }
+
+        // Helper: normalised offset from world coords
+        const toN = (ky, kz) => [ky / normKy, kz / normKz];
+
+        // Binary search along the line from origin to edge — O(n) per iteration
         let centerKy = 0, centerKz = 0;
         let kyRatio = 1.0, kzRatio = 1.0;
         let foundCenter = false;
         let curCenterEcho = -1;
-        const maxIter = 10;
-        
+        const maxIter = 30;
+
         for (let iter = 0; iter < maxIter; iter++) {
             centerKy = (startKy + endKy) / 2;
             centerKz = (startKz + endKz) / 2;
-            
-            curCenterEcho = tryCenter(centerKy, centerKz, kyRatio, kzRatio);
-            
+            const [oKyN, oKzN] = toN(centerKy, centerKz);
+
+            curCenterEcho = rankOfNearest(oKyN, oKzN, kyRatio, kzRatio);
+
             console.log(`CROC iter ${iter}: offset=[${centerKy.toFixed(1)}, ${centerKz.toFixed(1)}], found echo=${curCenterEcho}, want=${centerEcho}`);
-            
+
             if (curCenterEcho === centerEcho) {
                 foundCenter = true;
                 break;
             } else if (curCenterEcho > centerEcho) {
-                // Current center echo is too high - move closer to origin
-                endKy = centerKy;
-                endKz = centerKz;
+                endKy = centerKy; endKz = centerKz;
             } else {
-                // Current center echo is too low - move away from origin (toward edge)
-                startKy = centerKy;
-                startKz = centerKz;
+                startKy = centerKy; startKz = centerKz;
             }
         }
-        
-        // If binary search failed, adjust ellipse eccentricity
+
+        // If binary search failed, adjust ellipse eccentricity — O(n) per step
         if (!foundCenter) {
             console.log(`CROC: Binary search failed, trying ellipse adjustment. Final echo was ${curCenterEcho}`);
-            
-            // Determine which axis to adjust based on sector
-            // For SOUTH/NORTH: adjust kz axis (perpendicular to sector direction)
-            // For EAST/WEST: adjust ky axis (perpendicular to sector direction)
-            // If found echo is too LOW: compress perpendicular axis (ratio < 1.0)
-            // If found echo is too HIGH: stretch perpendicular axis (ratio > 1.0)
             let ratioStep = curCenterEcho < centerEcho ? 0.8 : 1.2;
-            
-            // Try adjusting ratio up to 20 steps
-            for (let iter = 0; iter < 20 && !foundCenter; iter++) {
+            const [oKyN, oKzN] = toN(centerKy, centerKz);
+
+            for (let iter = 0; iter < 40 && !foundCenter; iter++) {
                 if (largestSector === SOUTH || largestSector === NORTH) {
-                    // SOUTH or NORTH - adjust kz axis (perpendicular)
                     kzRatio *= ratioStep;
                 } else {
-                    // EAST or WEST - adjust ky axis (perpendicular)
                     kyRatio *= ratioStep;
                 }
-                
-                if (kyRatio < 0.1 || kyRatio > 10.0 || kzRatio < 0.1 || kzRatio > 10.0) break;
-                
-                curCenterEcho = tryCenter(centerKy, centerKz, kyRatio, kzRatio);
-                
+                if (kyRatio < 0.05 || kyRatio > 20.0 || kzRatio < 0.05 || kzRatio > 20.0) break;
+
+                curCenterEcho = rankOfNearest(oKyN, oKzN, kyRatio, kzRatio);
                 console.log(`CROC ellipse iter ${iter}: kyRatio=${kyRatio.toFixed(2)}, kzRatio=${kzRatio.toFixed(2)}, found echo=${curCenterEcho}`);
-                
+
                 if (curCenterEcho === centerEcho) {
                     foundCenter = true;
-                    break;
+                } else if ((curCenterEcho < centerEcho) !== (ratioStep < 1)) {
+                    // Overshot — flip step direction and halve it
+                    ratioStep = 1 + (1 - ratioStep) * 0.5;
                 }
             }
         }
-        
-        // If still not found, try reversed center echo
+
+        // If still not found, try reversed center echo — O(n) per iteration
         if (!foundCenter) {
-            console.log(`CROC: Ellipse adjustment failed, trying reversed center echo ${etl - 1 - centerEcho}`);
-            
             const reversedCenterEcho = etl - 1 - centerEcho;
-            kyRatio = 1.0;
-            kzRatio = 1.0;
+            console.log(`CROC: Ellipse adjustment failed, trying reversed center echo ${reversedCenterEcho}`);
+            kyRatio = 1.0; kzRatio = 1.0;
             let reversedFound = false;
-            
-            // Binary search again with reversed center
-            startKy = 0;
-            startKz = 0;
-            endKy = 0;
-            endKz = 0;
-            
+            startKy = 0; startKz = 0; endKy = 0; endKz = 0;
             if (largestSector === NORTH) endKy = maxKy;
             else if (largestSector === EAST) endKz = maxKz;
             else if (largestSector === SOUTH) endKy = -maxKy;
-            else if (largestSector === WEST) endKz = -maxKz;
-            
+            else endKz = -maxKz;
+
             for (let iter = 0; iter < maxIter; iter++) {
                 centerKy = (startKy + endKy) / 2;
                 centerKz = (startKz + endKz) / 2;
-                
-                curCenterEcho = tryCenter(centerKy, centerKz, kyRatio, kzRatio);
-                
+                const [oKyN, oKzN] = toN(centerKy, centerKz);
+                curCenterEcho = rankOfNearest(oKyN, oKzN, kyRatio, kzRatio);
                 console.log(`CROC reversed iter ${iter}: offset=[${centerKy.toFixed(1)}, ${centerKz.toFixed(1)}], found echo=${curCenterEcho}, want=${reversedCenterEcho}`);
-                
                 if (curCenterEcho === reversedCenterEcho) {
                     reversedFound = true;
-                    console.log(`CROC: Found solution for reversed center echo ${reversedCenterEcho}`);
                     break;
                 } else if (curCenterEcho > reversedCenterEcho) {
-                    endKy = centerKy;
-                    endKz = centerKz;
+                    endKy = centerKy; endKz = centerKz;
                 } else {
-                    startKy = centerKy;
-                    startKz = centerKz;
+                    startKy = centerKy; startKz = centerKz;
                 }
             }
-            
+
             if (reversedFound) {
-                // Reverse all echo assignments: echo -> (etl + 1 - echo) for 1-indexed
-                console.log(`CROC: Reversing all echo assignments`);
+                finalize(centerKy, centerKz, kyRatio, kzRatio);
                 for (let i = 0; i < numCoords; i++) {
                     coords[i].echo = etl + 1 - coords[i].echo;
                 }
-                
-                // Verify the center echo after reversal
-                let verifyMinDist = Infinity;
-                let verifyEcho = -1;
-                for (let i = 0; i < numCoords; i++) {
-                    const dist = Math.sqrt(coords[i].ky * coords[i].ky + coords[i].kz * coords[i].kz);
-                    if (dist < verifyMinDist) {
-                        verifyMinDist = dist;
-                        verifyEcho = coords[i].echo;
-                    }
-                }
-                console.log(`CROC: After reversal, center echo is ${verifyEcho}`);
+                console.log(`CROC: After reversal, center echo is ${coords[nearestCrocIdx].echo}`);
                 foundCenter = true;
             } else {
                 console.log(`CROC: Could not find a reversed solution`);
             }
         }
-        
+
         console.log(`CROC final: center=[${centerKy.toFixed(1)}, ${centerKz.toFixed(1)}], ratios=[${kyRatio.toFixed(2)}, ${kzRatio.toFixed(2)}], wanted=${centerEcho}`);
-        
-        // Only call tryCenter to finalize if we haven't done reversal
-        if (!foundCenter || foundCenter === false) {
-            tryCenter(centerKy, centerKz, kyRatio, kzRatio);
+
+        // Single final sort + echo assignment (skipped when reversal already did it)
+        if (!foundCenter || coords[nearestCrocIdx].echo === -1) {
+            finalize(centerKy, centerKz, kyRatio, kzRatio);
         }
         
         // Step 3: Calculate angle from offset center for shot ordering
