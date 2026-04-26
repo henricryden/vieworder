@@ -407,28 +407,39 @@ const D3Plots = (() => {
             data[i] = 243; data[i+1] = 243; data[i+2] = 243; data[i+3] = 255;
         }
 
-        const bw = Math.max(1, Math.round(blockWidth));
-        const bh = Math.max(1, Math.round(blockHeight));
-        const halfBw = bw >> 1;
-        const halfBh = bh >> 1;
-
-        for (let ci = 0; ci < coords.length; ci++) {
-            const coord = coords[ci];
-            const cx = (xScale(coord.ky) + margin.left + 0.5 | 0) - halfBw;
-            const cy = (yScale(coord.kz) + margin.top  + 0.5 | 0) - halfBh;
+        // Build integer-keyed color map: (ky+512)<<10|(kz+512) → packed RGB.
+        // Supports ky/kz in [-512, 511] (matrices up to 1024×1024).
+        const colorMap = new Map();
+        for (let i = 0; i < coords.length; i++) {
+            const coord = coords[i];
             const val = coord[valueKey] || 0;
             const li = val * 3;
-            const r = lut[li], g = lut[li + 1], b = lut[li + 2];
+            colorMap.set((coord.ky + 512) << 10 | (coord.kz + 512),
+                         lut[li] << 16 | lut[li + 1] << 8 | lut[li + 2]);
+        }
 
-            for (let py = cy; py < cy + bh; py++) {
-                if (py < 0 || py >= totalHeight) continue;
-                let idx = (py * totalWidth + cx) * 4;
-                for (let px = cx; px < cx + bw; px++, idx += 4) {
-                    if (px < 0 || px >= totalWidth) continue;
-                    data[idx]   = r;
-                    data[idx+1] = g;
-                    data[idx+2] = b;
-                    // data[idx+3] already 255
+        // Precompute the nearest integer k-space index for every canvas column/row.
+        // Pixel-scan approach: each output pixel looks up its k-space cell directly,
+        // so there are never sub-pixel gaps regardless of blockWidth.
+        const kyForPx = new Int16Array(totalWidth);
+        for (let px = 0; px < totalWidth; px++) {
+            kyForPx[px] = Math.round(xScale.invert(px - margin.left));
+        }
+        const kzForPy = new Int16Array(totalHeight);
+        for (let py = 0; py < totalHeight; py++) {
+            kzForPy[py] = Math.round(yScale.invert(py - margin.top));
+        }
+
+        // Write pixel colors via nearest-neighbor lookup
+        for (let py = 0; py < totalHeight; py++) {
+            const kzKey = kzForPy[py] + 512;
+            let idx = py * totalWidth * 4;
+            for (let px = 0; px < totalWidth; px++, idx += 4) {
+                const packed = colorMap.get((kyForPx[px] + 512) << 10 | kzKey);
+                if (packed !== undefined) {
+                    data[idx]   = packed >> 16 & 0xff;
+                    data[idx+1] = packed >> 8  & 0xff;
+                    data[idx+2] = packed       & 0xff;
                 }
             }
         }
