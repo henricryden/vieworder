@@ -416,6 +416,21 @@
                         <tbody id="phantom-tissue-body"></tbody>
                     </table>
                     <button class="phantom-reset-btn" id="phantom-reset-btn">↺ Reset all</button>
+
+                    <div style="margin-top:20px;border-top:1px solid var(--rule);padding-top:16px;">
+                        <h3 style="font-family:var(--sans);font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:var(--ink-mid);margin-bottom:12px;">Contrast pair</h3>
+                        <p style="font-size:12px;color:var(--ink-light);margin-bottom:10px;font-style:italic;">Shown in sequence tab as S₁ / S₂</p>
+                        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+                            <div class="control-group">
+                                <label for="contrast-t1-select" style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:var(--ink-mid);">S₁</label>
+                                <select id="contrast-t1-select"></select>
+                            </div>
+                            <div class="control-group">
+                                <label for="contrast-t2-select" style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:var(--ink-mid);">S₂</label>
+                                <select id="contrast-t2-select"></select>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div><!-- /tab-phantom -->
@@ -474,6 +489,14 @@
                 <div class="mprage-plot-panel">
                     <h3>MPRAGE window — Mxy per echo</h3>
                     <div class="mprage-chart-wrapper" id="mprage-mxy-chart"></div>
+                </div>
+            </div>
+
+            <!-- Contrast chart -->
+            <div class="mprage-plots-row full" id="mprage-contrast-row" style="margin-top:20px;">
+                <div class="mprage-plot-panel">
+                    <h3>Contrast — S₁ / S₂ per echo <span id="mprage-contrast-label" style="font-weight:400;color:#a0a0c0;"></span></h3>
+                    <div class="mprage-chart-wrapper" id="mprage-contrast-chart"></div>
                 </div>
             </div>
 
@@ -638,6 +661,14 @@
                 </div>
             </div>
 
+            <!-- Contrast chart -->
+            <div class="mprage-plots-row full" id="rare-contrast-row" style="margin-top:20px;">
+                <div class="mprage-plot-panel">
+                    <h3>Contrast — S₁ / S₂ per echo <span id="rare-contrast-label" style="font-weight:400;color:#a0a0c0;"></span></h3>
+                    <div class="mprage-chart-wrapper" id="rare-contrast-chart"></div>
+                </div>
+            </div>
+
             <!-- Full-sequence charts -->
             <div class="mprage-plots-row full" style="margin-top:20px;">
                 <div class="mprage-plot-panel">
@@ -729,6 +760,14 @@
                     </div>
                 </div>
             </div>
+
+            <!-- Contrast chart -->
+            <div class="mprage-plots-row full" id="fspgr-contrast-row" style="margin-top:20px;">
+                <div class="mprage-plot-panel">
+                    <h3>Contrast — S₁ / S₂ per excitation <span id="fspgr-contrast-label" style="font-weight:400;color:#a0a0c0;"></span></h3>
+                    <div class="mprage-chart-wrapper" id="fspgr-contrast-chart"></div>
+                </div>
+            </div>
         </div><!-- /tab-fspgr -->
 
         <!-- ══ TAB: ENRAGE Simulator ══════════════════════════════════ -->
@@ -787,6 +826,14 @@
                 <div class="mprage-plot-panel">
                     <h3>ENRAGE window — Mxy per echo</h3>
                     <div class="mprage-chart-wrapper" id="enrage-mxy-chart"></div>
+                </div>
+            </div>
+
+            <!-- Contrast chart -->
+            <div class="mprage-plots-row full" id="enrage-contrast-row" style="margin-top:20px;">
+                <div class="mprage-plot-panel">
+                    <h3>Contrast — S₁ / S₂ per echo <span id="enrage-contrast-label" style="font-weight:400;color:#a0a0c0;"></span></h3>
+                    <div class="mprage-chart-wrapper" id="enrage-contrast-chart"></div>
                 </div>
             </div>
 
@@ -1048,6 +1095,42 @@
             return seq;
         }
 
+        // ── Contrast chart helper ──────────────────────────────────────
+        function renderContrastChart({ containerId, rowId, labelId, xAxisLabel, xVals, s1, s2 }) {
+            const t1name = window.PhantomState.contrastTissue1;
+            const t2name = window.PhantomState.contrastTissue2;
+            const t1 = window.PhantomState.tissues.find(t => t.name === t1name);
+            const t2 = window.PhantomState.tissues.find(t => t.name === t2name);
+            const row = document.getElementById(rowId);
+            const container = document.getElementById(containerId);
+            if (!container) return;
+            if (!t1 || !t2 || t1.enabled === false || t2.enabled === false || !s1 || !s2) {
+                if (row) row.style.display = 'none';
+                return;
+            }
+            if (row) row.style.display = '';
+            const labelEl = document.getElementById(labelId);
+            if (labelEl) labelEl.textContent = `(S\u2081\u202f=\u202f${t1.label},\u2002S\u2082\u202f=\u202f${t2.label})`;
+            const data = xVals.map((x, i) => {
+                const abs2 = Math.abs(s2[i] != null ? s2[i] : 0);
+                if (abs2 < 1e-9) return null;
+                return { x, y: (s1[i] != null ? s1[i] : 0) / abs2 };
+            }).filter(Boolean);
+            if (!data.length) { if (row) row.style.display = 'none'; return; }
+            const yVals = data.map(d => d.y);
+            const yMin = Math.min(...yVals);
+            const yMax = Math.max(...yVals);
+            const pad = Math.max(0.05, 0.08 * (yMax - yMin || 1));
+            D3SeqPlots.createLinePlot(container, {
+                datasets: [{ label: 'Contrast', data, color: '#c8102e' }],
+                xType: 'linear',
+                xMin: xVals[0], xMax: xVals[xVals.length - 1],
+                yMin: Math.min(0, yMin - pad), yMax: yMax + pad,
+                xLabel: xAxisLabel || 'Echo index', yLabel: 'S\u2081\u202f/\u202fS\u2082',
+                showLegend: false,
+            });
+        }
+
         function cloneWithTissue(seq, T1, T2) {
             const n = new Sequence(seq.initialNState);
             for (const op of seq.operators)
@@ -1245,6 +1328,19 @@
                 showLegend: true,
                 onLegendClick,
             });
+
+            // ── Contrast chart ───────────────────────────────────────────
+            {
+                const t1name = window.PhantomState.contrastTissue1;
+                const t2name = window.PhantomState.contrastTissue2;
+                const pts1 = winResults[t1name];
+                const pts2 = winResults[t2name];
+                const xVals = pts1 ? pts1.map(pt => pt.pulseIndex) : null;
+                const s1 = pts1 ? pts1.map(pt => Math.sqrt((pt.MxyRe||0)**2 + (pt.MxyIm||0)**2)) : null;
+                const s2 = pts2 ? pts2.map(pt => Math.sqrt((pt.MxyRe||0)**2 + (pt.MxyIm||0)**2)) : null;
+                renderContrastChart({ containerId: 'mprage-contrast-chart', rowId: 'mprage-contrast-row',
+                    labelId: 'mprage-contrast-label', xAxisLabel: 'Echo index', xVals, s1, s2 });
+            }
         }
 
         function runMPRAGESimulation() {
@@ -2185,6 +2281,19 @@
                 showLegend: true,
                 onLegendClick,
             });
+
+            // ── Contrast chart ───────────────────────────────────────────
+            {
+                const t1name = window.PhantomState.contrastTissue1;
+                const t2name = window.PhantomState.contrastTissue2;
+                const pts1 = echoResults[t1name];
+                const pts2 = echoResults[t2name];
+                const xVals = pts1 ? pts1.map(pt => pt.trainIndex) : null;
+                const s1 = pts1 ? pts1.map(pt => Math.sqrt((pt.MxyRe||0)**2 + (pt.MxyIm||0)**2)) : null;
+                const s2 = pts2 ? pts2.map(pt => Math.sqrt((pt.MxyRe||0)**2 + (pt.MxyIm||0)**2)) : null;
+                renderContrastChart({ containerId: 'rare-contrast-chart', rowId: 'rare-contrast-row',
+                    labelId: 'rare-contrast-label', xAxisLabel: 'Echo index', xVals, s1, s2 });
+            }
         }
 
         async function runRARESimulation() {
@@ -2676,6 +2785,22 @@
                 showLegend: true,
                 onLegendClick: onFspgrLegendClick,
             });
+
+            // ── Contrast chart ───────────────────────────────────────────
+            {
+                const ct1 = window.PhantomState.tissues.find(t => t.name === window.PhantomState.contrastTissue1);
+                const ct2 = window.PhantomState.tissues.find(t => t.name === window.PhantomState.contrastTissue2);
+                let xVals = null, s1 = null, s2 = null;
+                if (ct1 && ct2 && ct1.enabled !== false && ct2.enabled !== false) {
+                    const { Mxy: mxy1 } = simulateFSPGR(showExc, alpha, TR, TE, ct1.T1, ct1.T2, ct1.PD);
+                    const { Mxy: mxy2 } = simulateFSPGR(showExc, alpha, TR, TE, ct2.T1, ct2.T2, ct2.PD);
+                    xVals = Array.from({ length: showExc }, (_, i) => i + 1);
+                    s1 = Array.from(mxy1);
+                    s2 = Array.from(mxy2);
+                }
+                renderContrastChart({ containerId: 'fspgr-contrast-chart', rowId: 'fspgr-contrast-row',
+                    labelId: 'fspgr-contrast-label', xAxisLabel: 'Excitation index', xVals, s1, s2 });
+            }
         }
 
         // ── Main FSPGR simulation ────────────────────────────────────────
@@ -3108,6 +3233,19 @@
                 const el = document.getElementById(id);
                 if (el) el.style.display = invertEnable ? '' : 'none';
             });
+
+            // ── Contrast chart ───────────────────────────────────────────
+            {
+                const t1name = window.PhantomState.contrastTissue1;
+                const t2name = window.PhantomState.contrastTissue2;
+                const pts1 = winResults[t1name];
+                const pts2 = winResults[t2name];
+                const xVals = pts1 ? pts1.map(pt => pt.pulseIndex) : null;
+                const s1 = pts1 ? pts1.map(pt => Math.sqrt((pt.MxyRe||0)**2 + (pt.MxyIm||0)**2)) : null;
+                const s2 = pts2 ? pts2.map(pt => Math.sqrt((pt.MxyRe||0)**2 + (pt.MxyIm||0)**2)) : null;
+                renderContrastChart({ containerId: 'enrage-contrast-chart', rowId: 'enrage-contrast-row',
+                    labelId: 'enrage-contrast-label', xAxisLabel: 'Echo index', xVals, s1, s2 });
+            }
         }
 
         function runENRAGESimulation() {
@@ -3256,6 +3394,14 @@
             getENRAGESignals,
             runSimulation: runENRAGESimulation,
         };
+
+        // ── Re-render contrast charts when the pair selection changes ────
+        window.addEventListener('contrastPairChanged', () => {
+            if (_mprageLastSimData) renderMPRAGECharts();
+            if (_rareLastSimData) renderRARECharts();
+            if (_fspgrShowExc > 0) renderFSPGRCharts(_fspgrShowExc);
+            if (_enrageLastSimData) renderENRAGECharts();
+        });
     </script>
 </body>
 </html>

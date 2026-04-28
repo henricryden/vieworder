@@ -197,7 +197,9 @@
                 .range([innerH, 0]);
         }
 
-        buildScales(opts.datasets || []);
+        let _currentDatasets = opts.datasets || [];
+
+        buildScales(_currentDatasets);
 
         drawAxes(g, xScale, yScale, innerW, innerH, {
             xLabel: opts.xLabel,
@@ -259,7 +261,7 @@
             }
         }
 
-        drawLines(opts.datasets || []);
+        drawLines(_currentDatasets);
 
         // Legend
         if (showLegend) {
@@ -286,11 +288,108 @@
             });
         }
 
+        // ─── Hover crosshair + tooltip ──────────────────────────────────────────
+        if (xType === 'linear') {
+            const hoverG = g.append('g').attr('class', 'hover-group').style('display', 'none');
+
+            // Faint vertical crosshair line
+            const crosshair = hoverG.append('line')
+                .attr('y1', 0)
+                .attr('y2', innerH)
+                .attr('stroke', 'rgba(255,255,255,0.22)')
+                .attr('stroke-width', 1)
+                .attr('stroke-dasharray', '4,3')
+                .attr('pointer-events', 'none');
+
+            // Tooltip group
+            const tooltipG = hoverG.append('g').attr('class', 'hover-tooltip');
+            const tooltipBg = tooltipG.append('rect')
+                .attr('rx', 4).attr('ry', 4)
+                .attr('fill', 'rgba(20,20,40,0.88)')
+                .attr('stroke', 'rgba(160,160,220,0.35)')
+                .attr('stroke-width', 1);
+
+            const bisect = d3.bisector(d => d.x).left;
+
+            // Transparent overlay on top captures mouse events
+            g.append('rect')
+                .attr('class', 'hover-overlay')
+                .attr('width', innerW)
+                .attr('height', innerH)
+                .attr('fill', 'none')
+                .attr('pointer-events', 'all')
+                .on('mousemove', function (event) {
+                    const [mx] = d3.pointer(event);
+                    const xVal = xScale.invert(mx);
+
+                    const rows = [];
+                    for (const ds of _currentDatasets) {
+                        if (ds.hidden || !ds.data || ds.data.length < 1) continue;
+                        const data = ds.data.filter(d => d.y != null);
+                        if (!data.length) continue;
+                        const idx = bisect(data, xVal);
+                        let yVal;
+                        if (idx === 0) {
+                            yVal = data[0].y;
+                        } else if (idx >= data.length) {
+                            yVal = data[data.length - 1].y;
+                        } else {
+                            const d0 = data[idx - 1], d1 = data[idx];
+                            const t = d1.x === d0.x ? 0 : (xVal - d0.x) / (d1.x - d0.x);
+                            yVal = d0.y + t * (d1.y - d0.y);
+                        }
+                        rows.push({ label: ds.label, color: ds.color, value: yVal });
+                    }
+
+                    if (!rows.length) { hoverG.style('display', 'none'); return; }
+
+                    crosshair.attr('x1', mx).attr('x2', mx);
+
+                    tooltipG.selectAll('text.hover-row').remove();
+                    const pad = 7, lineH = 15, textSize = 11;
+
+                    tooltipG.append('text').attr('class', 'hover-row')
+                        .attr('x', pad)
+                        .attr('y', pad + textSize)
+                        .attr('fill', DARK.axisText)
+                        .attr('font-size', textSize)
+                        .text(`x = ${xVal.toFixed(2)}`);
+
+                    rows.forEach((row, i) => {
+                        tooltipG.append('text').attr('class', 'hover-row')
+                            .attr('x', pad + 8)
+                            .attr('y', pad + textSize + (i + 1) * lineH + 2)
+                            .attr('fill', row.color)
+                            .attr('font-size', textSize)
+                            .text(`${row.label}: ${row.value.toFixed(3)}`);
+                    });
+
+                    const totalRows = 1 + rows.length;
+                    const tooltipH = pad * 2 + totalRows * lineH;
+                    const maxChars = Math.max(
+                        ('x = ' + xVal.toFixed(2)).length,
+                        ...rows.map(r => r.label.length + 8)
+                    );
+                    const tooltipW = Math.max(90, maxChars * 7);
+                    tooltipBg.attr('width', tooltipW).attr('height', tooltipH);
+
+                    let tx = mx + 12;
+                    if (tx + tooltipW > innerW) tx = mx - tooltipW - 12;
+                    tooltipG.attr('transform', `translate(${tx},8)`);
+
+                    hoverG.style('display', null);
+                })
+                .on('mouseleave', function () {
+                    hoverG.style('display', 'none');
+                });
+        }
+
         return {
             svg,
             xScale,
             yScale,
             update(newDatasets) {
+                _currentDatasets = newDatasets;
                 buildScales(newDatasets);
                 drawLines(newDatasets);
             },

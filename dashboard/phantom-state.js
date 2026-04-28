@@ -32,6 +32,8 @@
     window.PhantomState = {
         selectedPhantom: 'brain',
         tissues: deepCopyTissues('brain'),
+        contrastTissue1: 'gray',
+        contrastTissue2: 'white',
     };
 
     // ── Actions ───────────────────────────────────────────────────────────
@@ -93,6 +95,48 @@
                 window.dispatchEvent(new CustomEvent('phantomChanged', { detail: { enabledChanged: true } }));
             });
         });
+
+        populateContrastSelects();
+    }
+
+    function populateContrastSelects() {
+        const sel1 = document.getElementById('contrast-t1-select');
+        const sel2 = document.getElementById('contrast-t2-select');
+        if (!sel1 || !sel2) return;
+        const tissues = window.PhantomState.tissues;
+        [sel1, sel2].forEach(sel => {
+            const prev = sel.value;
+            sel.innerHTML = '';
+            tissues.forEach(t => {
+                const opt = document.createElement('option');
+                opt.value = t.name;
+                opt.textContent = t.label;
+                sel.appendChild(opt);
+            });
+            // Restore previous selection if still valid
+            if (tissues.some(t => t.name === prev)) sel.value = prev;
+        });
+        // Apply saved state
+        if (tissues.some(t => t.name === window.PhantomState.contrastTissue1))
+            sel1.value = window.PhantomState.contrastTissue1;
+        if (tissues.some(t => t.name === window.PhantomState.contrastTissue2))
+            sel2.value = window.PhantomState.contrastTissue2;
+
+        // Bind change listeners (once via data attribute flag)
+        if (!sel1.dataset.bound) {
+            sel1.dataset.bound = 'true';
+            sel1.addEventListener('change', () => {
+                window.PhantomState.contrastTissue1 = sel1.value;
+                window.dispatchEvent(new CustomEvent('contrastPairChanged'));
+            });
+        }
+        if (!sel2.dataset.bound) {
+            sel2.dataset.bound = 'true';
+            sel2.addEventListener('change', () => {
+                window.PhantomState.contrastTissue2 = sel2.value;
+                window.dispatchEvent(new CustomEvent('contrastPairChanged'));
+            });
+        }
     }
 
     function updateScanTabLabel() {
