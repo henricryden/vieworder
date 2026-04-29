@@ -320,7 +320,7 @@
                 .attr('pointer-events', 'all')
                 .on('mousemove', function (event) {
                     const [mx] = d3.pointer(event);
-                    const xVal = xScale.invert(mx);
+                    const xVal = Math.round(xScale.invert(mx));
 
                     const rows = [];
                     for (const ds of _currentDatasets) {
@@ -343,7 +343,8 @@
 
                     if (!rows.length) { hoverG.style('display', 'none'); return; }
 
-                    crosshair.attr('x1', mx).attr('x2', mx);
+                    const snappedX = xScale(xVal);
+                    crosshair.attr('x1', snappedX).attr('x2', snappedX);
 
                     tooltipG.selectAll('text.hover-row').remove();
                     const pad = 7, lineH = 15, textSize = 11;
@@ -353,7 +354,7 @@
                         .attr('y', pad + textSize)
                         .attr('fill', DARK.axisText)
                         .attr('font-size', textSize)
-                        .text(`x = ${xVal.toFixed(2)}`);
+                        .text(`x = ${xVal}`);
 
                     rows.forEach((row, i) => {
                         tooltipG.append('text').attr('class', 'hover-row')
