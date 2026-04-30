@@ -797,10 +797,6 @@
                         </div>
                         <div class="params-fields-col">
                             <div class="control-group">
-                                <label>Flip angle <span class="value" id="enrage-alpha-value">8</span> °</label>
-                                <input type="range" id="enrage-alpha" min="0" max="20" value="8" step="1" class="slider">
-                            </div>
-                            <div class="control-group">
                                 <label>Inner TR <span class="value" id="enrage-tr-value">7</span> ms</label>
                                 <input type="range" id="enrage-tr" min="1" max="15" value="7" step="0.5" class="slider">
                             </div>
@@ -816,6 +812,44 @@
                     </div>
                 </div>
             </div><!-- /mprage-params-grid -->
+
+            <!-- FA Scheme selector + param rows -->
+            <div class="mprage-panel rare-scheme-panel">
+                <h2>Flip angle scheme</h2>
+                <div class="rare-scheme-row">
+                    <label>Scheme</label>
+                    <select id="enrage-fa-scheme">
+                        <option value="constant">Constant</option>
+                        <option value="linear">Linear ramp</option>
+                        <option value="custom">Custom</option>
+                    </select>
+                </div>
+                <div class="rare-scheme-params">
+                    <div id="enrage-scheme-constant" class="rare-scheme-block">
+                        <div class="control-group">
+                            <label>Flip angle <span class="value" id="enrage-alpha-value">8</span> °</label>
+                            <input type="range" id="enrage-alpha" min="0" max="20" value="8" step="1" class="slider">
+                        </div>
+                    </div>
+                    <div id="enrage-scheme-linear" class="rare-scheme-block" style="display:none;">
+                        <p style="color:#a0a0c0;font-size:0.9em;margin:4px 0;">Drag the start and end nodes on the flip angle chart below to set the linear ramp.</p>
+                    </div>
+                    <div id="enrage-scheme-custom" class="rare-scheme-block" style="display:none;">
+                        <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;">
+                            <p style="color:#a0a0c0;font-size:0.9em;margin:4px 0;">Drag nodes on the flip angle chart for the readout train.</p>
+                            <button id="enrage-custom-add-node" class="rare-node-btn">+ Add node</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Flip angle schedule -->
+            <div class="mprage-plots-row full" style="margin-top:22px;">
+                <div class="mprage-plot-panel">
+                    <h3>Flip angle schedule</h3>
+                    <div class="mprage-chart-wrapper" style="height:216px;" id="enrage-fa-chart"></div>
+                </div>
+            </div>
 
             <!-- ENRAGE window charts (Mz + Mxy) -->
             <div class="mprage-plots-row" style="margin-top:22px;">
@@ -2984,8 +3018,6 @@
             const E1_TD2 = p.TD2 > 0 ? Math.exp(-p.TD2     / T1) : 1;
             const E1_TR  = Math.exp(-p.innerTR / T1);
             const E2_TE  = Math.exp(-TE / T2);
-            const ca     = Math.cos(p.flipAngle * Math.PI / 180);
-            const sa     = Math.sin(p.flipAngle * Math.PI / 180);
             const numDummy = p.numDummyPulses || 0;
             const total    = numDummy + p.numPulses;
             let Mz = PD;
@@ -3004,6 +3036,9 @@
                     const isDummy = i < numDummy;
                     const pulseIndex = i + 1;
                     const acquiredIndex = isDummy ? null : i - numDummy + 1;
+                    const fa_i = Array.isArray(p.faSchedule) ? (p.faSchedule[i] ?? p.flipAngle) : p.flipAngle;
+                    const ca = Math.cos(fa_i * Math.PI / 180);
+                    const sa = Math.sin(fa_i * Math.PI / 180);
                     const MxyRe = Mz * sa * E2_TE;
                     timeline.push({ pulseIndex, acquiredIndex, isDummy, Mz, MxyRe, MxyIm: 0 });
                     Mz = Mz * ca * E1_TR + PD * (1 - E1_TR);
@@ -3016,8 +3051,6 @@
             const TE    = p.TE || (p.innerTR / 2);
             const E1_TR = Math.exp(-p.innerTR / T1);
             const E2_TE = Math.exp(-TE / T2);
-            const ca    = Math.cos(p.flipAngle * Math.PI / 180);
-            const sa    = Math.sin(p.flipAngle * Math.PI / 180);
             const numDummy = p.numDummyPulses || 0;
             const total    = numDummy + p.numPulses;
             function sampleRelax(tStart, Mz0, dur, phase, out) {
@@ -3057,6 +3090,9 @@
                     const isDummy = i < numDummy;
                     const pulseIndex = i + 1;
                     const acquiredIndex = isDummy ? null : i - numDummy + 1;
+                    const fa_i = Array.isArray(p.faSchedule) ? (p.faSchedule[i] ?? p.flipAngle) : p.flipAngle;
+                    const ca = Math.cos(fa_i * Math.PI / 180);
+                    const sa = Math.sin(fa_i * Math.PI / 180);
                     const MxyRe = Mz * sa * E2_TE;
                     timeline.push({ time: ct, Mz, Mxy: Math.abs(MxyRe), phase: 'readout', pulseIndex, acquiredIndex, isDummy });
                     Mz = Mz * ca * E1_TR + PD * (1 - E1_TR);
@@ -3160,6 +3196,49 @@
         let _enrageHiddenLabels = new Set();
         let _enrageLastSimData  = null;
 
+        let _enrageLinearFANodes = null;   // [{pulseIndex, fa}] — two endpoints for linear scheme
+        let _enrageCustomNodes   = null;  // [{pulseIndex, fa}] — custom nodes for custom scheme
+        let _enrageFACtrlPtHandle = null; // { update, remove }
+
+        function defaultENRAGELinearNodes(n) {
+            return [
+                { pulseIndex: 1, fa: 8 },
+                { pulseIndex: n, fa: 8 },
+            ];
+        }
+
+        function defaultENRAGECustomNodes(n) {
+            return [
+                { pulseIndex: 1,                         fa: 8 },
+                { pulseIndex: Math.max(1, Math.round(n / 3)),     fa: 6 },
+                { pulseIndex: Math.max(1, Math.round(2 * n / 3)), fa: 4 },
+                { pulseIndex: n,                         fa: 2 },
+            ];
+        }
+
+        function normalizeENRAGENodes(nodes, pulseCount) {
+            const byPulse = new Map();
+            for (const node of nodes || []) {
+                const pulseIndex = Math.max(1, Math.min(pulseCount, Math.round(node.pulseIndex)));
+                const fa = Math.max(0, Math.min(30, node.fa));
+                byPulse.set(pulseIndex, { pulseIndex, fa });
+            }
+            return [...byPulse.values()].sort((a, b) => a.pulseIndex - b.pulseIndex);
+        }
+
+        function computeENRAGEFlipAngles(scheme, params, n) {
+            switch (scheme) {
+                case 'constant':
+                    return Array(n).fill(params.flipAngle);
+                case 'linear':
+                case 'custom': {
+                    return linearInterpFA(params.faNodes, n);
+                }
+                default:
+                    return Array(n).fill(8);
+            }
+        }
+
         function renderENRAGECharts() {
             if (!_enrageLastSimData) return;
             const { activeTissues, winResults, fullSel, fullRes,
@@ -3255,6 +3334,7 @@
             const numDummyPulses = parseInt(document.getElementById('enrage-dummy').value);
             const totalTrainPulses = etl + numDummyPulses;
             const invertEnable   = document.getElementById('enrage-invert-enable').checked;
+            const scheme         = document.getElementById('enrage-fa-scheme').value;
             const numSims        = 4;
 
             ['enrage-etl-display', 'enrage-etl-display-mz', 'enrage-etl-display-mxy'].forEach(id => {
@@ -3271,6 +3351,70 @@
                 numDummyPulses,
                 numPulses:  etl,
             };
+
+            // ── Compute flip angle schedule based on scheme ─────────────────
+            let faSchedule;
+            if (scheme === 'constant') {
+                faSchedule = computeENRAGEFlipAngles('constant', { flipAngle: p.flipAngle }, totalTrainPulses);
+            } else if (scheme === 'linear') {
+                if (!_enrageLinearFANodes) _enrageLinearFANodes = defaultENRAGELinearNodes(totalTrainPulses);
+                faSchedule = computeENRAGEFlipAngles('linear', { faNodes: _enrageLinearFANodes }, totalTrainPulses);
+            } else if (scheme === 'custom') {
+                if (!_enrageCustomNodes) _enrageCustomNodes = defaultENRAGECustomNodes(totalTrainPulses);
+                faSchedule = computeENRAGEFlipAngles('custom', { faNodes: _enrageCustomNodes }, totalTrainPulses);
+            } else {
+                faSchedule = Array(totalTrainPulses).fill(8);
+            }
+            p.faSchedule = faSchedule;
+
+            // ── Render FA bar chart ──────────────────────────────────────────
+            {
+                const faLabels = Array.from({ length: totalTrainPulses }, (_, i) => String(i + 1));
+                const faColors = faLabels.map((_, i) => i < numDummyPulses ? 'rgba(255,180,80,0.80)' : 'rgba(160,100,255,0.80)');
+                const trainTickStep = Math.max(10, Math.ceil(etl / 6 / 10) * 10);
+                const faTickValues = Array.from({ length: etl }, (_, i) => i + 1)
+                    .filter((n) => n === etl || n % trainTickStep === 0)
+                    .map(String);
+
+                const faPlot = D3SeqPlots.createBarPlot(document.getElementById('enrage-fa-chart'), {
+                    xLabels:   faLabels,
+                    values:    faSchedule,
+                    colors:    faColors,
+                    xTickValues: faTickValues,
+                    yMin: 0, yMax: 20,
+                    xLabel: 'Pulse index',
+                    yLabel: 'Flip angle (°)',
+                    draggable: false,
+                });
+
+                // ── Add control points for linear/custom schemes ────────────
+                if (_enrageFACtrlPtHandle) { _enrageFACtrlPtHandle.remove(); _enrageFACtrlPtHandle = null; }
+                if (scheme === 'linear' || scheme === 'custom') {
+                    const svgEl = document.querySelector('#enrage-fa-chart svg');
+                    if (svgEl) {
+                        const normalizedNodes = scheme === 'linear'
+                            ? _enrageLinearFANodes
+                            : _enrageCustomNodes;
+                        _enrageFACtrlPtHandle = D3SeqPlots.addFAControlPoints(svgEl, {
+                            xScale: faPlot.xScale,
+                            yScale: faPlot.yScale,
+                            pulseCount: totalTrainPulses,
+                            xOffset: 0,
+                            yMin: 0,
+                            yMax: 20,
+                            points: normalizeENRAGENodes(normalizedNodes, totalTrainPulses),
+                            onDragEnd: (newPts) => {
+                                if (scheme === 'linear') {
+                                    _enrageLinearFANodes = normalizeENRAGENodes(newPts, totalTrainPulses);
+                                } else if (scheme === 'custom') {
+                                    _enrageCustomNodes = normalizeENRAGENodes(newPts, totalTrainPulses);
+                                }
+                                runENRAGESimulation();
+                            },
+                        });
+                    }
+                }
+            }
 
             const activeTissues = window.PhantomState.tissues.filter(t => t.enabled !== false);
 
@@ -3314,8 +3458,10 @@
             const etl            = appParams.etl;
             const numDummyPulses = parseInt(document.getElementById('enrage-dummy').value);
             const invertEnable   = document.getElementById('enrage-invert-enable').checked;
+            const scheme         = document.getElementById('enrage-fa-scheme').value;
             const numSims        = 4;
             const t0             = performance.now();
+            const totalTrainPulses = etl + numDummyPulses;
 
             const p = {
                 TD1:        parseInt(document.getElementById('enrage-td1').value),
@@ -3327,6 +3473,22 @@
                 numDummyPulses,
                 numPulses:  etl,
             };
+
+            // ── Compute flip angle schedule based on scheme ─────────────────
+            let faSchedule;
+            if (scheme === 'constant') {
+                faSchedule = computeENRAGEFlipAngles('constant', { flipAngle: p.flipAngle }, totalTrainPulses);
+            } else if (scheme === 'linear') {
+                if (!_enrageLinearFANodes) _enrageLinearFANodes = defaultENRAGELinearNodes(totalTrainPulses);
+                faSchedule = computeENRAGEFlipAngles('linear', { faNodes: _enrageLinearFANodes }, totalTrainPulses);
+            } else if (scheme === 'custom') {
+                if (!_enrageCustomNodes) _enrageCustomNodes = defaultENRAGECustomNodes(totalTrainPulses);
+                faSchedule = computeENRAGEFlipAngles('custom', { faNodes: _enrageCustomNodes }, totalTrainPulses);
+            } else {
+                faSchedule = Array(totalTrainPulses).fill(8);
+            }
+            p.faSchedule = faSchedule;
+
             const result = {};
             for (const t of window.PhantomState.tissues.filter(t => t.enabled !== false)) {
                 const { timeline } = simulateENRAGEBloch(t.T1, t.T2, t.PD, p, numSims);
@@ -3369,6 +3531,44 @@
                 runENRAGESimulation();
             });
             updateTD2Visibility();
+
+            // Scheme selector + conditional block updates
+            const schemeSelect = document.getElementById('enrage-fa-scheme');
+            const schemeBlocks = {
+                constant: document.getElementById('enrage-scheme-constant'),
+                linear: document.getElementById('enrage-scheme-linear'),
+                custom: document.getElementById('enrage-scheme-custom'),
+            };
+            function updateSchemeBlocks() {
+                const scheme = schemeSelect.value;
+                for (const [key, block] of Object.entries(schemeBlocks)) {
+                    if (block) block.style.display = (key === scheme) ? '' : 'none';
+                }
+            }
+            schemeSelect.addEventListener('change', () => {
+                updateSchemeBlocks();
+                runENRAGESimulation();
+            });
+            updateSchemeBlocks();
+
+            // Add node button for custom scheme
+            const addNodeBtn = document.getElementById('enrage-custom-add-node');
+            if (addNodeBtn) {
+                addNodeBtn.addEventListener('click', () => {
+                    if (!_enrageCustomNodes) _enrageCustomNodes = defaultENRAGECustomNodes(72);
+                    const etl = window.AppState ? window.AppState.params.etl : 72;
+                    const totalTrainPulses = etl + (parseInt(document.getElementById('enrage-dummy').value) || 0);
+                    const midPoint = Math.round(totalTrainPulses / 2);
+                    const existingIndices = _enrageCustomNodes.map(n => n.pulseIndex);
+                    let newPulseIndex = midPoint;
+                    while (existingIndices.includes(newPulseIndex)) {
+                        newPulseIndex = newPulseIndex > midPoint ? newPulseIndex - 1 : newPulseIndex + 1;
+                    }
+                    _enrageCustomNodes.push({ pulseIndex: newPulseIndex, fa: 5 });
+                    _enrageCustomNodes = normalizeENRAGENodes(_enrageCustomNodes, totalTrainPulses);
+                    runENRAGESimulation();
+                });
+            }
         }
 
         // ── Expose module ────────────────────────────────────────────────

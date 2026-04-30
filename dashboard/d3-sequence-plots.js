@@ -467,6 +467,86 @@
 
         drawBars(values, opts.colors);
 
+        // ─── Hover crosshair + tooltip ──────────────────────────────────────────
+        const hoverG = g.append('g').attr('class', 'hover-group').style('display', 'none');
+
+        // Faint vertical crosshair line
+        const crosshair = hoverG.append('line')
+            .attr('y1', 0)
+            .attr('y2', innerH)
+            .attr('stroke', 'rgba(255,255,255,0.22)')
+            .attr('stroke-width', 1)
+            .attr('stroke-dasharray', '4,3')
+            .attr('pointer-events', 'none');
+
+        // Tooltip group
+        const tooltipG = hoverG.append('g').attr('class', 'hover-tooltip');
+        const tooltipBg = tooltipG.append('rect')
+            .attr('rx', 4).attr('ry', 4)
+            .attr('fill', 'rgba(20,20,40,0.88)')
+            .attr('stroke', 'rgba(160,160,220,0.35)')
+            .attr('stroke-width', 1);
+
+        // Transparent overlay on top captures mouse events
+        g.append('rect')
+            .attr('class', 'hover-overlay')
+            .attr('width', innerW)
+            .attr('height', innerH)
+            .attr('fill', 'none')
+            .attr('pointer-events', 'all')
+            .on('mousemove', function (event) {
+                const [mx] = d3.pointer(event);
+                
+                // Find nearest bar center
+                let bestIdx = 0;
+                let bestDist = Infinity;
+                for (let i = 0; i < xLabels.length; i++) {
+                    const barX = xScale(xLabels[i]) + xScale.bandwidth() / 2;
+                    const dist = Math.abs(mx - barX);
+                    if (dist < bestDist) {
+                        bestDist = dist;
+                        bestIdx = i;
+                    }
+                }
+
+                const pulseIndex = bestIdx + 1;
+                const faValue = values[bestIdx];
+                const barX = xScale(xLabels[bestIdx]) + xScale.bandwidth() / 2;
+
+                crosshair.attr('x1', barX).attr('x2', barX);
+
+                tooltipG.selectAll('text').remove();
+                const pad = 7, lineH = 15, textSize = 11;
+
+                tooltipG.append('text')
+                    .attr('x', pad)
+                    .attr('y', pad + textSize)
+                    .attr('fill', 'rgba(160,220,255,0.9)')
+                    .attr('font-size', textSize)
+                    .text(`Index: ${pulseIndex}`);
+
+                tooltipG.append('text')
+                    .attr('x', pad)
+                    .attr('y', pad + textSize + lineH)
+                    .attr('fill', 'rgba(255,200,100,0.9)')
+                    .attr('font-size', textSize)
+                    .text(`FA: ${faValue.toFixed(1)}°`);
+
+                const tooltipH = pad * 2 + 2 * lineH;
+                const maxChars = Math.max('Index: 9999'.length, 'FA: 20.0°'.length);
+                const tooltipW = Math.max(90, maxChars * 7);
+                tooltipBg.attr('width', tooltipW).attr('height', tooltipH);
+
+                let tx = mx + 12;
+                if (tx + tooltipW > innerW) tx = mx - tooltipW - 12;
+                tooltipG.attr('transform', `translate(${tx},8)`);
+
+                hoverG.style('display', null);
+            })
+            .on('mouseleave', function () {
+                hoverG.style('display', 'none');
+            });
+
         let dragEnabled = !!opts.draggable;
 
         function setupDrag() {
@@ -659,8 +739,86 @@
             .attr('class', 'fa-ctrl-pts')
             .attr('transform', `translate(${margin.left},${margin.top})`);
 
+        // Tooltip groups - one per control point
+        const tooltips = new Map();
+
+        function createTooltipElements(point) {
+            const tooltipG = g.append('g')
+                .attr('class', 'fa-tooltip')
+                .style('display', 'none')
+                .datum(point);
+            
+            tooltipG.append('rect')
+                .attr('class', 'fa-tooltip-bg')
+                .attr('rx', 4).attr('ry', 4)
+                .attr('fill', 'rgba(20,20,40,0.88)')
+                .attr('stroke', 'rgba(255,180,50,0.5)')
+                .attr('stroke-width', 1);
+            
+            return tooltipG;
+        }
+
+        function updateTooltip(d, tooltipG) {
+            const nodeX = pulseToPx(d.pulseIndex);
+            const nodeY = yScale(d.fa);
+            
+            const textLines = [
+                `Index: ${d.pulseIndex}`,
+                `FA: ${d.fa.toFixed(1)}°`
+            ];
+            
+            const lineHeight = 15;
+            const padding = 8;
+            const totalHeight = textLines.length * lineHeight + padding * 2;
+            
+            // Estimate width based on text length
+            const maxTextWidth = Math.max(
+                `Index: ${d.pulseIndex}`.length,
+                `FA: ${d.fa.toFixed(1)}°`.length
+            ) * 6.5;
+            const totalWidth = maxTextWidth + padding * 2;
+            
+            // Position tooltip above the node, centered
+            const tooltipX = nodeX - totalWidth / 2;
+            const tooltipY = nodeY - totalHeight - 10;
+            
+            // Update background rect
+            tooltipG.select('rect.fa-tooltip-bg')
+                .attr('x', tooltipX)
+                .attr('y', tooltipY)
+                .attr('width', totalWidth)
+                .attr('height', totalHeight);
+            
+            // Remove old text
+            tooltipG.selectAll('text').remove();
+            
+            // Add text lines
+            const startY = tooltipY + padding + lineHeight - 4;
+            textLines.forEach((line, i) => {
+                tooltipG.append('text')
+                    .attr('x', tooltipX + totalWidth / 2)
+                    .attr('y', startY + i * lineHeight)
+                    .attr('fill', 'rgba(255,220,100,0.95)')
+                    .attr('font-size', 11)
+                    .attr('text-anchor', 'middle')
+                    .text(line);
+            });
+        }
+
+        function showAllTooltips() {
+            tooltips.forEach(tooltipG => {
+                const d = tooltipG.datum();
+                updateTooltip(d, tooltipG);
+                tooltipG.style('display', null);
+            });
+        }
+
+        function hideAllTooltips() {
+            tooltips.forEach(tooltipG => tooltipG.style('display', 'none'));
+        }
+
         function draw(pts) {
-            g.selectAll('*').remove();
+            g.selectAll('circle.fa-ctrl-pt, line.fa-ctrl-line').remove();
             const sorted = [...pts].sort((a, b) => a.pulseIndex - b.pulseIndex);
 
             // Linear interpolation preview line through all nodes
@@ -678,6 +836,13 @@
                 }
             }
 
+            // Create tooltip for each point if not already present
+            pts.forEach(point => {
+                if (!tooltips.has(point)) {
+                    tooltips.set(point, createTooltipElements(point));
+                }
+            });
+
             g.selectAll('circle.fa-ctrl-pt').data(pts)
                 .enter().append('circle').attr('class', 'fa-ctrl-pt')
                 .attr('cx', d => pulseToPx(d.pulseIndex))
@@ -688,6 +853,9 @@
                 .attr('stroke-width', 1.5)
                 .attr('cursor', 'move')
                 .call(d3.drag()
+                    .on('start', function (event, d) {
+                        showAllTooltips();
+                    })
                     .on('drag', function (event, d) {
                         const i = pts.indexOf(d);
                         if (i < 0) return;
@@ -702,9 +870,11 @@
                         d.pulseIndex = bestPulse;
                         // y: clamp to [yMin, yMax]
                         d.fa = Math.max(yMin, Math.min(yMax, yScale.invert(event.y)));
+                        showAllTooltips();
                         draw(pts);
                     })
                     .on('end', function () {
+                        hideAllTooltips();
                         pts.sort((a, b) => a.pulseIndex - b.pulseIndex);
                         if (opts.onDragEnd) opts.onDragEnd(pts.map(p => ({ ...p })));
                     })
