@@ -1599,7 +1599,7 @@
                 const t = (pulse - left.pulseIndex) / span;
                 faSchedule.push(left.fa + (right.fa - left.fa) * t);
             }
-            return faSchedule.map(v => Math.round(v * 10) / 10);
+            return faSchedule.map(v => Math.round(v * 10000) / 10000);
         }
 
         function getRareCustomPulseLabels(etl, numDummyEchoes, drivenEqMode) {
@@ -2173,6 +2173,9 @@
         let _customNodes = null;  // [{echoIndex, fa}] — set when custom active
         let _mxyCtrlPtHandle = null; // { update, remove }
         let _faCtrlPtHandle = null;  // { update, remove }
+        let _rareFAPlot = null;      // bar plot reference for live drag updates
+        let _rareFAColors = null;    // last-used bar colors
+        let _rareFADragging = false; // true while dragging FA control points
 
         function defaultCtrlPts(etl) {
             const n = 5;
@@ -2422,17 +2425,23 @@
                         .filter((n) => n === etl || n % trainTickStep === 0)
                         .map(String),
                 ];
-                const faPlot = D3SeqPlots.createBarPlot(document.getElementById('rare-fa-chart'), {
-                    xLabels:   faLabels,
-                    values:    faValues,
-                    colors:    faColors,
-                    xTickValues: faTickValues,
-                    yMin: 0, yMax: 190,
-                    xLabel: 'Pulse index',
-                    yLabel: 'Flip angle (°)',
-                    draggable: false,
-                });
-
+                if (_rareFADragging && _rareFAPlot) {
+                    // During drag: just update bar values, skip SVG recreation
+                    _rareFAPlot.update(faValues, faColors);
+                } else {
+                    _rareFAColors = faColors;
+                    _rareFAPlot = D3SeqPlots.createBarPlot(document.getElementById('rare-fa-chart'), {
+                        xLabels:   faLabels,
+                        values:    faValues,
+                        colors:    faColors,
+                        xTickValues: faTickValues,
+                        yMin: 0, yMax: 190,
+                        xLabel: 'Pulse index',
+                        yLabel: 'Flip angle (°)',
+                        draggable: false,
+                    });
+                }
+                // (legend always updated)
                 document.getElementById('rare-fa-legend').innerHTML = [
                     '<div class="rare-fa-legend-item"><span class="rare-fa-swatch" style="background:rgba(100,160,255,0.85)"></span>Excitation</div>',
                     ...(numStartupEchoes > 0 ? ['<div class="rare-fa-legend-item"><span class="rare-fa-swatch" style="background:rgba(80,210,160,0.82)"></span>PSS startup</div>'] : []),
@@ -2441,22 +2450,30 @@
                     ...(drivenEqMode !== 'off' ? ['<div class="rare-fa-legend-item"><span class="rare-fa-swatch" style="background:rgba(255,120,160,0.92)"></span>Driven equilibrium RF</div>'] : []),
                 ].join('');
 
-                const svgEl = document.querySelector('#rare-fa-chart svg');
-                if (svgEl && scheme === 'custom') {
-                    const customPulseCount = totalTrainEchoes + (drivenEqMode !== 'off' ? 1 : 0);
-                    _faCtrlPtHandle = D3SeqPlots.addFAControlPoints(svgEl, {
-                        xScale: faPlot.xScale,
-                        yScale: faPlot.yScale,
-                        pulseCount: customPulseCount,
-                        xOffset: 1,
-                        yMin: 0,
-                        yMax: 180,
-                        points: normalizeCustomNodes(_customNodes, customPulseCount),
-                        onDragEnd: (newPts) => {
-                            _customNodes = normalizeCustomNodes(newPts, customPulseCount);
-                            requestRARESimulation(0);
-                        },
-                    });
+                if (!_rareFADragging) {
+                    const svgEl = document.querySelector('#rare-fa-chart svg');
+                    if (svgEl && scheme === 'custom') {
+                        const customPulseCount = totalTrainEchoes + (drivenEqMode !== 'off' ? 1 : 0);
+                        _faCtrlPtHandle = D3SeqPlots.addFAControlPoints(svgEl, {
+                            xScale: _rareFAPlot.xScale,
+                            yScale: _rareFAPlot.yScale,
+                            pulseCount: customPulseCount,
+                            xOffset: 1,
+                            yMin: 0,
+                            yMax: 180,
+                            points: normalizeCustomNodes(_customNodes, customPulseCount),
+                            onDrag: (newPts) => {
+                                _rareFADragging = true;
+                                _customNodes = normalizeCustomNodes(newPts, customPulseCount);
+                                requestRARESimulation(0);
+                            },
+                            onDragEnd: (newPts) => {
+                                _rareFADragging = false;
+                                _customNodes = normalizeCustomNodes(newPts, customPulseCount);
+                                requestRARESimulation(0);
+                            },
+                        });
+                    }
                 }
             }
 
@@ -3199,6 +3216,8 @@
         let _enrageLinearFANodes = null;   // [{pulseIndex, fa}] — two endpoints for linear scheme
         let _enrageCustomNodes   = null;  // [{pulseIndex, fa}] — custom nodes for custom scheme
         let _enrageFACtrlPtHandle = null; // { update, remove }
+        let _enrageFAPlot = null;         // bar plot reference for live drag updates
+        let _enrageFADragging = false;    // true while dragging FA control points
 
         function defaultENRAGELinearNodes(n) {
             return [
@@ -3371,47 +3390,63 @@
             {
                 const faLabels = Array.from({ length: totalTrainPulses }, (_, i) => String(i + 1));
                 const faColors = faLabels.map((_, i) => i < numDummyPulses ? 'rgba(255,180,80,0.80)' : 'rgba(160,100,255,0.80)');
-                const trainTickStep = Math.max(10, Math.ceil(etl / 6 / 10) * 10);
-                const faTickValues = Array.from({ length: etl }, (_, i) => i + 1)
-                    .filter((n) => n === etl || n % trainTickStep === 0)
-                    .map(String);
 
-                const faPlot = D3SeqPlots.createBarPlot(document.getElementById('enrage-fa-chart'), {
-                    xLabels:   faLabels,
-                    values:    faSchedule,
-                    colors:    faColors,
-                    xTickValues: faTickValues,
-                    yMin: 0, yMax: 20,
-                    xLabel: 'Pulse index',
-                    yLabel: 'Flip angle (°)',
-                    draggable: false,
-                });
+                if (_enrageFADragging && _enrageFAPlot) {
+                    // During drag: just update bar values, skip SVG recreation
+                    _enrageFAPlot.update(faSchedule, faColors);
+                } else {
+                    const trainTickStep = Math.max(10, Math.ceil(etl / 6 / 10) * 10);
+                    const faTickValues = Array.from({ length: etl }, (_, i) => i + 1)
+                        .filter((n) => n === etl || n % trainTickStep === 0)
+                        .map(String);
 
-                // ── Add control points for linear/custom schemes ────────────
-                if (_enrageFACtrlPtHandle) { _enrageFACtrlPtHandle.remove(); _enrageFACtrlPtHandle = null; }
-                if (scheme === 'linear' || scheme === 'custom') {
-                    const svgEl = document.querySelector('#enrage-fa-chart svg');
-                    if (svgEl) {
-                        const normalizedNodes = scheme === 'linear'
-                            ? _enrageLinearFANodes
-                            : _enrageCustomNodes;
-                        _enrageFACtrlPtHandle = D3SeqPlots.addFAControlPoints(svgEl, {
-                            xScale: faPlot.xScale,
-                            yScale: faPlot.yScale,
-                            pulseCount: totalTrainPulses,
-                            xOffset: 0,
-                            yMin: 0,
-                            yMax: 20,
-                            points: normalizeENRAGENodes(normalizedNodes, totalTrainPulses),
-                            onDragEnd: (newPts) => {
-                                if (scheme === 'linear') {
-                                    _enrageLinearFANodes = normalizeENRAGENodes(newPts, totalTrainPulses);
-                                } else if (scheme === 'custom') {
-                                    _enrageCustomNodes = normalizeENRAGENodes(newPts, totalTrainPulses);
-                                }
-                                runENRAGESimulation();
-                            },
-                        });
+                    _enrageFAPlot = D3SeqPlots.createBarPlot(document.getElementById('enrage-fa-chart'), {
+                        xLabels:   faLabels,
+                        values:    faSchedule,
+                        colors:    faColors,
+                        xTickValues: faTickValues,
+                        yMin: 0, yMax: 20,
+                        xLabel: 'Pulse index',
+                        yLabel: 'Flip angle (°)',
+                        draggable: false,
+                    });
+
+                    // ── Add control points for linear/custom schemes ────────────
+                    if (_enrageFACtrlPtHandle) { _enrageFACtrlPtHandle.remove(); _enrageFACtrlPtHandle = null; }
+                    if (scheme === 'linear' || scheme === 'custom') {
+                        const svgEl = document.querySelector('#enrage-fa-chart svg');
+                        if (svgEl) {
+                            const normalizedNodes = scheme === 'linear'
+                                ? _enrageLinearFANodes
+                                : _enrageCustomNodes;
+                            _enrageFACtrlPtHandle = D3SeqPlots.addFAControlPoints(svgEl, {
+                                xScale: _enrageFAPlot.xScale,
+                                yScale: _enrageFAPlot.yScale,
+                                pulseCount: totalTrainPulses,
+                                xOffset: 0,
+                                yMin: 0,
+                                yMax: 20,
+                                points: normalizeENRAGENodes(normalizedNodes, totalTrainPulses),
+                                onDrag: (newPts) => {
+                                    _enrageFADragging = true;
+                                    if (scheme === 'linear') {
+                                        _enrageLinearFANodes = normalizeENRAGENodes(newPts, totalTrainPulses);
+                                    } else if (scheme === 'custom') {
+                                        _enrageCustomNodes = normalizeENRAGENodes(newPts, totalTrainPulses);
+                                    }
+                                    runENRAGESimulation();
+                                },
+                                onDragEnd: (newPts) => {
+                                    _enrageFADragging = false;
+                                    if (scheme === 'linear') {
+                                        _enrageLinearFANodes = normalizeENRAGENodes(newPts, totalTrainPulses);
+                                    } else if (scheme === 'custom') {
+                                        _enrageCustomNodes = normalizeENRAGENodes(newPts, totalTrainPulses);
+                                    }
+                                    runENRAGESimulation();
+                                },
+                            });
+                        }
                     }
                 }
             }

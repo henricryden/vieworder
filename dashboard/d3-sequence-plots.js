@@ -530,7 +530,7 @@
                     .attr('y', pad + textSize + lineH)
                     .attr('fill', 'rgba(255,200,100,0.9)')
                     .attr('font-size', textSize)
-                    .text(`FA: ${faValue.toFixed(1)}°`);
+                    .text(`FA: ${faValue.toFixed(2)}°`);
 
                 const tooltipH = pad * 2 + 2 * lineH;
                 const maxChars = Math.max('Index: 9999'.length, 'FA: 20.0°'.length);
@@ -764,7 +764,7 @@
             
             const textLines = [
                 `Index: ${d.pulseIndex}`,
-                `FA: ${d.fa.toFixed(1)}°`
+                `FA: ${d.fa.toFixed(2)}°`
             ];
             
             const lineHeight = 15;
@@ -774,7 +774,7 @@
             // Estimate width based on text length
             const maxTextWidth = Math.max(
                 `Index: ${d.pulseIndex}`.length,
-                `FA: ${d.fa.toFixed(1)}°`.length
+                `FA: ${d.fa.toFixed(2)}°`.length
             ) * 6.5;
             const totalWidth = maxTextWidth + padding * 2;
             
@@ -868,10 +868,12 @@
                             if (dist < bestDist) { bestDist = dist; bestPulse = pulseIndex; }
                         }
                         d.pulseIndex = bestPulse;
-                        // y: clamp to [yMin, yMax]
-                        d.fa = Math.max(yMin, Math.min(yMax, yScale.invert(event.y)));
+                        // y: clamp to [yMin, yMax] and snap to 0.5° increments
+                        const clampedFA = Math.max(yMin, Math.min(yMax, yScale.invert(event.y)));
+                        d.fa = Math.round(clampedFA / 0.5) * 0.5;
                         showAllTooltips();
                         draw(pts);
+                        if (opts.onDrag) opts.onDrag(pts.map(p => ({ ...p })));
                     })
                     .on('end', function () {
                         hideAllTooltips();
