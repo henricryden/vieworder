@@ -210,6 +210,11 @@
                 <label for="center-echo-slider">Center Echo: <span id="center-echo-value">105</span></label>
                     <input type="range" id="center-echo-slider" min="1" max="256" value="105" class="slider" list="center-echo-ticks">
             </div>
+
+            <div class="control-group" id="macro-width-control">
+                <label for="macro-width-slider">Macro width: <span id="macro-width-value">2</span> <span id="macro-width-best"></span></label>
+                <input type="range" id="macro-width-slider" min="1" max="40" value="2" step="1" class="slider">
+            </div>
                 <datalist id="center-echo-ticks">
                     <option value="1"></option>
                     <option value="2"></option>
@@ -374,6 +379,7 @@
         <div class="info-panel">
             <p>Total phase encodes: <span id="info-total">0</span></p>
             <p>Number of shots: <span id="info-acceleration">1</span></p>
+            <p>RMS jump: <span id="metric-rms-jump">0.00</span></p>
         </div>
 
         <div class="perf-panel" id="perf-panel">
@@ -977,11 +983,11 @@
     </div><!-- /container -->
 
     <!-- Static JS: view order (order matters — kspace-utils before app) -->
-    <script src="kspace-utils.js"></script>
-    <script src="d3-plots.js"></script>
+    <script src="kspace-utils.js?v=20260614-macro-best1"></script>
+    <script src="d3-plots.js?v=20260614-macro-best1"></script>
     <script src="d3-sequence-plots.js?v=20260422b"></script>
     <script src="phantom-state.js"></script>
-    <script src="app.js?v=20260422b"></script>
+    <script src="app.js?v=20260614-macro-best1"></script>
     <script src="brain-phantom.js"></script>
     <script src="brain-sim.js"></script>
 
@@ -3648,4 +3654,3 @@
     </script>
 </body>
 </html>
-

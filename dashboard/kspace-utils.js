@@ -171,7 +171,7 @@ const KSpaceUtils = (() => {
      * @param {string} shotOrderParam - Shot ordering: 'ky', 'kz', or 'azimuthal' (for CPLO/LCPO)
      * @returns {Array} Coordinates with shot and echo assignments
      */
-    function assignViewOrdering(coords, etl, ordering, centerEcho, mtfDirection = 'ky', shotOrderParam = null) {
+    function assignViewOrdering(coords, etl, ordering, centerEcho, mtfDirection = 'ky', shotOrderParam = null, macroOptions = null) {
         if (coords.length === 0) return coords;
         
         // shotOrder is orthogonal to mtfDirection (or user-specified for LCPO/CPLO)
@@ -196,8 +196,43 @@ const KSpaceUtils = (() => {
             default:
                 sequentialOrdering(coords, etl, centerEcho, shotOrder);
         }
+
+        preserveBaseEcho(coords);
+        const macroWidth = Math.max(1, Math.floor(Number(macroOptions && macroOptions.macroWidth) || 2));
+        applyMacroCoarseFineAssignment(coords, etl, centerEcho, macroWidth, ordering, shotOrder);
+        coords.jumpMetrics = calculateJumpMetrics(coords);
         
         return coords;
+    }
+
+    function findBestMacroWidthByRms(generateCoords, etl, ordering, centerEcho, mtfDirection = 'ky', shotOrderParam = null, minWidth = 2, maxWidth = 40) {
+        const start = Math.max(1, Math.floor(Number(minWidth) || 2));
+        const stop = Math.max(start, Math.floor(Number(maxWidth) || start));
+        let bestWidth = start;
+        let bestRmsJump = Infinity;
+        let previousRmsJump = Infinity;
+        const evaluatedWidths = [];
+
+        for (let width = start; width <= stop; width++) {
+            const candidate = generateCoords();
+            assignViewOrdering(candidate, etl, ordering, centerEcho, mtfDirection, shotOrderParam, { macroWidth: width });
+            const rmsJump = candidate.jumpMetrics ? candidate.jumpMetrics.rmsJump : calculateJumpMetrics(candidate).rmsJump;
+            evaluatedWidths.push(width);
+            if (rmsJump < bestRmsJump) {
+                bestWidth = width;
+                bestRmsJump = rmsJump;
+            }
+            if (width > start && rmsJump > previousRmsJump + 1e-12) break;
+            previousRmsJump = rmsJump;
+        }
+
+        return {
+            bestWidth,
+            bestRmsJump,
+            searchMin: start,
+            searchMax: stop,
+            evaluatedWidths
+        };
     }
     
     /**
@@ -287,6 +322,413 @@ const KSpaceUtils = (() => {
             }
             pos = (pos + 1) % Math.max(1, numShots);
         }
+    }
+
+    function preserveBaseEcho(coords) {
+        for (let i = 0; i < coords.length; i++) {
+            coords[i].baseEcho = coords[i].echo;
+            coords[i].baseShot = coords[i].shot;
+            coords[i].baseRadarAngle = getRadarAngle(coords[i]);
+            coords[i].adjustedEcho = coords[i].echo;
+        }
+    }
+
+    function applyMacroCoarseFineAssignment(coords, etl, centerEcho, macroWidth, ordering, shotOrder) {
+        const numShots = getNumShots(coords);
+        if (macroWidth <= 0) macroWidth = 1;
+        if (macroWidth <= 1) return;
+
+        if (ordering === 'chevron') {
+            assignChevronCoarseMacroEchoes(coords, etl, centerEcho, macroWidth, numShots);
+        } else if (ordering === 'croc') {
+            assignCrocCoarseMacroEchoes(coords, etl, centerEcho, macroWidth, numShots);
+        } else {
+            assignFallbackCoarseMacroEchoes(coords, etl, macroWidth, numShots, ordering, shotOrder);
+        }
+
+        for (let i = 0; i < coords.length; i++) {
+            coords[i].macroOrderKey = getMacroOrderKey(coords[i], ordering, shotOrder);
+        }
+
+        const macroCount = Math.ceil(etl / macroWidth);
+        for (let macroEcho = 1; macroEcho <= macroCount; macroEcho++) {
+            assignMacroSegmentPaths(coords, macroEcho, macroWidth, etl, numShots);
+        }
+    }
+
+    function macroSegmentWidth(macroEcho, macroWidth, etl) {
+        const startEcho = (macroEcho - 1) * macroWidth + 1;
+        return Math.max(0, Math.min(etl, startEcho + macroWidth - 1) - startEcho + 1);
+    }
+
+    function macroEchoFromRank(rank, etl, macroWidth, numShots) {
+        const macroCount = Math.ceil(etl / macroWidth);
+        let remaining = Math.max(0, rank);
+        for (let macroEcho = 1; macroEcho <= macroCount; macroEcho++) {
+            const capacity = numShots * macroSegmentWidth(macroEcho, macroWidth, etl);
+            if (remaining < capacity) return macroEcho;
+            remaining -= capacity;
+        }
+        return macroCount;
+    }
+
+    function assignMacroEchoesBySortedIndices(coords, indices, etl, macroWidth, numShots) {
+        for (let rank = 0; rank < indices.length; rank++) {
+            coords[indices[rank]].macroEcho = macroEchoFromRank(rank, etl, macroWidth, numShots);
+        }
+    }
+
+    function coarseCenterEcho(centerEcho, etl, macroWidth) {
+        return Math.max(1, Math.min(Math.ceil(etl / macroWidth), Math.floor((centerEcho - 1) / macroWidth) + 1));
+    }
+
+    function nearestOriginIndex(coords) {
+        let nearestIdx = 0;
+        let minOriginSq = coords[0].ky * coords[0].ky + coords[0].kz * coords[0].kz;
+        for (let i = 1; i < coords.length; i++) {
+            const sq = coords[i].ky * coords[i].ky + coords[i].kz * coords[i].kz;
+            if (sq < minOriginSq) {
+                minOriginSq = sq;
+                nearestIdx = i;
+            }
+        }
+        return nearestIdx;
+    }
+
+    function assignChevronCoarseMacroEchoes(coords, etl, centerEcho, macroWidth, numShots) {
+        const numCoords = coords.length;
+        const indices = Array.from({ length: numCoords }, (_, i) => i);
+        let maxKy = 0;
+        for (let i = 0; i < numCoords; i++) {
+            const a = Math.abs(coords[i].ky);
+            if (a > maxKy) maxKy = a;
+        }
+        const y0 = maxKy;
+        const z0 = 0;
+        for (let i = 0; i < numCoords; i++) {
+            let theta = Math.atan2(coords[i].ky - y0, coords[i].kz - z0);
+            if (theta < 0) theta += 2 * Math.PI;
+            coords[i].theta = theta;
+        }
+
+        const nearestIdx = nearestOriginIndex(coords);
+        const kyDistFromY0 = new Float64Array(numCoords);
+        const absKzArr = new Float64Array(numCoords);
+        for (let i = 0; i < numCoords; i++) {
+            kyDistFromY0[i] = Math.abs(coords[i].ky - y0);
+            absKzArr[i] = Math.abs(coords[i].kz);
+        }
+
+        function setRadius(axisRatio) {
+            for (let i = 0; i < numCoords; i++) {
+                coords[i].ellipDist = kyDistFromY0[i] + absKzArr[i] * axisRatio;
+            }
+        }
+
+        function macroEchoOfNearest() {
+            const nearestDist = coords[nearestIdx].ellipDist;
+            let rank = 0;
+            for (let i = 0; i < numCoords; i++) {
+                if (coords[i].ellipDist < nearestDist) rank++;
+            }
+            return macroEchoFromRank(rank, etl, macroWidth, numShots);
+        }
+
+        const targetMacroCenter = coarseCenterEcho(centerEcho, etl, macroWidth);
+        const macroCount = Math.ceil(etl / macroWidth);
+        let leftRatio = 0.005;
+        let rightRatio = 100;
+        let axisRatio = Math.max(0.005, 2 * Math.PI * targetMacroCenter / Math.max(1, macroCount));
+        let foundCenter = false;
+
+        setRadius(axisRatio);
+        let currentMacroCenter = macroEchoOfNearest();
+        if (currentMacroCenter === targetMacroCenter) {
+            foundCenter = true;
+        } else if (currentMacroCenter > targetMacroCenter) {
+            leftRatio = axisRatio;
+        } else {
+            rightRatio = axisRatio;
+        }
+
+        for (let iter = 0; iter < 60 && !foundCenter; iter++) {
+            axisRatio = (leftRatio + rightRatio) / 2;
+            setRadius(axisRatio);
+            currentMacroCenter = macroEchoOfNearest();
+            if (currentMacroCenter === targetMacroCenter) {
+                foundCenter = true;
+            } else if (currentMacroCenter > targetMacroCenter) {
+                leftRatio = axisRatio;
+            } else {
+                rightRatio = axisRatio;
+            }
+        }
+
+        setRadius(axisRatio);
+        indices.sort((a, b) => coords[a].ellipDist - coords[b].ellipDist);
+        assignMacroEchoesBySortedIndices(coords, indices, etl, macroWidth, numShots);
+    }
+
+    function assignCrocCoarseMacroEchoes(coords, etl, centerEcho, macroWidth, numShots) {
+        const numCoords = coords.length;
+        const indices = Array.from({ length: numCoords }, (_, i) => i);
+        const NORTH = 0, EAST = 1, SOUTH = 2, WEST = 3;
+
+        const numCoordsPerSector = [0, 0, 0, 0];
+        for (let i = 0; i < numCoords; i++) {
+            coords[i].theta = Math.atan2(coords[i].ky + 0.5, coords[i].kz + 0.5);
+            const ky = coords[i].ky + 0.5;
+            const kz = coords[i].kz + 0.5;
+            const absKy = Math.abs(ky);
+            const absKz = Math.abs(kz);
+            if (absKy >= absKz) {
+                numCoordsPerSector[ky > 0 ? NORTH : SOUTH]++;
+            } else {
+                numCoordsPerSector[kz > 0 ? EAST : WEST]++;
+            }
+        }
+
+        let largestSector = 0;
+        for (let i = 1; i < 4; i++) {
+            if (numCoordsPerSector[i] >= numCoordsPerSector[largestSector]) largestSector = i;
+        }
+
+        let maxKy = 0;
+        let maxKz = 0;
+        for (let i = 0; i < numCoords; i++) {
+            const ak = Math.abs(coords[i].ky);
+            const az = Math.abs(coords[i].kz);
+            if (ak > maxKy) maxKy = ak;
+            if (az > maxKz) maxKz = az;
+        }
+        maxKy = maxKy || 1;
+        maxKz = maxKz || 1;
+
+        let startKy = 0;
+        let startKz = 0;
+        let endKy = 0;
+        let endKz = 0;
+        if (largestSector === NORTH) endKy = maxKy;
+        else if (largestSector === EAST) endKz = maxKz;
+        else if (largestSector === SOUTH) endKy = -maxKy;
+        else if (largestSector === WEST) endKz = -maxKz;
+
+        const nearestIdx = nearestOriginIndex(coords);
+        const kyN = new Float64Array(numCoords);
+        const kzN = new Float64Array(numCoords);
+        for (let i = 0; i < numCoords; i++) {
+            kyN[i] = coords[i].ky / maxKy;
+            kzN[i] = coords[i].kz / maxKz;
+        }
+        const nearestKyN = kyN[nearestIdx];
+        const nearestKzN = kzN[nearestIdx];
+
+        function macroEchoOfNearest(offsetKyN, offsetKzN, kyRatio, kzRatio) {
+            const dky = nearestKyN - offsetKyN;
+            const dkz = nearestKzN - offsetKzN;
+            const nearestSq = dky * dky * kyRatio * kyRatio + dkz * dkz * kzRatio * kzRatio;
+            let rank = 0;
+            for (let i = 0; i < numCoords; i++) {
+                const dk = kyN[i] - offsetKyN;
+                const dz = kzN[i] - offsetKzN;
+                if (dk * dk * kyRatio * kyRatio + dz * dz * kzRatio * kzRatio < nearestSq) rank++;
+            }
+            return macroEchoFromRank(rank, etl, macroWidth, numShots);
+        }
+
+        function setDistances(offsetKy, offsetKz, kyRatio, kzRatio) {
+            const offsetKyN = offsetKy / maxKy;
+            const offsetKzN = offsetKz / maxKz;
+            for (let i = 0; i < numCoords; i++) {
+                const dk = kyN[i] - offsetKyN;
+                const dz = kzN[i] - offsetKzN;
+                coords[i].ellipDist = dk * dk * kyRatio * kyRatio + dz * dz * kzRatio * kzRatio;
+            }
+        }
+
+        const targetMacroCenter = coarseCenterEcho(centerEcho, etl, macroWidth);
+        let centerKy = 0;
+        let centerKz = 0;
+        let kyRatio = 1.0;
+        let kzRatio = 1.0;
+        let foundCenter = false;
+        let currentMacroCenter = -1;
+
+        for (let iter = 0; iter < 30; iter++) {
+            centerKy = (startKy + endKy) / 2;
+            centerKz = (startKz + endKz) / 2;
+            currentMacroCenter = macroEchoOfNearest(centerKy / maxKy, centerKz / maxKz, kyRatio, kzRatio);
+            if (currentMacroCenter === targetMacroCenter) {
+                foundCenter = true;
+                break;
+            } else if (currentMacroCenter > targetMacroCenter) {
+                endKy = centerKy;
+                endKz = centerKz;
+            } else {
+                startKy = centerKy;
+                startKz = centerKz;
+            }
+        }
+
+        if (!foundCenter) {
+            let ratioStep = currentMacroCenter < targetMacroCenter ? 0.8 : 1.2;
+            const offsetKyN = centerKy / maxKy;
+            const offsetKzN = centerKz / maxKz;
+            for (let iter = 0; iter < 40 && !foundCenter; iter++) {
+                if (largestSector === SOUTH || largestSector === NORTH) {
+                    kzRatio *= ratioStep;
+                } else {
+                    kyRatio *= ratioStep;
+                }
+                if (kyRatio < 0.05 || kyRatio > 20.0 || kzRatio < 0.05 || kzRatio > 20.0) break;
+                currentMacroCenter = macroEchoOfNearest(offsetKyN, offsetKzN, kyRatio, kzRatio);
+                if (currentMacroCenter === targetMacroCenter) {
+                    foundCenter = true;
+                } else if ((currentMacroCenter < targetMacroCenter) !== (ratioStep < 1)) {
+                    ratioStep = 1 + (1 - ratioStep) * 0.5;
+                }
+            }
+        }
+
+        setDistances(centerKy, centerKz, kyRatio, kzRatio);
+        indices.sort((a, b) => coords[a].ellipDist - coords[b].ellipDist);
+        assignMacroEchoesBySortedIndices(coords, indices, etl, macroWidth, numShots);
+
+        for (let i = 0; i < numCoords; i++) {
+            let atan_x = 0;
+            let atan_y = 0;
+            const y = coords[i].ky - centerKy;
+            const z = coords[i].kz - centerKz;
+            if (largestSector === WEST) {
+                atan_x = -z;
+                atan_y = -y;
+            } else if (largestSector === SOUTH) {
+                atan_x = -y;
+                atan_y = z;
+            } else if (largestSector === EAST) {
+                atan_x = z;
+                atan_y = y;
+            } else {
+                atan_x = y;
+                atan_y = -z;
+            }
+            let angle = Math.atan2(atan_y, atan_x);
+            if (angle < 0) angle += 2 * Math.PI;
+            coords[i].crocAngle = angle;
+        }
+    }
+
+    function assignFallbackCoarseMacroEchoes(coords, etl, macroWidth, numShots, ordering, shotOrder) {
+        const indices = Array.from({ length: coords.length }, (_, i) => i);
+        for (let i = 0; i < coords.length; i++) {
+            coords[i].macroOrderKey = getMacroOrderKey(coords[i], ordering, shotOrder);
+        }
+        indices.sort((a, b) => {
+            if (coords[a].macroOrderKey !== coords[b].macroOrderKey) return coords[a].macroOrderKey - coords[b].macroOrderKey;
+            if (coords[a].baseEcho !== coords[b].baseEcho) return coords[a].baseEcho - coords[b].baseEcho;
+            return (coords[a].baseShot || 0) - (coords[b].baseShot || 0);
+        });
+        assignMacroEchoesBySortedIndices(coords, indices, etl, macroWidth, numShots);
+    }
+
+    function assignMacroSegmentPaths(coords, macroEcho, macroWidth, etl, numShots) {
+        const startEcho = (macroEcho - 1) * macroWidth + 1;
+        const endEcho = Math.min(etl, startEcho + macroWidth - 1);
+        const segment = [];
+        for (let i = 0; i < coords.length; i++) {
+            if (coords[i].macroEcho === macroEcho) segment.push(coords[i]);
+        }
+        segment.sort((a, b) => {
+            if (a.macroOrderKey !== b.macroOrderKey) return a.macroOrderKey - b.macroOrderKey;
+            if (a.baseEcho !== b.baseEcho) return a.baseEcho - b.baseEcho;
+            return (a.baseShot || 0) - (b.baseShot || 0);
+        });
+
+        const lanes = new Array(numShots);
+        let pos = 0;
+        for (let lane = 0; lane < numShots; lane++) {
+            lanes[lane] = [];
+            for (let echo = startEcho; echo <= endEcho && pos < segment.length; echo++, pos++) {
+                lanes[lane].push(segment[pos]);
+            }
+        }
+
+        for (let lane = 0; lane < numShots; lane++) {
+            const shot = lane;
+            const laneCoords = lanes[lane];
+            for (let i = 0; i < laneCoords.length; i++) {
+                const coord = laneCoords[i];
+                coord.shot = shot;
+                coord.echo = startEcho + i;
+                coord.adjustedEcho = coord.echo;
+            }
+        }
+    }
+
+    function getMacroOrderKey(coord, ordering, shotOrder) {
+        if (ordering === 'chevron' && Number.isFinite(coord.theta)) return normalizeAngle(coord.theta);
+        if (ordering === 'croc' && Number.isFinite(coord.crocAngle)) return normalizeAngle(coord.crocAngle);
+        if ((shotOrder === 'ky' || shotOrder === 'kz') && Number.isFinite(coord[shotOrder])) return coord[shotOrder];
+        if (Number.isFinite(coord.crocAngle)) return normalizeAngle(coord.crocAngle);
+        if (Number.isFinite(coord.theta)) return normalizeAngle(coord.theta);
+        if (Number.isFinite(coord.phi)) return normalizeAngle(coord.phi);
+        return 0;
+    }
+
+    function getNumShots(coords) {
+        let maxShot = -1;
+        for (let i = 0; i < coords.length; i++) {
+            if (coords[i].shot > maxShot) maxShot = coords[i].shot;
+        }
+        return Math.max(1, maxShot + 1);
+    }
+
+    function getRadarAngle(coord) {
+        const angle = Number.isFinite(coord.crocAngle) ? coord.crocAngle :
+            Number.isFinite(coord.theta) ? coord.theta :
+            Number.isFinite(coord.phi) ? coord.phi : 0;
+        return normalizeAngle(angle);
+    }
+
+    function normalizeAngle(angle) {
+        const twoPi = 2 * Math.PI;
+        let a = angle % twoPi;
+        if (a < 0) a += twoPi;
+        return a;
+    }
+
+    function calculateJumpMetrics(coords) {
+        const byShot = new Map();
+        for (let i = 0; i < coords.length; i++) {
+            const coord = coords[i];
+            if (!byShot.has(coord.shot)) byShot.set(coord.shot, []);
+            byShot.get(coord.shot).push(coord);
+        }
+
+        let totalSquaredJump = 0;
+        let transitionCount = 0;
+
+        for (const shotCoords of byShot.values()) {
+            shotCoords.sort((a, b) => {
+                if (a.echo !== b.echo) return a.echo - b.echo;
+                return (a.baseEcho || 0) - (b.baseEcho || 0);
+            });
+
+            for (let i = 1; i < shotCoords.length; i++) {
+                const prev = shotCoords[i - 1];
+                const cur = shotCoords[i];
+                const dy = cur.ky - prev.ky;
+                const dz = cur.kz - prev.kz;
+                const d2 = dy * dy + dz * dz;
+                totalSquaredJump += d2;
+                transitionCount++;
+            }
+        }
+
+        return {
+            transitionCount,
+            rmsJump: transitionCount > 0 ? Math.sqrt(totalSquaredJump / transitionCount) : 0
+        };
     }
     
     /**
@@ -949,6 +1391,8 @@ const KSpaceUtils = (() => {
     return {
         generateCoordinates,
         assignViewOrdering,
+        findBestMacroWidthByRms,
+        calculateJumpMetrics,
         calculateAcceleration
     };
 })();

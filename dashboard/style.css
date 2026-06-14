@@ -383,12 +383,71 @@ select:focus { outline: none; border-color: var(--red); }
 
 .plot-controls {
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
+  grid-template-columns: 1fr 1fr auto;
   gap: 16px;
   margin-bottom: 24px;
   padding: 16px 20px;
   background: var(--bg-panel);
   border: 1px solid var(--rule);
+}
+
+.highlight-style-control {
+  justify-content: center;
+  min-width: 132px;
+}
+
+.switch-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  color: var(--ink-light);
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  cursor: pointer;
+  user-select: none;
+}
+
+.switch-label input {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.switch-track {
+  position: relative;
+  width: 40px;
+  height: 20px;
+  border: 1px solid var(--ink);
+  background: #f7f7f7;
+  transition: background 0.15s ease;
+}
+
+.switch-track::after {
+  content: "";
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 14px;
+  height: 14px;
+  background: var(--ink);
+  transition: transform 0.15s ease, background 0.15s ease;
+}
+
+.switch-label input:checked + .switch-track {
+  background: var(--red);
+  border-color: var(--red);
+}
+
+.switch-label input:checked + .switch-track::after {
+  transform: translateX(20px);
+  background: white;
+}
+
+.switch-label input:focus-visible + .switch-track {
+  outline: 2px solid var(--red);
+  outline-offset: 2px;
 }
 
 .plots-container {

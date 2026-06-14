@@ -5,6 +5,10 @@
 
 const App = (() => {
     let currentCoords = [];
+    let currentJumpMetrics = null;
+    let currentMacroSearch = null;
+    let updateTimer = null;
+    let updateGeneration = 0;
     let currentParams = {
         etl: 144,
         ky: 256,
@@ -18,39 +22,144 @@ const App = (() => {
         shotOrder: 'azimuthal',
         coverage: 'elliptical',
         useCaipirinha: true,
-        calibrationSize: 32
+        calibrationSize: 32,
+        macroWidth: 2
+    };
+    const viewOrderUrlSchema = {
+        ky: { key: 'ky', type: 'int', min: 64, max: 320 },
+        kz: { key: 'kz', type: 'int', min: 64, max: 320 },
+        kyAccel: { key: 'ry', type: 'int', min: 1, max: 4 },
+        kzAccel: { key: 'rz', type: 'int', min: 1, max: 4 },
+        calibrationSize: { key: 'cal', type: 'int', min: 16, max: 64 },
+        kzPF: { key: 'pf', type: 'float', min: 0.5, max: 1.0 },
+        useCaipirinha: { key: 'caipi', type: 'bool' },
+        coverage: { key: 'cov', type: 'enum', values: ['rectangular', 'elliptical'] },
+        ordering: { key: 'method', type: 'enum', values: ['sequential', 'lcpo', 'cplo', 'chevron', 'croc'] },
+        etl: { key: 'etl', type: 'int', min: 8, max: 256 },
+        centerEcho: { key: 'center', type: 'int', min: 1, max: 256 },
+        mtfDirection: { key: 'mtf', type: 'enum', values: ['ky', 'kz', 'kr'] },
+        shotOrder: { key: 'shotOrder', type: 'enum', values: ['ky', 'kz', 'azimuthal'] },
+        macroWidth: { key: 'macro', type: 'int', min: 1, max: 40 }
     };
     
     /**
      * Initialize the application
      */
     function init() {
+        applyViewOrderParamsFromUrl();
         D3Plots.init();
         setupEventListeners();
-        // Initialize UI controls to match currentParams
-        const orderingSelect = document.getElementById('ordering-select');
-        if (orderingSelect) orderingSelect.value = currentParams.ordering;
-
-        const etlSlider = document.getElementById('etl-slider');
-        const etlValue = document.getElementById('etl-value');
-        if (etlSlider) etlSlider.value = currentParams.etl;
-        if (etlValue) etlValue.textContent = currentParams.etl;
-
-        const centerSlider = document.getElementById('center-echo-slider');
-        const centerValue = document.getElementById('center-echo-value');
-        if (centerSlider) {
-            centerSlider.max = currentParams.etl;
-            centerSlider.value = currentParams.centerEcho;
-        }
-        if (centerValue) centerValue.textContent = currentParams.centerEcho;
-
-        const mtfSelect = document.getElementById('mtf-direction-select');
-        if (mtfSelect) mtfSelect.value = currentParams.mtfDirection;
+        syncViewOrderControlsFromParams();
 
         // Render slider ticks for visible controls
         renderAllSliderTicks();
         updateControlAvailability();
         updatePlots();
+    }
+
+    function applyViewOrderParamsFromUrl() {
+        if (!window.location || !window.location.search) return;
+        const params = new URLSearchParams(window.location.search);
+        for (const [paramName, spec] of Object.entries(viewOrderUrlSchema)) {
+            if (!params.has(spec.key)) continue;
+            const parsed = parseUrlParam(params.get(spec.key), spec);
+            if (parsed !== null) currentParams[paramName] = parsed;
+        }
+        currentParams.centerEcho = clamp(currentParams.centerEcho, 1, currentParams.etl);
+    }
+
+    function parseUrlParam(raw, spec) {
+        if (raw === null || raw === undefined) return null;
+        if (spec.type === 'int') {
+            const value = parseInt(raw, 10);
+            if (!Number.isFinite(value)) return null;
+            return clamp(value, spec.min, spec.max);
+        }
+        if (spec.type === 'float') {
+            const value = parseFloat(raw);
+            if (!Number.isFinite(value)) return null;
+            return clamp(value, spec.min, spec.max);
+        }
+        if (spec.type === 'bool') {
+            if (raw === '1' || raw === 'true') return true;
+            if (raw === '0' || raw === 'false') return false;
+            return null;
+        }
+        if (spec.type === 'enum') {
+            return spec.values.includes(raw) ? raw : null;
+        }
+        return null;
+    }
+
+    function clamp(value, min, max) {
+        return Math.max(min, Math.min(max, value));
+    }
+
+    function updateViewOrderUrl() {
+        if (!window.history || !window.location) return;
+        const url = new URL(window.location.href);
+        url.searchParams.delete('opt');
+        url.searchParams.delete('tol');
+        for (const [paramName, spec] of Object.entries(viewOrderUrlSchema)) {
+            let value = currentParams[paramName];
+            if (spec.type === 'bool') value = value ? '1' : '0';
+            url.searchParams.set(spec.key, String(value));
+        }
+        window.history.replaceState(null, '', url);
+    }
+
+    function syncViewOrderControlsFromParams() {
+        const setValue = (id, value) => {
+            const el = document.getElementById(id);
+            if (el) el.value = value;
+        };
+        const setText = (id, value) => {
+            const el = document.getElementById(id);
+            if (el) el.textContent = value;
+        };
+
+        setValue('ky-slider', currentParams.ky);
+        setText('ky-value', currentParams.ky);
+        setValue('kz-slider', currentParams.kz);
+        setText('kz-value', currentParams.kz);
+        setValue('ky-accel-slider', currentParams.kyAccel);
+        setText('ky-accel-value', currentParams.kyAccel);
+        setValue('kz-accel-slider', currentParams.kzAccel);
+        setText('kz-accel-value', currentParams.kzAccel);
+        setValue('cal-size-slider', currentParams.calibrationSize);
+        setText('cal-size-value', currentParams.calibrationSize);
+        setValue('kz-pf-slider', currentParams.kzPF);
+        setText('kz-pf-value', currentParams.kzPF.toFixed(2).replace(/\.00$/, '.0'));
+        const caipiCheckbox = document.getElementById('caipi-checkbox');
+        if (caipiCheckbox) caipiCheckbox.checked = currentParams.useCaipirinha;
+        setValue('coverage-select', currentParams.coverage);
+        setValue('ordering-select', currentParams.ordering);
+        setValue('etl-slider', currentParams.etl);
+        setText('etl-value', currentParams.etl);
+        currentParams.centerEcho = clamp(currentParams.centerEcho, 1, currentParams.etl);
+        const centerSlider = document.getElementById('center-echo-slider');
+        if (centerSlider) {
+            centerSlider.max = currentParams.etl;
+            centerSlider.value = currentParams.centerEcho;
+        }
+        setText('center-echo-value', currentParams.centerEcho);
+        syncCenterEchoTicks();
+        syncOrderingControls();
+        setValue('mtf-direction-select', currentParams.mtfDirection);
+        setValue('shot-order-select', currentParams.shotOrder);
+        setValue('macro-width-slider', currentParams.macroWidth);
+        setText('macro-width-value', currentParams.macroWidth);
+        updateMacroWidthBestLabel();
+    }
+
+    function syncCenterEchoTicks() {
+        const centerDatalist = document.getElementById('center-echo-ticks');
+        if (!centerDatalist) return;
+        let opts = '';
+        for (let i = 1; i <= currentParams.etl; i++) {
+            opts += `<option value="${i}"></option>`;
+        }
+        centerDatalist.innerHTML = opts;
     }
 
     /**
@@ -166,6 +275,66 @@ const App = (() => {
             } else {
                 if (caipiGroup) caipiGroup.classList.remove('disabled');
             }
+        }
+
+        const macroGroup = document.getElementById('macro-width-control');
+        const macroSlider = document.getElementById('macro-width-slider');
+        if (macroSlider) macroSlider.disabled = false;
+        if (macroGroup) {
+            macroGroup.classList.remove('disabled');
+            macroGroup.style.display = '';
+        }
+    }
+
+    function syncOrderingControls() {
+        const mtfControl = document.getElementById('mtf-control');
+        const mtfSelect = document.getElementById('mtf-direction-select');
+        const shotOrderControl = document.getElementById('shot-order-control');
+        const shotOrderSelect = document.getElementById('shot-order-select');
+        if (!mtfControl || !mtfSelect || !shotOrderControl || !shotOrderSelect) return;
+
+        if (currentParams.ordering === 'sequential' || currentParams.ordering === 'lcpo') {
+            mtfControl.style.display = '';
+            mtfSelect.innerHTML = '<option value="ky">k<sub>y</sub></option><option value="kz">k<sub>z</sub></option>';
+            mtfSelect.disabled = false;
+            if (currentParams.mtfDirection !== 'ky' && currentParams.mtfDirection !== 'kz') {
+                currentParams.mtfDirection = 'ky';
+            }
+            mtfSelect.value = currentParams.mtfDirection;
+        } else if (currentParams.ordering === 'cplo') {
+            mtfControl.style.display = '';
+            mtfSelect.innerHTML = '<option value="kr">k<sub>r</sub></option>';
+            mtfSelect.value = 'kr';
+            currentParams.mtfDirection = 'kr';
+            mtfSelect.disabled = false;
+        } else {
+            mtfControl.style.display = 'none';
+            currentParams.mtfDirection = 'ky';
+        }
+
+        if (currentParams.ordering === 'cplo') {
+            shotOrderControl.style.display = 'inline-flex';
+            shotOrderSelect.innerHTML = `
+                    <option value="ky">k<sub>y</sub></option>
+                    <option value="kz">k<sub>z</sub></option>
+                    <option value="azimuthal">Azimuthal</option>
+                `;
+            if (!['ky', 'kz', 'azimuthal'].includes(currentParams.shotOrder)) {
+                currentParams.shotOrder = 'azimuthal';
+            }
+            shotOrderSelect.value = currentParams.shotOrder;
+        } else if (currentParams.ordering === 'lcpo') {
+            shotOrderControl.style.display = 'inline-flex';
+            shotOrderSelect.innerHTML = `
+                    <option value="ky">k<sub>y</sub></option>
+                    <option value="kz">k<sub>z</sub></option>
+                `;
+            if (currentParams.shotOrder === 'azimuthal') {
+                currentParams.shotOrder = 'ky';
+            }
+            shotOrderSelect.value = currentParams.shotOrder;
+        } else {
+            shotOrderControl.style.display = 'none';
         }
     }
     
@@ -316,67 +485,7 @@ const App = (() => {
         // Ordering select
         document.getElementById('ordering-select').addEventListener('change', (e) => {
             currentParams.ordering = e.target.value;
-
-            // Update MTF Direction widget per ordering method
-            const mtfControl = document.getElementById('mtf-control');
-            const mtfSelect = document.getElementById('mtf-direction-select');
-            const shotOrderControl = document.getElementById('shot-order-control');
-            const shotOrderSelect = document.getElementById('shot-order-select');
-            
-            if (e.target.value === 'sequential' || e.target.value === 'lcpo') {
-                // Show ky/kz options
-                mtfControl.style.display = '';
-                mtfSelect.innerHTML = '<option value="ky">k<sub>y</sub></option><option value="kz">k<sub>z</sub></option>';
-                mtfSelect.disabled = false;
-                // Keep previously selected if applicable
-                if (currentParams.mtfDirection !== 'ky' && currentParams.mtfDirection !== 'kz') {
-                    currentParams.mtfDirection = 'ky';
-                    mtfSelect.value = 'ky';
-                } else {
-                    mtfSelect.value = currentParams.mtfDirection;
-                }
-            } else if (e.target.value === 'cplo') {
-                // CPLO only uses radial option 'kr'
-                mtfControl.style.display = '';
-                mtfSelect.innerHTML = '<option value="kr">k<sub>r</sub></option>';
-                mtfSelect.value = 'kr';
-                currentParams.mtfDirection = 'kr';
-                mtfSelect.disabled = false;
-            } else {
-                // Chevron and CROC: hide widget
-                mtfControl.style.display = 'none';
-                // set to default
-                currentParams.mtfDirection = 'ky';
-            }
-
-            // Show/hide shot order control based on ordering
-            
-            if (currentParams.ordering === 'cplo') {
-                shotOrderControl.style.display = 'inline-flex';
-                // Enable all options for CPLO
-                shotOrderSelect.innerHTML = `
-                    <option value="ky">k<sub>y</sub></option>
-                    <option value="kz">k<sub>z</sub></option>
-                    <option value="azimuthal">Azimuthal</option>
-                `;
-                if (!['ky', 'kz', 'azimuthal'].includes(currentParams.shotOrder)) {
-                    currentParams.shotOrder = 'azimuthal';
-                }
-                shotOrderSelect.value = currentParams.shotOrder;
-            } else if (currentParams.ordering === 'lcpo') {
-                shotOrderControl.style.display = 'inline-flex';
-                // Only ky/kz for LCPO
-                shotOrderSelect.innerHTML = `
-                    <option value="ky">k<sub>y</sub></option>
-                    <option value="kz">k<sub>z</sub></option>
-                `;
-                if (currentParams.shotOrder === 'azimuthal') {
-                    currentParams.shotOrder = 'ky';
-                }
-                shotOrderSelect.value = currentParams.shotOrder;
-            } else {
-                shotOrderControl.style.display = 'none';
-            }
+            syncOrderingControls();
             
             // Update control availability when ordering changes
             updateControlAvailability();
@@ -394,6 +503,21 @@ const App = (() => {
             currentParams.shotOrder = e.target.value;
             updatePlots();
         });
+
+        const macroWidthSlider = document.getElementById('macro-width-slider');
+        if (macroWidthSlider) {
+            macroWidthSlider.addEventListener('input', (e) => {
+                currentParams.macroWidth = parseInt(e.target.value);
+                document.getElementById('macro-width-value').textContent = currentParams.macroWidth;
+                updatePlots(250);
+            });
+            macroWidthSlider.addEventListener('change', (e) => {
+                currentParams.macroWidth = parseInt(e.target.value);
+                document.getElementById('macro-width-value').textContent = currentParams.macroWidth;
+                updatePlots();
+            });
+        }
+
         
         // ky Acceleration slider - update display while dragging and update immediately
         document.getElementById('ky-accel-slider').addEventListener('input', (e) => {
@@ -491,6 +615,15 @@ const App = (() => {
                 D3Plots.drawHighlights();
             });
         }
+
+        const shotTrajectoryToggle = document.getElementById('shot-trajectory-toggle');
+        if (shotTrajectoryToggle) {
+            D3Plots.setShowShotTrajectory(shotTrajectoryToggle.checked);
+            shotTrajectoryToggle.addEventListener('change', (e) => {
+                D3Plots.setShowShotTrajectory(e.target.checked);
+                D3Plots.drawHighlights();
+            });
+        }
         
         if (shotSelector) {
             shotSelector.addEventListener('input', (e) => {
@@ -561,9 +694,19 @@ const App = (() => {
     /**
      * Update all plots based on current parameters
      */
-    function updatePlots() {
+    function updatePlots(delay = 0) {
+        updateGeneration++;
+        const generation = updateGeneration;
+        updateViewOrderUrl();
+        if (updateTimer) {
+            clearTimeout(updateTimer);
+            updateTimer = null;
+        }
+        showSpinner();
         // Use setTimeout to yield to browser briefly for UI updates
-        setTimeout(() => {
+        updateTimer = setTimeout(() => {
+            updateTimer = null;
+            if (generation !== updateGeneration) return;
             const t0 = performance.now();
 
             // Generate coordinates
@@ -586,9 +729,13 @@ const App = (() => {
                 currentParams.ordering,
                 currentParams.centerEcho,
                 currentParams.mtfDirection,
-                currentParams.shotOrder
+                currentParams.shotOrder,
+                {
+                    macroWidth: currentParams.macroWidth
+                }
             );
             const t2 = performance.now();
+            currentJumpMetrics = currentCoords.jumpMetrics || KSpaceUtils.calculateJumpMetrics(currentCoords);
 
             // If Sequential mode, derive the center echo from the centermost coordinate
             if (currentParams.ordering === 'sequential' && currentCoords.length > 0) {
@@ -613,8 +760,10 @@ const App = (() => {
                     if (centerValue) {
                         centerValue.textContent = currentParams.centerEcho;
                     }
+                    updateViewOrderUrl();
                 }
             }
+            currentMacroSearch = findBestMacroWidth();
 
             // Render plots
             D3Plots.plotByShotNumber(currentCoords);
@@ -636,7 +785,43 @@ const App = (() => {
                 shot:   t3 - t2,
                 echo:   t4 - t3,
             });
-        }, 0);
+            updateMacroWidthBestLabel();
+            hideSpinner();
+        }, delay);
+    }
+
+    function makeCurrentCoordinates() {
+        return KSpaceUtils.generateCoordinates(
+            currentParams.ky,
+            currentParams.kz,
+            currentParams.kyAccel,
+            currentParams.kzAccel,
+            currentParams.useCaipirinha,
+            currentParams.coverage,
+            currentParams.calibrationSize,
+            currentParams.kzPF
+        );
+    }
+
+    function findBestMacroWidth() {
+        const macroSlider = document.getElementById('macro-width-slider');
+        const maxWidth = macroSlider ? parseInt(macroSlider.max, 10) : 40;
+        return KSpaceUtils.findBestMacroWidthByRms(
+            makeCurrentCoordinates,
+            currentParams.etl,
+            currentParams.ordering,
+            currentParams.centerEcho,
+            currentParams.mtfDirection,
+            currentParams.shotOrder,
+            1,
+            maxWidth
+        );
+    }
+
+    function updateMacroWidthBestLabel() {
+        const best = document.getElementById('macro-width-best');
+        if (!best) return;
+        best.textContent = currentMacroSearch ? `(best ${currentMacroSearch.bestWidth})` : '';
     }
 
     /**
@@ -669,6 +854,7 @@ const App = (() => {
         
         document.getElementById('info-total').textContent = totalCoords;
         document.getElementById('info-acceleration').textContent = numShots;
+        updateJumpMetricPanel();
         
         // Update shot/echo selector sliders
         const shotSlider = document.getElementById('shot-select-slider');
@@ -710,6 +896,17 @@ const App = (() => {
         // Redraw highlights with the updated selections
         D3Plots.drawHighlights();
     }
+
+    function updateJumpMetricPanel() {
+        const metrics = currentJumpMetrics || KSpaceUtils.calculateJumpMetrics(currentCoords);
+        const fmtFloat = (value) => value.toFixed(2);
+        const set = (id, val) => {
+            const el = document.getElementById(id);
+            if (el) el.textContent = val;
+        };
+
+        set('metric-rms-jump', fmtFloat(metrics.rmsJump));
+    }
     
     /**
      * Get current coordinates (for debugging/export)
@@ -724,6 +921,10 @@ const App = (() => {
     function getCurrentParams() {
         return {...currentParams};
     }
+
+    function getCurrentJumpMetrics() {
+        return currentJumpMetrics ? {...currentJumpMetrics} : null;
+    }
     
     /**
      * Export view order and metadata to JSON
@@ -734,6 +935,7 @@ const App = (() => {
         const numberOfShots = shots.size;
         const totalEncodes = currentCoords.length;
         const encodesPerShot = totalEncodes > 0 ? Math.ceil(totalEncodes / numberOfShots) : 0;
+        const metrics = currentJumpMetrics || KSpaceUtils.calculateJumpMetrics(currentCoords);
         
         // Build metadata object with human-readable keys
         const metadata = {
@@ -752,7 +954,9 @@ const App = (() => {
             "View Ordering": currentParams.ordering,
             "Center Echo": currentParams.centerEcho,
             "MTF Direction": currentParams.mtfDirection,
-            "Shot Order": currentParams.shotOrder
+            "Shot Order": currentParams.shotOrder,
+            "Macro Width": currentParams.macroWidth,
+            "RMS jump": metrics.rmsJump
         };
         
         // Build encodes array: sort by (shot asc, echo asc), project relevant fields
@@ -765,6 +969,7 @@ const App = (() => {
             .map(c => ({
                 shot: c.shot,
                 echo: c.echo,
+                macroEcho: c.macroEcho,
                 ky: c.ky,
                 kz: c.kz
             }));
@@ -792,7 +997,8 @@ const App = (() => {
         init,
         renderAllSliderTicks,
         getCurrentCoords,
-        getCurrentParams
+        getCurrentParams,
+        getCurrentJumpMetrics
     };
 })();
 
@@ -802,6 +1008,7 @@ window.App = App;
 window.AppState = {
     get coords() { return App.getCurrentCoords(); },
     get params()  { return App.getCurrentParams(); },
+    get jumpMetrics() { return App.getCurrentJumpMetrics(); },
 };
 
 // Initialize when DOM is ready

@@ -5,7 +5,8 @@
   "private": true,
   "scripts": {
     "build": "node build.js",
-    "dev": "python3 -m http.server 8000"
+    "dev": "python3 -m http.server 8000",
+    "test": "node --test tests/*.test.js"
   },
   "devDependencies": {
     "javascript-obfuscator": "^4.1.0",
