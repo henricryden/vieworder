@@ -213,7 +213,7 @@
 
             <div class="control-group" id="macro-width-control">
                 <label for="macro-width-slider">Macro width: <span id="macro-width-value">2</span> <span id="macro-width-best"></span></label>
-                <input type="range" id="macro-width-slider" min="1" max="40" value="2" step="1" class="slider">
+                <input type="range" id="macro-width-slider" min="1" max="10" value="2" step="1" class="slider">
             </div>
                 <datalist id="center-echo-ticks">
                     <option value="1"></option>
@@ -336,26 +336,37 @@
         </div>
         
         <div class="plot-controls">
-            <div class="control-group">
-                <label>
-                    <input type="checkbox" id="shot-highlight-checkbox" checked>
-                    Highlight Shot: <span id="shot-select-value">1</span>
-                </label>
-                <input type="range" id="shot-select-slider" min="1" max="1" value="1" step="1" class="slider">
+            <div class="plot-control-pair">
+                <div class="control-group">
+                    <label>
+                        <input type="checkbox" id="shot-highlight-checkbox" checked>
+                        Highlight Shot: <span id="shot-select-value">1</span>
+                    </label>
+                    <input type="range" id="shot-select-slider" min="1" max="1" value="1" step="1" class="slider">
+                </div>
+                <div class="control-group highlight-style-control">
+                    <label class="switch-label" for="shot-trajectory-toggle">
+                        <span>Shot path</span>
+                        <input type="checkbox" id="shot-trajectory-toggle" checked>
+                        <span class="switch-track" aria-hidden="true"></span>
+                    </label>
+                </div>
             </div>
-            <div class="control-group">
-                <label>
-                    <input type="checkbox" id="echo-highlight-checkbox" checked>
-                    Highlight Echo: <span id="echo-select-value">1</span>
-                </label>
-                <input type="range" id="echo-select-slider" min="1" max="1" value="1" step="1" class="slider">
-            </div>
-            <div class="control-group highlight-style-control">
-                <label class="switch-label" for="shot-trajectory-toggle">
-                    <span>Shot path</span>
-                    <input type="checkbox" id="shot-trajectory-toggle" checked>
-                    <span class="switch-track" aria-hidden="true"></span>
-                </label>
+            <div class="plot-control-pair">
+                <div class="control-group">
+                    <label>
+                        <input type="checkbox" id="echo-highlight-checkbox" checked>
+                        Highlight Echo: <span id="echo-select-value">1</span>
+                    </label>
+                    <input type="range" id="echo-select-slider" min="1" max="1" value="1" step="1" class="slider">
+                </div>
+                <div class="control-group highlight-style-control">
+                    <label class="switch-label" for="echo-trajectory-toggle">
+                        <span>Echo path</span>
+                        <input type="checkbox" id="echo-trajectory-toggle" checked>
+                        <span class="switch-track" aria-hidden="true"></span>
+                    </label>
+                </div>
             </div>
         </div>
 
@@ -983,11 +994,11 @@
     </div><!-- /container -->
 
     <!-- Static JS: view order (order matters — kspace-utils before app) -->
-    <script src="kspace-utils.js?v=20260614-macro-best1"></script>
-    <script src="d3-plots.js?v=20260614-macro-best1"></script>
+    <script src="kspace-utils.js?v=20260614-echo-path1"></script>
+    <script src="d3-plots.js?v=20260614-echo-path1"></script>
     <script src="d3-sequence-plots.js?v=20260422b"></script>
     <script src="phantom-state.js"></script>
-    <script src="app.js?v=20260614-macro-best1"></script>
+    <script src="app.js?v=20260614-echo-path1"></script>
     <script src="brain-phantom.js"></script>
     <script src="brain-sim.js"></script>
 

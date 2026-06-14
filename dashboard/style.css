@@ -383,12 +383,19 @@ select:focus { outline: none; border-color: var(--red); }
 
 .plot-controls {
   display: grid;
-  grid-template-columns: 1fr 1fr auto;
+  grid-template-columns: 1fr 1fr;
   gap: 16px;
   margin-bottom: 24px;
   padding: 16px 20px;
   background: var(--bg-panel);
   border: 1px solid var(--rule);
+}
+
+.plot-control-pair {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 14px;
+  align-items: center;
 }
 
 .highlight-style-control {
@@ -413,6 +420,13 @@ select:focus { outline: none; border-color: var(--red); }
   position: absolute;
   opacity: 0;
   pointer-events: none;
+}
+
+.switch-label > span:not(.switch-track) {
+  font-family: var(--sans);
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--ink-light);
 }
 
 .switch-track {
@@ -1228,6 +1242,7 @@ select:focus { outline: none; border-color: var(--red); }
 
 @media (max-width: 700px) {
   .plot-controls { grid-template-columns: 1fr; }
+  .plot-control-pair { grid-template-columns: 1fr; }
   .brain-compare-grid { grid-template-columns: 1fr; }
   .phantom-layout { grid-template-columns: 1fr; }
   .rare-driven-eq-group { grid-template-columns: 1fr; }

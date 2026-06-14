@@ -39,7 +39,7 @@ const App = (() => {
         centerEcho: { key: 'center', type: 'int', min: 1, max: 256 },
         mtfDirection: { key: 'mtf', type: 'enum', values: ['ky', 'kz', 'kr'] },
         shotOrder: { key: 'shotOrder', type: 'enum', values: ['ky', 'kz', 'azimuthal'] },
-        macroWidth: { key: 'macro', type: 'int', min: 1, max: 40 }
+        macroWidth: { key: 'macro', type: 'int', min: 1, max: 10 }
     };
     
     /**
@@ -643,10 +643,19 @@ const App = (() => {
         const echoSelector = document.getElementById('echo-select-slider');
         const echoSelectorValue = document.getElementById('echo-select-value');
         const echoCheckbox = document.getElementById('echo-highlight-checkbox');
+        const echoTrajectoryToggle = document.getElementById('echo-trajectory-toggle');
         
         if (echoCheckbox) {
             echoCheckbox.addEventListener('change', (e) => {
                 D3Plots.setShowEchoHighlight(e.target.checked);
+                D3Plots.drawHighlights();
+            });
+        }
+
+        if (echoTrajectoryToggle) {
+            D3Plots.setShowEchoTrajectory(echoTrajectoryToggle.checked);
+            echoTrajectoryToggle.addEventListener('change', (e) => {
+                D3Plots.setShowEchoTrajectory(e.target.checked);
                 D3Plots.drawHighlights();
             });
         }

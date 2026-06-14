@@ -4,6 +4,8 @@
  */
 
 const D3Plots = (() => {
+    const plotBackgroundRgb = [218, 218, 218];
+    const plotBackgroundHex = '#dadada';
     let shotCanvas = null;
     let echoCanvas = null;
     let shotCtx = null;
@@ -43,6 +45,7 @@ const D3Plots = (() => {
     let showShotHighlight = true; // controlled by checkbox
     let showEchoHighlight = true; // controlled by checkbox
     let showShotTrajectory = true; // controlled by plot style toggle
+    let showEchoTrajectory = true; // controlled by plot style toggle
     
     /**
      * Initialize plot containers with Canvas elements
@@ -412,9 +415,12 @@ const D3Plots = (() => {
         const imgData = ctx.createImageData(totalWidth, totalHeight);
         const data = imgData.data;
 
-        // Fill background (#f3f3f3 = 243,243,243)
+        // Fill background.
         for (let i = 0; i < data.length; i += 4) {
-            data[i] = 243; data[i+1] = 243; data[i+2] = 243; data[i+3] = 255;
+            data[i] = plotBackgroundRgb[0];
+            data[i+1] = plotBackgroundRgb[1];
+            data[i+2] = plotBackgroundRgb[2];
+            data[i+3] = 255;
         }
 
         // Build integer-keyed color map: (ky+512)<<10|(kz+512) → packed RGB.
@@ -616,6 +622,50 @@ const D3Plots = (() => {
         ctx.restore();
     }
 
+    function drawHighlightedEchoPath(ctx, coords, xScale, yScale) {
+        if (!showEchoHighlight || !showEchoTrajectory || selectedEchoIndex === null) return;
+        const selected = coords
+            .filter((coord) => coord.echo === selectedEchoIndex)
+            .sort((a, b) => {
+                if (a.shot !== b.shot) return a.shot - b.shot;
+                return (a.baseShot || 0) - (b.baseShot || 0);
+            });
+        if (selected.length < 2) return;
+
+        ctx.save();
+        ctx.translate(margin.left, margin.top);
+        ctx.lineJoin = 'round';
+        ctx.lineCap = 'round';
+
+        ctx.beginPath();
+        for (let i = 0; i < selected.length; i++) {
+            const x = xScale(selected[i].ky);
+            const y = yScale(selected[i].kz);
+            if (i === 0) ctx.moveTo(x, y);
+            else ctx.lineTo(x, y);
+        }
+        ctx.strokeStyle = 'rgba(0, 0, 0, 0.88)';
+        ctx.lineWidth = 3;
+        ctx.stroke();
+
+        ctx.restore();
+    }
+
+    function drawSelectedEchoMarkers(ctx, coords, xScale, yScale) {
+        if (!showEchoHighlight || selectedEchoIndex === null) return;
+        ctx.save();
+        ctx.translate(margin.left, margin.top);
+        ctx.fillStyle = 'white';
+        ctx.globalAlpha = 1.0;
+        for (const coord of coords) {
+            if (coord.echo !== selectedEchoIndex) continue;
+            const x = xScale(coord.ky) - blockWidth / 2;
+            const y = yScale(coord.kz) - blockHeight / 2;
+            ctx.fillRect(x, y, blockWidth, blockHeight);
+        }
+        ctx.restore();
+    }
+
     /**
      * Draw highlight overlays on both canvases for selected shot/echo
      */
@@ -646,8 +696,12 @@ const D3Plots = (() => {
             }
             shotCtx.restore();
             drawHighlightedShotPath(shotCtx, shotCoords, shotXScale, shotYScale);
+            drawHighlightedEchoPath(shotCtx, shotCoords, shotXScale, shotYScale);
             if (showShotTrajectory) {
                 drawSelectedShotMarkers(shotCtx, shotCoords, shotXScale, shotYScale);
+            }
+            if (showEchoTrajectory) {
+                drawSelectedEchoMarkers(shotCtx, shotCoords, shotXScale, shotYScale);
             }
         }
 
@@ -673,8 +727,12 @@ const D3Plots = (() => {
             }
             echoCtx.restore();
             drawHighlightedShotPath(echoCtx, echoCoords, echoXScale, echoYScale);
+            drawHighlightedEchoPath(echoCtx, echoCoords, echoXScale, echoYScale);
             if (showShotTrajectory) {
                 drawSelectedShotMarkers(echoCtx, echoCoords, echoXScale, echoYScale);
+            }
+            if (showEchoTrajectory) {
+                drawSelectedEchoMarkers(echoCtx, echoCoords, echoXScale, echoYScale);
             }
         }
     }
@@ -702,6 +760,10 @@ const D3Plots = (() => {
 
     function setShowShotTrajectory(enabled) {
         showShotTrajectory = enabled;
+    }
+
+    function setShowEchoTrajectory(enabled) {
+        showEchoTrajectory = enabled;
     }
     
     /**
@@ -736,7 +798,7 @@ const D3Plots = (() => {
         let svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${svgWidth}" height="${svgHeight}" viewBox="0 0 ${svgWidth} ${svgHeight}">`;
         
         // Background
-        svg += `<rect width="${svgWidth}" height="${svgHeight}" fill="#f3f3f3"/>`;
+        svg += `<rect width="${svgWidth}" height="${svgHeight}" fill="${plotBackgroundHex}"/>`;
         
         // Title
         svg += `<text x="${svgWidth/2}" y="25" text-anchor="middle" font-family="sans-serif" font-size="16" font-weight="bold" fill="black">${title}</text>`;
@@ -838,6 +900,7 @@ const D3Plots = (() => {
         setShowShotHighlight,
         setShowEchoHighlight,
         setShowShotTrajectory,
+        setShowEchoTrajectory,
         exportShotSVG,
         exportEchoSVG
     };
