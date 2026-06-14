@@ -42,6 +42,7 @@ const D3Plots = (() => {
     let selectedEchoIndex = null; // one-based (echo values are 1..ETL)
     let showShotHighlight = true; // controlled by checkbox
     let showEchoHighlight = true; // controlled by checkbox
+    let showShotTrajectory = true; // controlled by plot style toggle
     
     /**
      * Initialize plot containers with Canvas elements
@@ -144,10 +145,19 @@ const D3Plots = (() => {
         
         if (closest) {
             tooltip.style.visibility = 'visible';
+            const baseEchoLine = closest.baseEcho && closest.baseEcho !== closest.echo
+                ? `<br/>Base echo: ${closest.baseEcho}`
+                : '';
+            const baseShotLine = Number.isInteger(closest.baseShot) && closest.baseShot !== closest.shot
+                ? `<br/>Base shot: ${closest.baseShot}`
+                : '';
+            const macroEchoLine = Number.isInteger(closest.macroEcho)
+                ? `<br/>Macro echo: ${closest.macroEcho}`
+                : '';
             tooltip.innerHTML = `
                 <strong>${closest.isCalibration ? 'Calibration' : 'Acquisition'}</strong><br/>
                 Shot: ${closest.shot || 0}<br/>
-                Echo: ${closest.echo || 0}<br/>
+                Echo: ${closest.echo || 0}${baseEchoLine}${baseShotLine}${macroEchoLine}<br/>
                 ky: ${closest.ky}<br/>
                 kz: ${closest.kz}<br/>
                 r: ${closest.r.toFixed(3)}<br/>
@@ -535,6 +545,77 @@ const D3Plots = (() => {
         console.log('Echo plot rendered:', coords.length, 'points (Canvas)');
     }
 
+    function drawHighlightedShotPath(ctx, coords, xScale, yScale) {
+        if (!showShotHighlight || !showShotTrajectory || selectedShotIndex === null) return;
+        const selected = coords
+            .filter((coord) => coord.shot === selectedShotIndex)
+            .sort((a, b) => {
+                if (a.echo !== b.echo) return a.echo - b.echo;
+                return (a.baseEcho || 0) - (b.baseEcho || 0);
+            });
+        if (selected.length < 2) return;
+
+        ctx.save();
+        ctx.translate(margin.left, margin.top);
+        ctx.lineJoin = 'round';
+        ctx.lineCap = 'round';
+
+        ctx.beginPath();
+        for (let i = 0; i < selected.length; i++) {
+            const x = xScale(selected[i].ky);
+            const y = yScale(selected[i].kz);
+            if (i === 0) ctx.moveTo(x, y);
+            else ctx.lineTo(x, y);
+        }
+        ctx.strokeStyle = 'rgba(0, 0, 0, 0.85)';
+        ctx.lineWidth = 4;
+        ctx.stroke();
+
+        ctx.beginPath();
+        for (let i = 0; i < selected.length; i++) {
+            const x = xScale(selected[i].ky);
+            const y = yScale(selected[i].kz);
+            if (i === 0) ctx.moveTo(x, y);
+            else ctx.lineTo(x, y);
+        }
+        ctx.strokeStyle = 'rgba(255, 255, 255, 0.95)';
+        ctx.lineWidth = 2;
+        ctx.stroke();
+
+        const first = selected[0];
+        const last = selected[selected.length - 1];
+        ctx.fillStyle = 'rgba(80, 220, 120, 0.95)';
+        ctx.strokeStyle = 'black';
+        ctx.lineWidth = 1.5;
+        ctx.beginPath();
+        ctx.arc(xScale(first.ky), yScale(first.kz), 4, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.stroke();
+
+        ctx.fillStyle = 'rgba(255, 120, 80, 0.95)';
+        ctx.beginPath();
+        ctx.arc(xScale(last.ky), yScale(last.kz), 4, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.stroke();
+
+        ctx.restore();
+    }
+
+    function drawSelectedShotMarkers(ctx, coords, xScale, yScale) {
+        if (!showShotHighlight || selectedShotIndex === null) return;
+        ctx.save();
+        ctx.translate(margin.left, margin.top);
+        ctx.fillStyle = 'black';
+        ctx.globalAlpha = 1.0;
+        for (const coord of coords) {
+            if (coord.shot !== selectedShotIndex) continue;
+            const x = xScale(coord.ky) - blockWidth / 2;
+            const y = yScale(coord.kz) - blockHeight / 2;
+            ctx.fillRect(x, y, blockWidth, blockHeight);
+        }
+        ctx.restore();
+    }
+
     /**
      * Draw highlight overlays on both canvases for selected shot/echo
      */
@@ -564,6 +645,10 @@ const D3Plots = (() => {
                 }
             }
             shotCtx.restore();
+            drawHighlightedShotPath(shotCtx, shotCoords, shotXScale, shotYScale);
+            if (showShotTrajectory) {
+                drawSelectedShotMarkers(shotCtx, shotCoords, shotXScale, shotYScale);
+            }
         }
 
         // Draw on echo canvas (only current selections and if enabled)
@@ -587,6 +672,10 @@ const D3Plots = (() => {
                 }
             }
             echoCtx.restore();
+            drawHighlightedShotPath(echoCtx, echoCoords, echoXScale, echoYScale);
+            if (showShotTrajectory) {
+                drawSelectedShotMarkers(echoCtx, echoCoords, echoXScale, echoYScale);
+            }
         }
     }
 
@@ -609,6 +698,10 @@ const D3Plots = (() => {
     
     function setShowEchoHighlight(enabled) {
         showEchoHighlight = enabled;
+    }
+
+    function setShowShotTrajectory(enabled) {
+        showShotTrajectory = enabled;
     }
     
     /**
@@ -744,6 +837,7 @@ const D3Plots = (() => {
         setSelectedEcho,
         setShowShotHighlight,
         setShowEchoHighlight,
+        setShowShotTrajectory,
         exportShotSVG,
         exportEchoSVG
     };
