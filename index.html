@@ -17,7 +17,7 @@
             window.addEventListener('DOMContentLoaded', () => {
                 const banner = document.createElement('div');
                 banner.style.cssText = 'position:fixed;top:0;left:0;right:0;background:#c8102e;color:white;padding:12px;z-index:10000;font-weight:bold;text-align:center;';
-                banner.innerHTML = '⚠️ MPRAGE simulator requires HTTP/HTTPS (dynamic imports blocked with file:// protocol). Run: <code style="background:rgba(0,0,0,0.3);padding:2px 6px;">npm run dev</code> then visit <a href="http://localhost:8000/dashboard/" style="color:white;text-decoration:underline;">http://localhost:8000/dashboard/</a>';
+                banner.innerHTML = 'For the review app, use HTTP/HTTPS instead of opening this file directly. Run: <code style="background:rgba(0,0,0,0.3);padding:2px 6px;">npm run dev</code> then visit <a href="http://localhost:8000/vieworder_review/" style="color:white;text-decoration:underline;">http://localhost:8000/vieworder_review/</a>';
                 document.body.insertBefore(banner, document.body.firstChild);
             });
         }
@@ -206,6 +206,11 @@
                 <label for="center-echo-slider">Center Echo: <span id="center-echo-value">105</span></label>
                     <input type="range" id="center-echo-slider" min="1" max="256" value="105" class="slider" list="center-echo-ticks">
             </div>
+            
+            <div class="control-group" id="macro-width-control">
+                <label for="macro-width-slider">Macro width: <span id="macro-width-value">2</span> <span id="macro-width-best"></span></label>
+                <input type="range" id="macro-width-slider" min="1" max="10" value="2" step="1" class="slider">
+            </div>
                 <datalist id="center-echo-ticks">
                     <option value="1"></option>
                     <option value="2"></option>
@@ -326,19 +331,37 @@
         </div>
         
         <div class="plot-controls">
-            <div class="control-group">
-                <label>
-                    <input type="checkbox" id="shot-highlight-checkbox" checked>
-                    Highlight Shot: <span id="shot-select-value">1</span>
-                </label>
-                <input type="range" id="shot-select-slider" min="1" max="1" value="1" step="1" class="slider">
+            <div class="plot-control-pair">
+                <div class="control-group">
+                    <label>
+                        <input type="checkbox" id="shot-highlight-checkbox" checked>
+                        Highlight Shot: <span id="shot-select-value">1</span>
+                    </label>
+                    <input type="range" id="shot-select-slider" min="1" max="1" value="1" step="1" class="slider">
+                </div>
+                <div class="control-group highlight-style-control">
+                    <label class="switch-label" for="shot-trajectory-toggle">
+                        <span>Shot path</span>
+                        <input type="checkbox" id="shot-trajectory-toggle" checked>
+                        <span class="switch-track" aria-hidden="true"></span>
+                    </label>
+                </div>
             </div>
-            <div class="control-group">
-                <label>
-                    <input type="checkbox" id="echo-highlight-checkbox" checked>
-                    Highlight Echo: <span id="echo-select-value">1</span>
-                </label>
-                <input type="range" id="echo-select-slider" min="1" max="1" value="1" step="1" class="slider">
+            <div class="plot-control-pair">
+                <div class="control-group">
+                    <label>
+                        <input type="checkbox" id="echo-highlight-checkbox" checked>
+                        Highlight Echo: <span id="echo-select-value">1</span>
+                    </label>
+                    <input type="range" id="echo-select-slider" min="1" max="1" value="1" step="1" class="slider">
+                </div>
+                <div class="control-group highlight-style-control">
+                    <label class="switch-label" for="echo-trajectory-toggle">
+                        <span>Echo path</span>
+                        <input type="checkbox" id="echo-trajectory-toggle" checked>
+                        <span class="switch-track" aria-hidden="true"></span>
+                    </label>
+                </div>
             </div>
         </div>
 
@@ -362,6 +385,23 @@
         <div class="info-panel">
             <p>Total phase encodes: <span id="info-total">0</span></p>
             <p>Number of shots: <span id="info-acceleration">1</span></p>
+            <p>RMS jump: <span id="metric-rms-jump">0.00</span></p>
+        </div>
+
+        <div class="perf-panel" id="perf-panel">
+            <details>
+                <summary>Timing breakdown</summary>
+                <table class="perf-table">
+                    <thead><tr><th>Stage</th><th>ms</th><th>%</th></tr></thead>
+                    <tbody>
+                        <tr><td>generateCoordinates</td><td id="perf-gen">--</td><td id="perf-gen-pct">--</td></tr>
+                        <tr><td>assignViewOrdering</td><td id="perf-assign">--</td><td id="perf-assign-pct">--</td></tr>
+                        <tr><td>plotByShotNumber</td><td id="perf-shot">--</td><td id="perf-shot-pct">--</td></tr>
+                        <tr><td>plotByEchoNumber</td><td id="perf-echo">--</td><td id="perf-echo-pct">--</td></tr>
+                        <tr class="perf-total"><td><strong>Total</strong></td><td id="perf-total">--</td><td>100%</td></tr>
+                    </tbody>
+                </table>
+            </details>
         </div>
         </div><!-- /tab-view-order -->
 
@@ -403,7 +443,6 @@
                             </div>
                         </div>
                     </div>
-                    <button class="mprage-btn-simulate" id="mprage-simulate-btn">▶ Simulate MPRAGE</button>
                 </div>
             </div><!-- /mprage-params-grid -->
 
@@ -464,42 +503,22 @@
                 const etl = window.AppState ? window.AppState.params.etl : 72;
                 const el  = document.getElementById('mprage-etl-display');
                 if (el) el.textContent = etl;
+                if (window.MPRAGEModule?.runSimulation) window.MPRAGEModule.runSimulation();
                 requestAnimationFrame(() => { if (window.App) App.renderAllSliderTicks(); });
             }
         }
     </script>
 
-    <!-- MPRAGE EPG module (ES module for js-epg import) -->
+    <!-- MPRAGE module -->
     <script type="module">
-        // ── Load EPG library ────────────────────────────────────────────
-        let Sequence, StateMatrix, RFPulse, Relaxation, GradientShift, ADC, Spoiler, Complex;
-        let _ready = false;
-
-        // Resolve path: works for dev (served from root, page at /dashboard/)
-        // and for dist/gh-pages (index.html at root, js-epg/ alongside it)
-        const _epgPath = location.pathname.startsWith('/dashboard/')
-            ? '../js-epg/src/index.js'
-            : './js-epg/src/index.js';
-        import(_epgPath)
-            .then(m => {
-                ({ Sequence, StateMatrix, RFPulse, Relaxation,
-                   GradientShift, ADC, Spoiler, Complex } = m);
-                _ready = true;
-                console.log('✓ EPG modules loaded');
-                populateTissueTable();
-                setupMPRAGESliders();
-            })
-            .catch(err => {
-                console.error('✗ EPG module load failed:', err);
-            });
+        let _ready = true;
 
         // ── 3 T tissue values (SpinSight constants.py) ─────────────────
         const TISSUES_3T = [
             { name: 'gray',       label: 'Gray matter',  T1: 1450, T2: 100,   PD: 1.0,  color: '#00ff00' },
             { name: 'white',      label: 'White matter', T1: 830,  T2: 69,    PD: 0.92,  color: '#d40000' },
             { name: 'CSF',        label: 'CSF',          T1: 4160, T2: 2100, PD: 1.0,  color: '#00ffff' },
-            { name: 'adipose',    label: 'Adipose',      T1: 370,  T2: 130,  PD: 1.0,  color: '#ffe680' },
-            { name: 'bonemarrow', label: 'Bone marrow',  T1: 898,  T2: 34,   PD: 1.0,  color: '#ffff44' },
+            { name: 'adipose',    label: 'Fat',          T1: 370,  T2: 130,  PD: 1.0,  color: '#ffe680' },
         ];
 
         function populateTissueTable() {
@@ -518,125 +537,101 @@
                 </tr>`).join('');
         }
 
-        // ── MPRAGE sequence builder ─────────────────────────────────────
-        function buildMPRAGE(p) {
-            const seq = new Sequence(20);
-            const TE  = p.TE || (p.innerTR / 2);
-            seq.add(new RFPulse(180, 0));
-            seq.add(new Relaxation(p.TI, 1000, 100));
-            for (let i = 0; i < p.numPulses; i++) {
-                seq.add(new RFPulse(p.flipAngle, 90));
-                seq.add(new Relaxation(TE, 1000, 100));
-                seq.add(new ADC(`p${i + 1}`));
-                const rem = p.innerTR - TE;
-                if (rem > 0) seq.add(new Relaxation(rem, 1000, 100));
-                if (p.perfectSpoilingEnable) seq.add(new Spoiler());
-                seq.add(new GradientShift(1));
+        // Analytical Bloch simulation helpers. Perfect spoiling is assumed.
+        function simulateMPRAGEBloch(T1, T2, PD, p, numSims) {
+            const TE     = p.TE || (p.innerTR / 2);
+            const E1_TI  = Math.exp(-p.TI / T1);
+            const E1_TR  = Math.exp(-p.innerTR / T1);
+            const E1_rec = Math.exp(-p.recovery / T1);
+            const E2_TE  = Math.exp(-TE / T2);
+            const ca     = Math.cos(p.flipAngle * Math.PI / 180);
+            const sa     = Math.sin(p.flipAngle * Math.PI / 180);
+            let Mz = PD;
+            let timeline = [];
+
+            for (let sim = 0; sim < numSims; sim++) {
+                timeline = [];
+                Mz = -Mz;
+                Mz = PD + (Mz - PD) * E1_TI;
+                for (let i = 0; i < p.numPulses; i++) {
+                    const pulseIndex = i + 1;
+                    const MxyRe = Mz * sa * E2_TE;
+                    timeline.push({ pulseIndex, Mz, MxyRe, MxyIm: 0 });
+                    Mz = Mz * ca * E1_TR + PD * (1 - E1_TR);
+                }
+                Mz = Mz * E1_rec + PD * (1 - E1_rec);
             }
-            seq.add(new Relaxation(p.recovery, 1000, 100));
-            return seq;
+            return { timeline, mzFinal: Mz };
         }
 
-        function cloneWithTissue(seq, T1, T2) {
-            const n = new Sequence(seq.initialNState);
-            for (const op of seq.operators)
-                n.add(op instanceof Relaxation ? new Relaxation(op.tau, T1, T2, op.g) : op);
-            return n;
+        function simulateMPRAGEBlochFull(T1, T2, PD, p, numSims) {
+            const TE     = p.TE || (p.innerTR / 2);
+            const E1_TR  = Math.exp(-p.innerTR / T1);
+            const E2_TE  = Math.exp(-TE / T2);
+            const ca     = Math.cos(p.flipAngle * Math.PI / 180);
+            const sa     = Math.sin(p.flipAngle * Math.PI / 180);
+
+            function sampleRelax(tStart, Mz0, duration, phase, out) {
+                if (duration <= 0) return;
+                const steps = Math.max(2, Math.min(240, Math.ceil(duration / 2)));
+                const step = duration / steps;
+                for (let k = 0; k <= steps; k++) {
+                    const elapsed = k * step;
+                    out.push({
+                        time: tStart + elapsed,
+                        Mz: PD + (Mz0 - PD) * Math.exp(-elapsed / T1),
+                        Mxy: 0,
+                        phase
+                    });
+                }
+            }
+
+            let Mz = PD;
+            let timeline = [];
+            let totalTime = 0;
+            for (let sim = 0; sim < numSims; sim++) {
+                timeline = [];
+                let currentTime = 0;
+                Mz = -Mz;
+                sampleRelax(currentTime, Mz, p.TI, 'inversion', timeline);
+                Mz = PD + (Mz - PD) * Math.exp(-p.TI / T1);
+                currentTime += p.TI;
+
+                for (let i = 0; i < p.numPulses; i++) {
+                    const MxyRe = Mz * sa * E2_TE;
+                    timeline.push({
+                        time: currentTime,
+                        Mz,
+                        Mxy: Math.abs(MxyRe),
+                        phase: 'readout',
+                        pulseIndex: i + 1
+                    });
+                    Mz = Mz * ca * E1_TR + PD * (1 - E1_TR);
+                    currentTime += p.innerTR;
+                }
+
+                sampleRelax(currentTime, Mz, p.recovery, 'recovery', timeline);
+                Mz = PD + (Mz - PD) * Math.exp(-p.recovery / T1);
+                currentTime += p.recovery;
+                totalTime = currentTime;
+            }
+            return { timeline, totalTime, mzFinal: Mz };
         }
 
-        function simulateAndTrackWithState(seq, T1, T2, initState, PD) {
-            const ts = cloneWithTissue(seq, T1, T2);
-            const s  = initState || new StateMatrix(20);
-            if (!initState && PD !== 1.0) {
-                for (const st of s.states()) {
-                    st[0].real *= PD; st[0].imag *= PD;
-                    st[1].real *= PD; st[1].imag *= PD;
-                    st[2].real *= PD; st[2].imag *= PD;
-                }
-            }
-            const timeline = [];
-            let t = 0;
-            for (const op of ts.operators) {
-                if (op instanceof ADC) {
-                    const f0 = s.F0();
-                    timeline.push({ time: t, Mz: s.Z0().real, MxyRe: f0.real, MxyIm: f0.imag });
-                }
-                op.apply(s);
-                if (op instanceof Relaxation) t += op.tau;
-            }
-            return { timeline, finalState: s };
-        }
-
-        function simulateFullSequenceWithState(seq, T1, T2, initState, PD) {
-            const ts = cloneWithTissue(seq, T1, T2);
-            const s  = initState || new StateMatrix(20);
-            if (!initState && PD !== 1.0) {
-                for (const st of s.states()) {
-                    st[0].real *= PD; st[0].imag *= PD;
-                    st[1].real *= PD; st[1].imag *= PD;
-                    st[2].real *= PD; st[2].imag *= PD;
-                }
-            }
-            const timeline = []; let ct = 0;
-            let phase = 'inversion';
-            const phaseStart = { inversion: 0, prep: 0, recovery: 0 };
-            let inPrep = false;
-
-            for (const op of ts.operators) {
-                if (op instanceof RFPulse && op.alpha_deg === 180) {
-                    phase = 'inversion'; phaseStart.inversion = ct;
-                } else if (op instanceof RFPulse && op.alpha_deg < 90 && !inPrep) {
-                    phase = 'prep'; phaseStart.prep = ct; inPrep = true;
-                }
-                if (op instanceof Relaxation && op.tau > 100) {
-                    const t0 = ct;
-                    for (let rt = t0; rt <= t0 + op.tau; rt += 1) {
-                        const e = rt - t0;
-                        timeline.push({ time: rt,
-                            Mz:  1 - (1 - s.Z0().real)                * Math.exp(-e / op.T1),
-                            Mxy: Complex.magnitude(s.F0())             * Math.exp(-e / op.T2),
-                            phase });
-                    }
-                    op.apply(s); ct += op.tau;
-                    if (op.tau > 500 && inPrep) { phase = 'recovery'; phaseStart.recovery = ct - op.tau; inPrep = false; }
-                } else {
-                    op.apply(s);
-                    if (op instanceof Relaxation) {
-                        ct += op.tau;
-                        if (op.tau > 500 && inPrep) { phase = 'recovery'; phaseStart.recovery = ct - op.tau; inPrep = false; }
-                    }
-                    if (op instanceof ADC)
-                        timeline.push({ time: ct, Mz: s.Z0().real, Mxy: Complex.magnitude(s.F0()), phase });
-                }
-            }
-            return { timeline, phaseStart, totalTime: ct, finalState: s };
-        }
-
-        // ── getMPRAGESignals: called by brain-sim.js ────────────────────
+        // ── Signal access for callers that need the MPRAGE echo profile ──
         function getMPRAGESignals(appParams) {
             if (!_ready) return null;
             const etl     = appParams.etl;
             const numSims = parseInt(document.getElementById('numSims').value);
             const t0      = performance.now();
 
-            const p = {
-                TI:                    parseInt(document.getElementById('ti').value),
-                flipAngle:             parseFloat(document.getElementById('alpha').value),
-                innerTR:               parseFloat(document.getElementById('tr').value),
-                TE:                    parseFloat(document.getElementById('te').value),
-                numPulses:             etl,
-                recovery:              parseInt(document.getElementById('recovery').value),
-                perfectSpoilingEnable: true,
-            };
-            const seq = buildMPRAGE(p);
+            const p = readMPRAGEParams(etl);
             const result = {};
             for (const t of TISSUES_3T) {
-                let st = null;
-                for (let i = 0; i < numSims; i++)
-                    st = simulateAndTrackWithState(seq, t.T1, t.T2, st ? st.finalState : null, t.PD);
+                const { timeline } = simulateMPRAGEBloch(t.T1, t.T2, t.PD, p, numSims);
                 // Store complex signals: [re0, im0, re1, im1, ..., re(etl-1), im(etl-1)]
                 const MxyComplex = new Float32Array(etl * 2);
-                st.timeline.forEach((pt, i) => { 
+                timeline.forEach((pt, i) => { 
                     if (i < etl) { 
                         MxyComplex[i * 2] = pt.MxyRe; 
                         MxyComplex[i * 2 + 1] = pt.MxyIm; 
@@ -648,52 +643,104 @@
             return result;
         }
 
-        // ── Tab 2 "Simulate" button ─────────────────────────────────────
+        // ── Tab 2 MPRAGE simulation ──────────────────────────────────────
         let mzChart = null, mxyChart = null, fullMzChart = null, fullMxyChart = null;
+        let mprageUpdateTimer = null;
+        let mprageUpdateGeneration = 0;
+        let currentFullPhaseStart = { prep: 0, recovery: 0 };
+        let currentFullTotalTime = 0;
+        const phaseBoxPlugin = {
+            id: 'phaseBoxes',
+            afterDatasetsDraw(chart) {
+                const { ctx, scales: { x }, chartArea } = chart;
+                [
+                    { color: 'rgba(255,100,100,0.12)', start: 0, end: currentFullPhaseStart.prep },
+                    { color: 'rgba(100,200,255,0.12)', start: currentFullPhaseStart.prep, end: currentFullPhaseStart.recovery },
+                    { color: 'rgba(100,255,100,0.12)', start: currentFullPhaseStart.recovery, end: currentFullTotalTime },
+                ].forEach(({ color, start, end }) => {
+                    ctx.fillStyle = color;
+                    ctx.fillRect(
+                        x.getPixelForValue(start),
+                        chartArea.top,
+                        x.getPixelForValue(end) - x.getPixelForValue(start),
+                        chartArea.bottom - chartArea.top
+                    );
+                });
+            },
+        };
 
-        async function runMPRAGESimulation() {
-            if (!_ready) { console.warn('[MPRAGE] EPG not ready'); return; }
-            const btn = document.getElementById('mprage-simulate-btn');
-            btn.disabled = true;
+        function readMPRAGEParams(etl) {
+            return {
+                TI:        parseInt(document.getElementById('ti').value),
+                flipAngle: parseFloat(document.getElementById('alpha').value),
+                innerTR:   parseFloat(document.getElementById('tr').value),
+                TE:        parseFloat(document.getElementById('te').value),
+                numPulses: etl,
+                recovery:  parseInt(document.getElementById('recovery').value),
+            };
+        }
+
+        function upsertChart(chart, canvasId, config) {
+            if (!chart) return new Chart(document.getElementById(canvasId), config);
+            chart.data = config.data;
+            chart.options = config.options;
+            chart.update('none');
+            return chart;
+        }
+
+        function requestMPRAGESimulation(delay = 80) {
+            mprageUpdateGeneration++;
+            const generation = mprageUpdateGeneration;
+            if (mprageUpdateTimer) {
+                clearTimeout(mprageUpdateTimer);
+                mprageUpdateTimer = null;
+            }
+            mprageUpdateTimer = setTimeout(() => {
+                mprageUpdateTimer = null;
+                if (generation !== mprageUpdateGeneration) return;
+                runMPRAGESimulation();
+            }, delay);
+        }
+
+        function runMPRAGESimulation() {
+            if (!_ready) { console.warn('[MPRAGE] module not ready'); return; }
             const t0 = performance.now();
 
             const etl     = window.AppState ? window.AppState.params.etl : 72;
             const numSims = parseInt(document.getElementById('numSims').value);
             document.getElementById('etlDisplayMz').textContent  = etl;
             document.getElementById('etlDisplayMxy').textContent = etl;
-
-            const p = {
-                TI:                    parseInt(document.getElementById('ti').value),
-                flipAngle:             parseFloat(document.getElementById('alpha').value),
-                innerTR:               parseFloat(document.getElementById('tr').value),
-                TE:                    parseFloat(document.getElementById('te').value),
-                numPulses:             etl,
-                recovery:              parseInt(document.getElementById('recovery').value),
-                perfectSpoilingEnable: true,
-            };
-            const seq = buildMPRAGE(p);
+            const p = readMPRAGEParams(etl);
 
             // Window charts (all 5 tissues)
             const winResults = {};
             for (const t of TISSUES_3T) {
-                let st = null;
-                for (let i = 0; i < numSims; i++)
-                    st = simulateAndTrackWithState(seq, t.T1, t.T2, st ? st.finalState : null, t.PD);
-                winResults[t.name] = st.timeline;
+                winResults[t.name] = simulateMPRAGEBloch(t.T1, t.T2, t.PD, p, numSims).timeline;
             }
             console.log(`[MPRAGE] window sim in ${(performance.now()-t0).toFixed(0)} ms`);
 
             const labels = Array.from({ length: etl }, (_, i) => String(i + 1));
-            const dark = {
+            const darkBase = {
                 responsive: true, maintainAspectRatio: false, animation: false,
                 interaction: { mode: 'index', intersect: false },
                 plugins: { legend: { position: 'right', labels: { color: '#e0e0ff', font: { size: 10 } } } },
-                scales: {
+            };
+            const windowScales = {
                     x: { ticks: { color: '#a0a0c0', maxTicksLimit: 12 },
                          grid: { color: 'rgba(255,255,255,0.05)' },
                          title: { display: true, text: 'Echo index', color: '#e0e0ff' } },
                     y: { ticks: { color: '#a0a0c0' }, grid: { color: 'rgba(255,255,255,0.05)' } },
-                },
+            };
+            const fullScales = (title, yMin) => ({
+                x: { type: 'linear', min: 0, max: currentFullTotalTime,
+                     ticks: { color: '#a0a0c0' }, grid: { color: 'rgba(255,255,255,0.05)' },
+                     title: { display: true, text: 'Time (ms)', color: '#e0e0ff' } },
+                y: { min: yMin, ticks: { color: '#a0a0c0' }, grid: { color: 'rgba(255,255,255,0.05)' },
+                     title: { display: true, text: title, color: '#e0e0ff' } },
+            });
+            const dark = {
+                ...darkBase,
+                scales: windowScales,
             };
 
             const mkDatasets = (key) => TISSUES_3T.map(t => ({
@@ -709,17 +756,15 @@
                 }),
                 borderColor: t.color, backgroundColor: 'transparent',
                 borderWidth: 2, pointRadius: 0, tension: 0,
-                hidden: ['CSF', 'adipose', 'bonemarrow'].includes(t.name),
+                hidden: ['CSF', 'adipose'].includes(t.name),
             }));
 
-            if (mzChart)  mzChart.destroy();
-            mzChart = new Chart(document.getElementById('mzChart'), {
+            mzChart = upsertChart(mzChart, 'mzChart', {
                 type: 'line', data: { labels, datasets: mkDatasets('Mz') },
                 options: { ...dark, scales: { ...dark.scales, y: { ...dark.scales.y, min: -1.2, max: 1.2 } } },
             });
 
-            if (mxyChart) mxyChart.destroy();
-            mxyChart = new Chart(document.getElementById('mxyChart'), {
+            mxyChart = upsertChart(mxyChart, 'mxyChart', {
                 type: 'line', data: { labels, datasets: mkDatasets('Mxy') },
                 options: { ...dark, scales: { ...dark.scales, y: { ...dark.scales.y, min: 0 } } },
             });
@@ -729,32 +774,16 @@
             const fullSel = TISSUES_3T.slice(0, 3);
             const fullRes = {};
             for (const t of fullSel) {
-                let st = null;
-                for (let i = 0; i < numSims; i++)
-                    st = simulateFullSequenceWithState(seq, t.T1, t.T2, st ? st.finalState : null, t.PD);
-                fullRes[t.name] = st;
+                fullRes[t.name] = simulateMPRAGEBlochFull(t.T1, t.T2, t.PD, p, numSims);
             }
             console.log(`[MPRAGE] full seq sim in ${(performance.now()-t1).toFixed(0)} ms`);
 
             const ref        = fullRes[fullSel[0].name];
             const totalTime  = ref.totalTime;
-            const phaseStart = ref.phaseStart;
-
-            const phaseBoxPlugin = {
-                id: 'phaseBoxes',
-                afterDatasetsDraw(ch) {
-                    const { ctx, scales: { x, y }, chartArea } = ch;
-                    [
-                        { color: 'rgba(255,100,100,0.12)', s: 0,                    e: phaseStart.prep },
-                        { color: 'rgba(100,200,255,0.12)', s: phaseStart.prep,      e: phaseStart.recovery },
-                        { color: 'rgba(100,255,100,0.12)', s: phaseStart.recovery,  e: totalTime },
-                    ].forEach(({ color, s, e }) => {
-                        ctx.fillStyle = color;
-                        ctx.fillRect(x.getPixelForValue(s), chartArea.top,
-                                     x.getPixelForValue(e) - x.getPixelForValue(s),
-                                     chartArea.bottom - chartArea.top);
-                    });
-                },
+            currentFullTotalTime = totalTime;
+            currentFullPhaseStart = {
+                prep: p.TI,
+                recovery: p.TI + p.numPulses * p.innerTR,
             };
 
             const fullDs = (key) => fullSel.map(t => ({
@@ -763,50 +792,56 @@
                 borderColor: t.color, backgroundColor: 'transparent',
                 borderWidth: 1.5, pointRadius: 0, tension: 0,
             }));
+
             const fullOpts = (title, yMin) => ({
-                ...dark,
-                scales: {
-                    x: { type: 'linear', min: 0, max: totalTime,
-                         ticks: { color: '#a0a0c0' }, grid: { color: 'rgba(255,255,255,0.05)' },
-                         title: { display: true, text: 'Time (ms)', color: '#e0e0ff' } },
-                    y: { min: yMin, ticks: { color: '#a0a0c0' }, grid: { color: 'rgba(255,255,255,0.05)' },
-                         title: { display: true, text: title, color: '#e0e0ff' } },
-                },
+                ...darkBase,
+                scales: fullScales(title, yMin),
             });
 
-            if (fullMzChart)  fullMzChart.destroy();
-            fullMzChart = new Chart(document.getElementById('fullMzChart'), {
+            fullMzChart = upsertChart(fullMzChart, 'fullMzChart', {
                 type: 'line', data: { datasets: fullDs('Mz') },
                 options: fullOpts('Mz', -1.2), plugins: [phaseBoxPlugin],
             });
 
-            if (fullMxyChart) fullMxyChart.destroy();
-            fullMxyChart = new Chart(document.getElementById('fullMxyChart'), {
+            fullMxyChart = upsertChart(fullMxyChart, 'fullMxyChart', {
                 type: 'line', data: { datasets: fullDs('Mxy') },
                 options: fullOpts('Mxy', 0), plugins: [phaseBoxPlugin],
             });
 
-            btn.disabled = false;
             console.log(`[MPRAGE] total sim in ${(performance.now()-t0).toFixed(0)} ms`);
         }
 
         // ── MPRAGE slider live-update ────────────────────────────────────
         function setupMPRAGESliders() {
-            document.getElementById('mprage-simulate-btn')
-                    .addEventListener('click', runMPRAGESimulation);
             ['ti','recovery','alpha','tr','te','numSims'].forEach(id => {
                 const sl = document.getElementById(id);
                 const sp = document.getElementById(id + 'Value');
-                if (sl && sp) sl.addEventListener('input', () => { sp.textContent = sl.value; });
+                if (!sl || !sp) return;
+                sl.addEventListener('input', () => {
+                    sp.textContent = sl.value;
+                    requestMPRAGESimulation(80);
+                });
+                sl.addEventListener('change', () => {
+                    sp.textContent = sl.value;
+                    requestMPRAGESimulation(0);
+                });
             });
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', () => requestMPRAGESimulation(0), { once: true });
+            } else {
+                requestMPRAGESimulation(0);
+            }
         }
 
         // ── Expose module ────────────────────────────────────────────────
         window.MPRAGEModule = {
             get ready() { return _ready; },
             getMPRAGESignals,
+            runSimulation: () => requestMPRAGESimulation(0),
         };
+
+        populateTissueTable();
+        setupMPRAGESliders();
     </script>
 </body>
 </html>
-

@@ -1,1 +1,1427 @@
-(function(_0xb38a02,_0x64673b){const _0x2a3cbc=_0x504e,_0x42c6f0=_0xb38a02();while(!![]){try{const _0x4bd1b4=parseInt(_0x2a3cbc(0x311))/0x1+-parseInt(_0x2a3cbc(0x283))/0x2*(-parseInt(_0x2a3cbc(0x1d5))/0x3)+parseInt(_0x2a3cbc(0x2b6))/0x4+parseInt(_0x2a3cbc(0x178))/0x5+-parseInt(_0x2a3cbc(0x2a4))/0x6+-parseInt(_0x2a3cbc(0x2c8))/0x7*(-parseInt(_0x2a3cbc(0x1c6))/0x8)+-parseInt(_0x2a3cbc(0x2e3))/0x9*(parseInt(_0x2a3cbc(0x31d))/0xa);if(_0x4bd1b4===_0x64673b)break;else _0x42c6f0['push'](_0x42c6f0['shift']());}catch(_0x17b99b){_0x42c6f0['push'](_0x42c6f0['shift']());}}}(_0x3031,0x98002));function _0x3031(){const _0x3a40c5=['giLXs','oYyhs','doHMH','min','max','bCmro','OipAQ','mUlOY',',\x20centerEcho=','weRnF','CMeNT','ellipDist','uwjMl','UEVZJ','zpvXZ','YzBZm','HibDA','sGTeU','VJvGH','etWhL','ryBaA','wiiVC','618129FMdjYi','jZInW','ahkzK','wBrkx','arbIE','kGXol','zyWph','push','AuCdu','nVrpi','],\x20ratios=[','FQYEe','2270KaAoKg','iRAAU','RXzYl','JGcCj','SvbXC','xPonK','lcpo','chevron','GDLWs','csbsf','jiwnE','gnYWy','meGTp','FBEFL','\x20coords','zubMI','3604965MQLXqd','BIxBV','elliptical','ApjxF','BDBgD','CmpOo','REfXh','JYmPn','zVJmg','LATE','rAxoV','qziQD','NQOae','koHNn','eHvmX','CROC\x20largest\x20sector:\x20','PiKwP','RLKWt','hnyGM','mtYEO','iGzHH','kUQeA','bBQGh','WYWeT','hBiqS','bxYIb','ceil','OwtAa','zpTdh','kKXVI','yqjwJ','QCnrv','sqrt','ScJCh','LeisR','mckTr','VmLvs','VqsVE','oXVqY','VVhzZ','UOLox','SQsMt','wmEEd','qMkyM','kTXZy','wWiBE','gmNnv','hsQPg','toFixed','NKlQw','uakmt','uEuCw','gYxzA','gAYOW','soKLs','YJXBl','XWIeN','OfPTC','BLVyP','RWlrx','upFGV','xVDFL','eIzAo','BqDqm','JXWgJ','iEZKH','ZjPun','CROC:\x20Reversing\x20all\x20echo\x20assignments','kuGbg','nOOOK','LDsjX','FDbGH','PIlCJ','hBRHi','map','nGBSh','oOLeP','fYDpJ','216824QeJESn','mngDh','ejSxr','gRnVI','Chevron\x20final:\x20axisRatio=','VcwLk','jzCbL','nCPls','yPWRr','SxAdU','CROC:\x20After\x20reversal,\x20center\x20echo\x20is\x20','essyX','SkoZg','\x20with\x20','sSoPK','10563wzPDHE','XCKJa','oDtrF','adjustedEcho','DepRC','oZrHl','aAWHW','tPfWU','yIXVy','round','uIpib','KjiVw','YdoiT','CROC:\x20Binary\x20search\x20failed,\x20trying\x20ellipse\x20adjustment.\x20Final\x20echo\x20was\x20','iuxwF','shot','LiBnV','JzUVG','PCKOZ','keys','eldCx','doWZF','bhdML','hqzym','BbkYY','OgGct','CROC\x20final:\x20center=[','sort','InWRe','mmYRH','JntWf','ikCSt','wiZAT','join','uCMKy','JwQGY','BiUgc','nTuDs','EeHjp','whfKR','shuxL','zPMJB','cqetF','echo','GFXwg','EtPYX','grJQs','TqbjF','SLHMN','PKXVH','bWGJV','SOUTH','tEsjm','vrsqO','zfGjH','bPCQL','kJhSG','from','hpnco','MBWwI','ZaTGg','CFpZF',':\x20offset=[','XBZXC','XPldo','yYaej','XvzHy','qddVn','XKXFq','theta','tsDke','MsHRd','GtvoI','CqQvb','PzLkR','ifriE','KLzMi','xLqPk','EJTBx','BJRxe','mJjVs','QTEtx','vZBhw','MpEED','cPrJa','DDNES','ZklUr','IBVGg','nFECg','uEzzX','dMHbM','CROC\x20sectors\x20[NORTH,\x20EAST,\x20SOUTH,\x20WEST]:\x20[','dqECF','gVpAe','fqzFb','floor','iTqOn','MaEsC','Chevron:\x20reversing\x20echo\x20assignments\x20for\x20reversed\x20center\x20','mKlIY','jJBMp','SCLBS','WLoky','OWgEf','qVJWw','wLHAP','BPHTT','jQPgw','BFfEO','dsMVh','yTMqv','uIrDa','JTBBo','OxGFd','EtsJd','PnFXf','FmRFY','ImRGb','wFDbk','zmxRi','kATLB','vLaKV','vAKxN','hrrRT','EOpXf','noSup','log','HHGbz','azimuthal','JJpFk','pKAHO','GtpHR','hqeRe','OXhHt','dcqjL','AsVrG','yhECe','bHJci','rnJcI','zxCPv','cdOJH','HDNyO','zKSAd','OYghh','zKtUR','TOLII','mBwEH','RKmQy','zBVfB','wtQnw','xvkep','bRnnu','NeGUf','QwUGI','LZjzn','fCeJK','jWnYT','eXJgn','phi','QIaXH','tCaHF','VqmBQ','KhDDx','obJRk','ydaFL','akjbU','UUNjt','Chevron:\x20trying\x20reversed\x20center\x20echo\x20','jxxMN','CROC:\x20Ellipse\x20adjustment\x20failed,\x20trying\x20reversed\x20center\x20echo\x20','sgCSl','RSESh','FvJOG','nECzM','678VssbTR','ifHSL','XuWpC','NORTH','QmBcV','aacec','oLFmQ','BOaiC','QJPST','NqKYV','VnxzN','EFqds','noeMn','QDbHn','phrHx','EAST','iuvpa','dBUUu','cfCFq','UDpgM','FVLFo','UPlmd','crocAngle','hcHKy','tArqf','RNBzx','mJCVw','length','lMBhq','LKRxj','ThvLb','odWKa','XedQb','4221474Aruxfe','RrNji','mXoUz','mygCc','TXSmG','kDdjb','xvaXJ','CROC\x20iter\x20','RVpJg','FAiIN','XVecv','WOpyv','EHUzS','GVPvr','tLGAg','pCYyl','XWlhr','fQcxP','1242096JNpaWR','abs','Moqkv','DdYtf','VgBna','ryXYl','FZUxX','atan2','jkcrP','MZOXB','mBTWC','rpmWQ','HbWzn','xlAzo','gcAWT','YUxrY','OHXBc','TUDuI','49fFvZCo','rZAfK','JndEb','czBWA',',\x20want=','vViJL','sNEWP','lbSMN','IqbLo','QrWpv','LlcPJ','biuBl','vujJm','nFNCy','tYgdD','JdRqU','UTkib','oyQyo','AxAWs','WQGsy','IoFXp','AaoaT','uujPL','kaiVH','lceiQ','ehTXB','YoXFN','67671OmdnJL','FfPsE','MrIHL','nhiFA','rCNDu','CbHIj','dsWja','eoLRf','FXXYH','pPPUn','ErEwY','FlKLU','VewKa','ZXzXS','SSsAL','LAeQL','],\x20found\x20echo=','rectangular','CrPGU','SzCOG','yRKja','Fsahp','yYZPK','GRsIA'];_0x3031=function(){return _0x3a40c5;};return _0x3031();}function _0x504e(_0x251d53,_0x2c18f4){_0x251d53=_0x251d53-0x176;const _0x30314c=_0x3031();let _0x504ed0=_0x30314c[_0x251d53];return _0x504ed0;}const KSpaceUtils=((()=>{const _0x5f2c3d=_0x504e,_0x33c4a3={'hBRHi':function(_0x6d7e82,_0x2976a2){return _0x6d7e82+_0x2976a2;},'oyQyo':function(_0x42e7a1,_0x2cf64e){return _0x42e7a1-_0x2cf64e;},'VgBna':function(_0x40ad05,_0x5c0a1b){return _0x40ad05*_0x5c0a1b;},'bRnnu':function(_0x59d0e5,_0x2659e5){return _0x59d0e5|_0x2659e5;},'FlKLU':function(_0x2ab0d3,_0x5f12e5){return _0x2ab0d3/_0x5f12e5;},'wFDbk':function(_0x2bb2c3,_0x1ee552){return _0x2bb2c3+_0x1ee552;},'hqzym':function(_0x18b7e8,_0x3264f1){return _0x18b7e8*_0x3264f1;},'HbWzn':function(_0x2ed463,_0x41309d){return _0x2ed463/_0x41309d;},'PIlCJ':function(_0x4454f8,_0x1bbe40){return _0x4454f8/_0x1bbe40;},'JJpFk':function(_0x4616e,_0x39737f){return _0x4616e+_0x39737f;},'nECzM':function(_0x6b0d13,_0x3bdf39){return _0x6b0d13/_0x3bdf39;},'CbHIj':function(_0xf85ffb,_0x54c4e7){return _0xf85ffb+_0x54c4e7;},'InWRe':function(_0x29f684,_0x857586){return _0x29f684*_0x857586;},'eldCx':function(_0xb04214,_0x2eb368){return _0xb04214<_0x2eb368;},'HQIFE':_0x5f2c3d(0x181),'FAiIN':function(_0x571e9c,_0x4778f2){return _0x571e9c-_0x4778f2;},'jWnYT':function(_0x588aa6,_0x22187a){return _0x588aa6<_0x22187a;},'mBwEH':_0x5f2c3d(0x2be),'JYmPn':_0x5f2c3d(0x31a),'pKAHO':function(_0x388e4f,_0x2e9412){return _0x388e4f===_0x2e9412;},'upFGV':function(_0x4e07c8,_0x177570){return _0x4e07c8>=_0x177570;},'hcHKy':function(_0x4d1327,_0x480e1b){return _0x4d1327===_0x480e1b;},'bxYIb':'BdDme','czBWA':function(_0x2f013a,_0x4b333c){return _0x2f013a%_0x4b333c;},'gnYWy':function(_0x1dc099,_0x2ae507){return _0x1dc099+_0x2ae507;},'qguQq':function(_0x23e683,_0x1143bb){return _0x23e683+_0x1143bb;},'obJRk':function(_0x19e0f4,_0xe19274){return _0x19e0f4>_0xe19274;},'VcwLk':function(_0x33cde9,_0x5832d0){return _0x33cde9/_0x5832d0;},'PiKwP':function(_0x1d2904,_0x505132){return _0x1d2904/_0x505132;},'FZUxX':function(_0x19a75f,_0x48d2d0){return _0x19a75f>_0x48d2d0;},'XBZXC':function(_0x2d6b62,_0x47e70e){return _0x2d6b62+_0x47e70e;},'hsQPg':function(_0x2caf00,_0x20600b){return _0x2caf00/_0x20600b;},'JntWf':function(_0x591190,_0xf103b7){return _0x591190+_0xf103b7;},'rCNDu':_0x5f2c3d(0x17a),'tEsjm':function(_0x2547cc,_0x24dea2){return _0x2547cc+_0x24dea2;},'gYxzA':function(_0x5a9bf4,_0x1cfd1e){return _0x5a9bf4>_0x1cfd1e;},'ImRGb':function(_0x649e92,_0x57fb15){return _0x649e92<_0x57fb15;},'tsDke':function(_0x395827,_0x4aa660){return _0x395827>=_0x4aa660;},'AxAWs':function(_0x2c73d0,_0x5eb1ab){return _0x2c73d0<_0x5eb1ab;},'bPCQL':function(_0x386ac,_0x19e87e){return _0x386ac+_0x19e87e;},'aacec':function(_0x432ac0,_0x2d92f3){return _0x432ac0/_0x2d92f3;},'mmYRH':function(_0x5b81c6,_0x3acc2c){return _0x5b81c6+_0x3acc2c;},'zxCPv':function(_0x5daa4c,_0x33114d){return _0x5daa4c/_0x33114d;},'tCaHF':function(_0x472d40,_0x3d864d){return _0x472d40*_0x3d864d;},'zKSAd':function(_0x2c9e42,_0x58ab44){return _0x2c9e42<_0x58ab44;},'QIaXH':function(_0x473b77,_0x1e954f){return _0x473b77!==_0x1e954f;},'aAWHW':_0x5f2c3d(0x259),'giLXs':function(_0x41eddb,_0x2e0021){return _0x41eddb|_0x2e0021;},'sGTeU':function(_0x1d1927,_0x50af51){return _0x1d1927-_0x50af51;},'SzCOG':function(_0x34fd56,_0x3ea96f){return _0x34fd56/_0x3ea96f;},'GtpHR':function(_0xe31d20,_0x5c6da7){return _0xe31d20|_0x5c6da7;},'xvaXJ':_0x5f2c3d(0x2dd),'iuvpa':function(_0xfaaa70,_0x5c0cee){return _0xfaaa70>_0x5c0cee;},'VVhzZ':function(_0x4a7d91,_0x1175e5){return _0x4a7d91>_0x1175e5;},'QmBcV':function(_0x58f0bd,_0xeba9fb){return _0x58f0bd===_0xeba9fb;},'KhDDx':_0x5f2c3d(0x2e5),'ZaTGg':function(_0x225bd3,_0x3f8d67){return _0x225bd3===_0x3f8d67;},'ejSxr':'lYKqN','wmEEd':function(_0x3eac05,_0x36fedb){return _0x3eac05<_0x36fedb;},'EtsJd':function(_0x5570b7,_0x30b7a5){return _0x5570b7>=_0x30b7a5;},'TXSmG':function(_0x5bb41d,_0x32b46a){return _0x5bb41d>=_0x32b46a;},'OYghh':function(_0x31b1ff,_0x2d6333){return _0x31b1ff>_0x2d6333;},'DDNES':function(_0x3479af,_0x492a5a){return _0x3479af/_0x492a5a;},'fqzFb':function(_0x53cd7c,_0xcefcdb){return _0x53cd7c*_0xcefcdb;},'VqmBQ':function(_0x3eea04,_0x49c927){return _0x3eea04===_0x49c927;},'zfGjH':_0x5f2c3d(0x289),'hpnco':_0x5f2c3d(0x17c),'IoFXp':function(_0x168eb0,_0x365aee){return _0x168eb0+_0x365aee;},'oAeBC':function(_0x218357,_0x3965f2){return _0x218357|_0x3965f2;},'pCYyl':function(_0x132565,_0x29ceab){return _0x132565|_0x29ceab;},'mUlOY':function(_0x561a17,_0x493314){return _0x561a17-_0x493314;},'yYZPK':function(_0x165850,_0x351bd5){return _0x165850-_0x351bd5;},'JzUVG':function(_0x112b1a,_0x3ef04b){return _0x112b1a===_0x3ef04b;},'QFbVn':'VqsVE','NKlQw':'sequential','UUNjt':function(_0x4fe5d0,_0x510eaf,_0x28e9eb,_0x2589e7,_0x5d46c6){return _0x4fe5d0(_0x510eaf,_0x28e9eb,_0x2589e7,_0x5d46c6);},'dqECF':_0x5f2c3d(0x324),'fYDpJ':function(_0x3c56e1,_0x4e84ee,_0x392c66,_0x542c87,_0x70c382){return _0x3c56e1(_0x4e84ee,_0x392c66,_0x542c87,_0x70c382);},'zdXnJ':'croc','CrPGU':function(_0x165383,_0x386b54,_0x447a03,_0x985a03,_0x3688df){return _0x165383(_0x386b54,_0x447a03,_0x985a03,_0x3688df);},'BkuGU':function(_0x2005e7,_0x253e45){return _0x2005e7-_0x253e45;},'RKmQy':function(_0xe06fa0,_0x4e0ef3){return _0xe06fa0-_0x4e0ef3;},'ceBxO':function(_0x4596be,_0x5dd6fe){return _0x4596be===_0x5dd6fe;},'rAxoV':_0x5f2c3d(0x28e),'zpvXZ':'PKXVH','oXVqY':function(_0x1f9119,_0x1a2cc9){return _0x1f9119!==_0x1a2cc9;},'wWiBE':function(_0x16c115,_0x5cfa0d){return _0x16c115-_0x5cfa0d;},'bengM':function(_0x59924d,_0x413dbd){return _0x59924d-_0x413dbd;},'vujJm':function(_0x1ab258,_0x12e464){return _0x1ab258<_0x12e464;},'BPHTT':function(_0x171f6a,_0x53508c){return _0x171f6a-_0x53508c;},'mygCc':function(_0xf3d667,_0x14ca8e){return _0xf3d667*_0x14ca8e;},'BJRxe':function(_0x24b3ee,_0x4e8626){return _0x24b3ee===_0x4e8626;},'JGcCj':'LAeQL','koHNn':function(_0x4dada7,_0x3eedbd){return _0x4dada7!==_0x3eedbd;},'iuxwF':_0x5f2c3d(0x2f7),'DepRC':function(_0x5cc97e,_0x53b34a){return _0x5cc97e<=_0x53b34a;},'kGXol':function(_0x1ce8ff,_0x46b672){return _0x1ce8ff<=_0x46b672;},'mckTr':'HuBTN','vLaKV':_0x5f2c3d(0x23b),'ehTXB':function(_0x5e97a0,_0x521e4d){return _0x5e97a0>_0x521e4d;},'nCPls':function(_0xff905e,_0x30c0eb){return _0xff905e!==_0x30c0eb;},'biuBl':'krTFa','NeGUf':_0x5f2c3d(0x325),'UOLox':_0x5f2c3d(0x27f),'kDdjb':'qtXym','ojnAm':_0x5f2c3d(0x26e),'sNEWP':_0x5f2c3d(0x194),'BIxBV':function(_0x2eb78f,_0x399800){return _0x2eb78f%_0x399800;},'ErEwY':function(_0x2569e4,_0x59bd0a){return _0x2569e4<=_0x59bd0a;},'IIiVL':function(_0x5c1771,_0x590f53){return _0x5c1771+_0x590f53;},'uMgUV':function(_0x186a81,_0x3601b){return _0x186a81-_0x3601b;},'jZInW':function(_0xba0b75,_0x414ea4){return _0xba0b75*_0x414ea4;},'zBVfB':function(_0x16ed1b,_0x51cf85){return _0x16ed1b-_0x51cf85;},'lbSMN':function(_0x491f23,_0x4682ab){return _0x491f23!==_0x4682ab;},'mdvJX':_0x5f2c3d(0x27a),'MZOXB':_0x5f2c3d(0x2bb),'RLKWt':function(_0x429bb5,_0x1bf8a4){return _0x429bb5|_0x1bf8a4;},'FXXYH':function(_0x136245,_0x1760ae,_0x3b6c0d,_0x5497cb){return _0x136245(_0x1760ae,_0x3b6c0d,_0x5497cb);},'odWKa':function(_0x5a550e,_0x5860c1){return _0x5a550e*_0x5860c1;},'yqjwJ':_0x5f2c3d(0x315),'nWUbS':function(_0x5271d3,_0x2966b9){return _0x5271d3-_0x2966b9;},'lMBhq':function(_0x3cc04e,_0x183255){return _0x3cc04e<_0x183255;},'LyaFn':function(_0xfd821e,_0x5d874e){return _0xfd821e*_0x5d874e;},'qddVn':function(_0x4d1dd4,_0x2ac31c){return _0x4d1dd4<_0x2ac31c;},'tArqf':_0x5f2c3d(0x30d),'FdvgO':'brKAz','RWlrx':function(_0xc3e802,_0x5601a5){return _0xc3e802*_0x5601a5;},'NQOae':function(_0x2000c4,_0x192f53){return _0x2000c4+_0x192f53;},'YJXBl':function(_0x483e9e,_0x2d8647){return _0x483e9e/_0x2d8647;},'DERmQ':'KcGQc','QCnrv':_0x5f2c3d(0x30e),'FVLFo':function(_0x94e9f9,_0x213ee3){return _0x94e9f9*_0x213ee3;},'RNBzx':function(_0x21cfbf,_0x1c0b43){return _0x21cfbf<_0x1c0b43;},'uEzzX':function(_0x13e284,_0x11da38,_0x21db90,_0x4017a5){return _0x13e284(_0x11da38,_0x21db90,_0x4017a5);},'uIpib':function(_0x10e95d,_0x14c514,_0x2c1b56,_0x3db8bb){return _0x10e95d(_0x14c514,_0x2c1b56,_0x3db8bb);},'kuGbg':function(_0x3458aa,_0x143def){return _0x3458aa-_0x143def;},'ifriE':function(_0x1fe275,_0x30137a){return _0x1fe275*_0x30137a;},'OxGFd':function(_0x48468a,_0x13dad3){return _0x48468a/_0x13dad3;},'zubMI':'deetm','ceshG':_0x5f2c3d(0x2a3),'JTBBo':function(_0x2c3eb6,_0x40e6e7){return _0x2c3eb6/_0x40e6e7;},'xLqPk':function(_0x24a17a,_0x30cbd7){return _0x24a17a+_0x30cbd7;},'tYgdD':function(_0x3059fc,_0x4c8ab8){return _0x3059fc(_0x4c8ab8);},'zmxRi':function(_0x342853,_0x2c7004){return _0x342853/_0x2c7004;},'mLdhp':function(_0x5a3124){return _0x5a3124();},'YoXFN':_0x5f2c3d(0x217),'OHXBc':_0x5f2c3d(0x304),'TOLII':function(_0x8e5ce,_0x2966b1){return _0x8e5ce<_0x2966b1;},'yhECe':function(_0x4bede8,_0x23c127){return _0x4bede8<_0x23c127;},'dcqjL':function(_0x4609ce,_0x863f24){return _0x4609ce!==_0x863f24;},'GRsIA':_0x5f2c3d(0x1ce),'ZXzXS':function(_0x3154f7,_0x29a221){return _0x3154f7(_0x29a221);},'JwQGY':function(_0x12f673,_0x4df07a){return _0x12f673<_0x4df07a;},'oDtrF':_0x5f2c3d(0x326),'sZnJU':function(_0x3a871e,_0x5bd84a){return _0x3a871e|_0x5bd84a;},'nGBSh':function(_0x1ed230,_0x17e1fb){return _0x1ed230===_0x17e1fb;},'kATLB':_0x5f2c3d(0x244),'TqbjF':function(_0x1f6dd1,_0x2513ad){return _0x1f6dd1|_0x2513ad;},'dsWja':function(_0x5b810b){return _0x5b810b();},'WOpyv':function(_0x14fc1b,_0x2cc885){return _0x14fc1b<_0x2cc885;},'lzSVp':function(_0x22622b,_0x499bd2){return _0x22622b<_0x499bd2;},'EHUzS':function(_0x5b2c93,_0x3028b7){return _0x5b2c93|_0x3028b7;},'gcAWT':_0x5f2c3d(0x232),'qVJWw':function(_0x36db6a,_0x23c8ed){return _0x36db6a>_0x23c8ed;},'jpbMK':'AuCdu','eVTiB':_0x5f2c3d(0x2d7),'CqQvb':function(_0x54379b,_0x1488fe){return _0x54379b===_0x1488fe;},'nhiFA':_0x5f2c3d(0x313),'tPfWU':function(_0xc138fe,_0xf02806){return _0xc138fe+_0xf02806;},'eIzAo':function(_0x1fc04f,_0x4e8857,_0x1d8b6b,_0x317f67){return _0x1fc04f(_0x4e8857,_0x1d8b6b,_0x317f67);},'reZPL':function(_0x21a7d7,_0x4d3f3d,_0x4d3778,_0x176d90){return _0x21a7d7(_0x4d3f3d,_0x4d3778,_0x176d90);},'wBrkx':function(_0x2fcec2,_0x5101a6){return _0x2fcec2!==_0x5101a6;},'MBWwI':function(_0x1460b3,_0x8ea0ab,_0x2af16c){return _0x1460b3(_0x8ea0ab,_0x2af16c);},'zyWph':function(_0x66cdbc,_0x59852f){return _0x66cdbc+_0x59852f;},'QrWpv':function(_0x3e4d66,_0x1f48da,_0x109876,_0x1c5140){return _0x3e4d66(_0x1f48da,_0x109876,_0x1c5140);},'uCMKy':function(_0x4a030b,_0x25f997){return _0x4a030b!==_0x25f997;},'zPMJB':'gnnjN','cqetF':function(_0x214361,_0x3f661e){return _0x214361-_0x3f661e;},'mtYEO':function(_0x4c791c,_0xfc2af8){return _0x4c791c%_0xfc2af8;},'uwjMl':function(_0x1c1bf7,_0x28c28a){return _0x1c1bf7*_0x28c28a;},'UPlmd':_0x5f2c3d(0x21f),'qMkyM':function(_0x274a7d,_0x5e2b2f){return _0x274a7d<_0x5e2b2f;},'lceiQ':'utbou','ScJCh':function(_0x4c20c3,_0x29cffc){return _0x4c20c3+_0x29cffc;},'HHGbz':function(_0x194412,_0x5bbe0f){return _0x194412+_0x5bbe0f;},'meGTp':function(_0x1a4bba,_0x57ccae){return _0x1a4bba/_0x57ccae;},'xvkep':_0x5f2c3d(0x290),'nOOOK':_0x5f2c3d(0x22c),'FDbGH':function(_0x286d9b,_0xf7e813){return _0x286d9b<_0xf7e813;},'jJBMp':function(_0x342a05,_0x38ef30){return _0x342a05===_0x38ef30;},'PCKOZ':_0x5f2c3d(0x1aa),'HibDA':'UCAxp','jQPgw':function(_0x12676c,_0x45a126){return _0x12676c>_0x45a126;},'SLHMN':function(_0x45d9c5,_0x4193ec){return _0x45d9c5-_0x4193ec;},'oYyhs':function(_0xf18be3,_0x2b7aba){return _0xf18be3-_0x2b7aba;},'iEZKH':function(_0x365a2,_0x3725a5){return _0x365a2+_0x3725a5;},'gmNnv':function(_0x1558b5,_0x9f0e21){return _0x1558b5-_0x9f0e21;},'NqKYV':function(_0x3118d3,_0x2a7d5d){return _0x3118d3-_0x2a7d5d;},'rpmWQ':function(_0x371ecf,_0x55816d){return _0x371ecf-_0x55816d;},'ApjxF':function(_0x1715c9,_0x277e2a){return _0x1715c9%_0x277e2a;},'iTqOn':function(_0x41fc86,_0x24279c){return _0x41fc86-_0x24279c;},'FvJOG':function(_0x3d8679,_0x1b6458){return _0x3d8679+_0x1b6458;},'xPonK':function(_0x15979f,_0x503ac3){return _0x15979f<=_0x503ac3;},'iBdSB':function(_0x268081,_0x25eb91){return _0x268081/_0x25eb91;},'fXrxt':'VhZJF','EJTBx':'ocCfl','TUDuI':function(_0x60554b,_0x4ca010){return _0x60554b+_0x4ca010;},'JxKUe':function(_0x3d0a0f,_0xd4914f){return _0x3d0a0f*_0xd4914f;},'HgCtV':function(_0x232394,_0x1ea4cc){return _0x232394-_0x1ea4cc;},'cdOJH':function(_0x3fad83,_0x2d6c6c){return _0x3fad83|_0x2d6c6c;},'ifHSL':function(_0xf51efa,_0x470e29){return _0xf51efa/_0x470e29;},'xlAzo':function(_0x46757f,_0x1e91ad){return _0x46757f===_0x1e91ad;},'mBTWC':'GtvoI','WYWeT':function(_0x6d4838,_0x478533){return _0x6d4838===_0x478533;},'ThvLb':function(_0xba079a,_0x19344f,_0x426537,_0x438f59){return _0xba079a(_0x19344f,_0x426537,_0x438f59);},'YdoiT':function(_0x45d7ff,_0x342ce3,_0x1e68de,_0x207724){return _0x45d7ff(_0x342ce3,_0x1e68de,_0x207724);},'THapb':function(_0x243c11,_0x14e2ad){return _0x243c11>=_0x14e2ad;},'neCYg':function(_0x41ef44,_0x3f5d54){return _0x41ef44>_0x3f5d54;},'XPldo':'IXbdO','vrsqO':_0x5f2c3d(0x31e),'Moqkv':function(_0x429a4f,_0x2efd61){return _0x429a4f!==_0x2efd61;},'sSoPK':_0x5f2c3d(0x1e0),'gRnVI':function(_0x15bc0a,_0x5422d5){return _0x15bc0a/_0x5422d5;},'wiZAT':function(_0x82df8b,_0x22c362){return _0x82df8b-_0x22c362;},'SQsMt':function(_0x587734,_0x219878){return _0x587734/_0x219878;},'sXPVD':function(_0xd717d2,_0xc71571){return _0xd717d2-_0xc71571;},'SCLBS':function(_0x1256aa,_0x1bb840){return _0x1256aa*_0x1bb840;},'DdYtf':function(_0x1bc043,_0x3c0aa4){return _0x1bc043*_0x3c0aa4;},'VewKa':function(_0x4016ca,_0x1b1d27){return _0x4016ca<_0x1b1d27;},'YISst':function(_0x576ca5,_0x45ecc){return _0x576ca5-_0x45ecc;},'LiBnV':function(_0x7bea89,_0x22420f){return _0x7bea89<_0x22420f;},'zKtUR':function(_0x5c3e22,_0x28071d){return _0x5c3e22*_0x28071d;},'qziQD':function(_0x3ad34,_0x29f25c){return _0x3ad34*_0x29f25c;},'CGitT':function(_0x4ec6b8,_0x399a07){return _0x4ec6b8-_0x399a07;},'UUKJh':function(_0x5e6219,_0x19bc46){return _0x5e6219-_0x19bc46;},'fCeJK':function(_0x46dfb7,_0x4aee72,_0x3cbb7f,_0x4d25a7){return _0x46dfb7(_0x4aee72,_0x3cbb7f,_0x4d25a7);},'bhdML':function(_0xf3f70d,_0x2f92c8){return _0xf3f70d%_0x2f92c8;},'rnJcI':function(_0x76dce9,_0x274dff){return _0x76dce9-_0x274dff;},'geeDH':function(_0x53d325,_0x37974e){return _0x53d325===_0x37974e;},'mXoUz':function(_0x1a7c67,_0x5471de){return _0x1a7c67===_0x5471de;},'mngDh':'mSEsS','FQYEe':function(_0x1f8713,_0x5c9950){return _0x1f8713!==_0x5c9950;},'OWgEf':_0x5f2c3d(0x279),'QJPST':function(_0x17cb0d,_0xa3472c){return _0x17cb0d-_0xa3472c;},'RIYds':function(_0x556c23,_0x1434bc){return _0x556c23===_0x1434bc;},'OgGct':function(_0x3a1724,_0x47460f){return _0x3a1724>=_0x47460f;},'SkoZg':_0x5f2c3d(0x291),'hrrRT':function(_0x300d75,_0x3aacbc){return _0x300d75>_0x3aacbc;},'nuDbp':function(_0x277407,_0x4d568b){return _0x277407>_0x4d568b;},'mJjVs':function(_0x1a6c48,_0x2179c5){return _0x1a6c48!==_0x2179c5;},'bHJci':'hjfjo','tdMBQ':_0x5f2c3d(0x286),'dMHbM':_0x5f2c3d(0x292),'yIXVy':_0x5f2c3d(0x208),'RXzYl':function(_0x197eb8,_0x438901){return _0x197eb8===_0x438901;},'kTXZy':function(_0x275609,_0x436c74){return _0x275609||_0x436c74;},'XWIeN':function(_0x4bc06e,_0x2ca273){return _0x4bc06e||_0x2ca273;},'XKXFq':function(_0x793d07,_0x476521){return _0x793d07+_0x476521;},'uujPL':function(_0x3c1dfc,_0x23b869){return _0x3c1dfc>_0x23b869;},'kKXVI':_0x5f2c3d(0x186),'LZjzn':_0x5f2c3d(0x1da),'EOpXf':function(_0x3fa994,_0x2ae244){return _0x3fa994<_0x2ae244;},'BwrFH':function(_0x40d89b,_0x2ef298){return _0x40d89b<_0x2ef298;},'YUxrY':function(_0x23e4c5,_0x4a3f5f){return _0x23e4c5===_0x4a3f5f;},'LDsjX':_0x5f2c3d(0x300),'gJMsj':_0x5f2c3d(0x18e),'EeHjp':function(_0x443736,_0x381fd0){return _0x443736!==_0x381fd0;},'SvbXC':_0x5f2c3d(0x216),'LKRxj':_0x5f2c3d(0x180),'mvInV':function(_0x2205f0,_0x2e19e0){return _0x2205f0<_0x2e19e0;},'nFNCy':function(_0x5e783a,_0x52b389){return _0x5e783a>_0x52b389;},'CFpZF':function(_0x5fb513,_0x240f7e){return _0x5fb513-_0x240f7e;},'xzqkp':function(_0x3a3cfa,_0x177a7e){return _0x3a3cfa-_0x177a7e;},'BLVyP':function(_0x2b7f6e,_0x2fd9b5){return _0x2b7f6e-_0x2fd9b5;},'BFfEO':function(_0xa6c98e,_0x37e58c){return _0xa6c98e===_0x37e58c;},'UTkib':function(_0x2d4b6a,_0x3bc579){return _0x2d4b6a<_0x3bc579;},'oOLeP':function(_0x4e8282,_0x286266){return _0x4e8282/_0x286266;},'essyX':function(_0x3231a9,_0x4f4b2c,_0xc3c514,_0x83b214,_0x31ff44){return _0x3231a9(_0x4f4b2c,_0xc3c514,_0x83b214,_0x31ff44);},'JXWgJ':function(_0x5e4331,_0x5e9612){return _0x5e4331>_0x5e9612;},'QAOtx':_0x5f2c3d(0x22b),'MsHRd':function(_0x2027aa,_0x25417b){return _0x2027aa+_0x25417b;},'SSsAL':function(_0x44f6af,_0xc4ba1c){return _0x44f6af<_0xc4ba1c;},'RrNji':'AwxGX','AfIWt':function(_0x5ceb5a,_0x3b6258){return _0x5ceb5a===_0x3b6258;},'BqDqm':function(_0x3f95e6,_0x5cca50,_0x4c3844,_0x386677,_0x175d35){return _0x3f95e6(_0x5cca50,_0x4c3844,_0x386677,_0x175d35);},'noSup':function(_0x3524a4,_0x294152){return _0x3524a4<_0x294152;},'CMeNT':_0x5f2c3d(0x1b1),'hBiqS':function(_0x1a3110,_0x52aab9){return _0x1a3110===_0x52aab9;},'XCKJa':function(_0x4f4033,_0x39587c){return _0x4f4033===_0x39587c;},'VnxzN':_0x5f2c3d(0x201),'LlcPJ':function(_0x38f6b6,_0x4fef69){return _0x38f6b6*_0x4fef69;},'HtBQP':function(_0x242b87,_0xbcbb1){return _0x242b87!==_0xbcbb1;},'MpEED':function(_0x15b808,_0x3b24ed){return _0x15b808!==_0x3b24ed;},'iGzHH':_0x5f2c3d(0x249),'tLGAg':_0x5f2c3d(0x242),'GVPvr':_0x5f2c3d(0x243),'VpWsZ':_0x5f2c3d(0x327),'doWZF':function(_0x5a6c91,_0x1e27c6){return _0x5a6c91!==_0x1e27c6;},'UEVZJ':function(_0x3e6d1c,_0x1049d1){return _0x3e6d1c!==_0x1049d1;},'dCDZY':_0x5f2c3d(0x1ae),'AsVrG':_0x5f2c3d(0x2ea),'nTuDs':function(_0xa5afa9,_0x1fdff9,_0x6229b3,_0x12aa50){return _0xa5afa9(_0x1fdff9,_0x6229b3,_0x12aa50);},'wtQnw':function(_0x5c49f4,_0x1a24d0){return _0x5c49f4!==_0x1a24d0;},'ryBaA':_0x5f2c3d(0x29d)};function _0xc85dc1(_0xc56224,_0x1be3d4,_0x168daf=0x1,_0x28b341=0x1,_0x247d2b=!![],_0x3ba4dc=_0x5f2c3d(0x2f4),_0x2bac8f=0x80,_0xd158a0=0x1){const _0x284f17=_0x5f2c3d,_0x2ae549={'REfXh':function(_0xc44dba,_0x4ace83){const _0x28e382=_0x504e;return _0x33c4a3[_0x28e382(0x1c1)](_0xc44dba,_0x4ace83);},'qJQXN':function(_0x4fc6a0,_0x21926f){const _0x3523ed=_0x504e;return _0x33c4a3[_0x3523ed(0x2d9)](_0x4fc6a0,_0x21926f);},'wLHAP':function(_0x58890d,_0x11417d){const _0xac545f=_0x504e;return _0x33c4a3[_0xac545f(0x2ba)](_0x58890d,_0x11417d);},'vZBhw':function(_0x472c0b,_0x4e0381){const _0x281979=_0x504e;return _0x33c4a3[_0x281979(0x26c)](_0x472c0b,_0x4e0381);},'Fsahp':function(_0x403274,_0x14dcd5){const _0x12fb7a=_0x504e;return _0x33c4a3[_0x12fb7a(0x2ee)](_0x403274,_0x14dcd5);}},_0x50403f=_0x33c4a3[_0x284f17(0x24b)](Math['ceil'](_0x33c4a3['FlKLU'](_0xc56224*_0x1be3d4,_0x33c4a3[_0x284f17(0x1ec)](_0x168daf,_0x28b341))),_0x33c4a3[_0x284f17(0x1ec)](_0x2bac8f,_0x2bac8f)),_0x1ec59c=new Array(_0x50403f);let _0x1da490=0x0;const _0x252d80=_0x33c4a3[_0x284f17(0x2ee)](_0xc56224,0x2),_0x332c41=_0x33c4a3[_0x284f17(0x2c2)](_0x1be3d4,0x2),_0x52f155=_0xc56224/0x2,_0x6cb7d3=_0x1be3d4/0x2,_0x12b791=0.000001,_0x4310ab=Math[_0x284f17(0x2fe)](_0x2bac8f,_0xc56224),_0x189bf3=Math['min'](_0x2bac8f,_0x1be3d4),_0x5d741b=Math[_0x284f17(0x234)](_0x252d80-_0x33c4a3[_0x284f17(0x1c0)](_0x4310ab,0x2)),_0x2380cc=_0x33c4a3[_0x284f17(0x256)](_0x5d741b,_0x4310ab),_0x149dbc=Math[_0x284f17(0x234)](_0x33c4a3[_0x284f17(0x2d9)](_0x332c41,_0x33c4a3[_0x284f17(0x282)](_0x189bf3,0x2))),_0x4429ea=_0x33c4a3['CbHIj'](_0x149dbc,_0x189bf3);let _0xda31ed=Math[_0x284f17(0x1de)](_0x33c4a3[_0x284f17(0x1f1)](_0xd158a0-0.5,_0x1be3d4));if(_0xda31ed<0x0)_0xda31ed=0x0;if(_0xda31ed>Math[_0x284f17(0x234)](_0x1be3d4/0x2))_0xda31ed=Math[_0x284f17(0x234)](_0x1be3d4/0x2);const _0x5a322e=_0x33c4a3[_0x284f17(0x1e9)](_0xd158a0,0x1)?_0x33c4a3['HQIFE']:'NO',_0x5e25fd=_0x247d2b?0x1:0x0,_0x339ee2=_0x33c4a3[_0x284f17(0x2ad)](_0xc56224,0x1);let _0x4c58a0=0x0;for(let _0x402a84=0x0;_0x33c4a3[_0x284f17(0x271)](_0x402a84,_0x1be3d4);_0x402a84+=_0x28b341){if(_0x33c4a3[_0x284f17(0x267)]!==_0x33c4a3[_0x284f17(0x17f)]){const _0xa94dea=_0x402a84;if(_0x33c4a3[_0x284f17(0x257)](_0x5a322e,'LATE')&&_0x33c4a3[_0x284f17(0x1b4)](_0xa94dea,_0x1be3d4/0x2+_0xda31ed)){if(_0x33c4a3[_0x284f17(0x29a)](_0x33c4a3[_0x284f17(0x191)],_0x284f17(0x32a)))_0x4fe4a4=_0x5cfa6a,_0x619a64=_0x374de0;else{_0x4c58a0+=_0x5e25fd,_0x4c58a0=_0x33c4a3['czBWA'](_0x4c58a0,_0x33c4a3[_0x284f17(0x328)](_0x339ee2,0x1));continue;}}for(let _0x19aabe=0x0;_0x33c4a3['eldCx'](_0x19aabe,_0xc56224);_0x19aabe+=_0x168daf){let _0x526561=_0x33c4a3['qguQq'](_0x19aabe,_0x4c58a0);_0x526561>=_0xc56224&&(_0x526561=_0x526561%_0xc56224);const _0x418254=_0x33c4a3[_0x284f17(0x278)](_0xc56224,0x1)?_0x33c4a3[_0x284f17(0x1cb)](_0x33c4a3[_0x284f17(0x1c1)](_0x33c4a3[_0x284f17(0x2d9)](_0x526561,_0x33c4a3[_0x284f17(0x188)](_0xc56224,0x2)),0.5),_0x52f155):0x0,_0x18b17f=_0x33c4a3[_0x284f17(0x2bc)](_0x1be3d4,0x1)?_0x33c4a3[_0x284f17(0x1cb)](_0x33c4a3[_0x284f17(0x214)](_0xa94dea-_0x33c4a3[_0x284f17(0x1a7)](_0x1be3d4,0x2),0.5),_0x6cb7d3):0x0,_0x291de3=Math[_0x284f17(0x198)](_0x33c4a3[_0x284f17(0x1f3)](_0x418254*_0x418254,_0x18b17f*_0x18b17f)),_0x55773e=Math[_0x284f17(0x2bd)](_0x18b17f,_0x418254);if(_0x3ba4dc===_0x33c4a3['rCNDu']&&_0x33c4a3['obJRk'](_0x291de3,_0x33c4a3[_0x284f17(0x209)](0x1,_0x12b791)))continue;if((_0x33c4a3[_0x284f17(0x278)](_0x168daf,0x1)||_0x33c4a3[_0x284f17(0x1ac)](_0x28b341,0x1))&&(_0x33c4a3['upFGV'](_0x526561,_0x5d741b)&&_0x33c4a3[_0x284f17(0x24a)](_0x526561,_0x2380cc))&&(_0x33c4a3[_0x284f17(0x21b)](_0xa94dea,_0x149dbc)&&_0x33c4a3[_0x284f17(0x2da)](_0xa94dea,_0x4429ea))){if(_0x33c4a3[_0x284f17(0x257)](_0x3ba4dc,_0x33c4a3[_0x284f17(0x2e7)])){const _0x535e7a=_0x33c4a3['bPCQL'](_0x526561,0.5)-_0x33c4a3[_0x284f17(0x288)](_0xc56224,0x2),_0x29890f=_0x33c4a3['mmYRH'](_0xa94dea,0.5)-_0x33c4a3[_0x284f17(0x260)](_0x1be3d4,0x2),_0x459a52=_0x33c4a3['FlKLU'](_0x535e7a,_0x4310ab/0x2),_0xaa2429=_0x29890f/(_0x189bf3/0x2),_0x2437c7=_0x33c4a3[_0x284f17(0x275)](_0x459a52,_0x459a52)+_0x33c4a3[_0x284f17(0x1ec)](_0xaa2429,_0xaa2429);if(_0x33c4a3[_0x284f17(0x263)](_0x2437c7,_0x33c4a3[_0x284f17(0x1f2)](0x1,_0x12b791)))continue;}else{if(_0x33c4a3[_0x284f17(0x274)](_0x33c4a3[_0x284f17(0x1db)],_0x284f17(0x2df)))continue;else return _0x3ab84d[_0x284f17(0x1f0)]((_0x26f6e1,_0x355aa0)=>{return _0x26ee46[_0x26f6e1]['r']-_0x487990[_0x355aa0]['r'];});}}_0x1ec59c[_0x1da490++]={'ky':_0x33c4a3[_0x284f17(0x2fb)](_0x33c4a3[_0x284f17(0x2d9)](_0x526561,_0xc56224/0x2),0x0),'kz':_0x33c4a3[_0x284f17(0x26c)](_0x33c4a3['sGTeU'](_0xa94dea,_0x33c4a3[_0x284f17(0x2f6)](_0x1be3d4,0x2)),0x0),'r':_0x291de3,'phi':_0x55773e,'y_idx':_0x33c4a3[_0x284f17(0x258)](_0x526561,0x0),'z_idx':_0xa94dea|0x0,'shot':-0x1,'echo':-0x1,'isCalibration':![]};}if(_0x33c4a3['gYxzA'](_0x5e25fd,0x0)){if(_0x33c4a3[_0x284f17(0x29a)](_0x33c4a3[_0x284f17(0x2aa)],_0x284f17(0x2dd)))_0x4c58a0+=_0x5e25fd,_0x4c58a0=_0x4c58a0%(_0x339ee2+0x1);else{const _0x43260c=arguments[0x2],_0x4228b7=arguments[0x3];return 0x0;}}}else _0x4a457d[_0x10c2c0]=_0x50cbb5;}if(_0x33c4a3[_0x284f17(0x293)](_0x168daf,0x1)||_0x33c4a3[_0x284f17(0x19f)](_0x28b341,0x1)){if(_0x33c4a3[_0x284f17(0x287)](_0x33c4a3[_0x284f17(0x277)],'MrIHL'))for(let _0x36f54b=_0x5d741b;_0x36f54b<_0x2380cc;_0x36f54b++){if(_0x33c4a3[_0x284f17(0x211)](_0x33c4a3[_0x284f17(0x1c8)],'lYKqN'))for(let _0x336d8d=_0x149dbc;_0x33c4a3[_0x284f17(0x24a)](_0x336d8d,_0x4429ea);_0x336d8d++){if(_0x33c4a3[_0x284f17(0x1a2)](_0x336d8d,0x0)||_0x33c4a3[_0x284f17(0x247)](_0x336d8d,_0x1be3d4)||_0x33c4a3[_0x284f17(0x24a)](_0x36f54b,0x0)||_0x33c4a3[_0x284f17(0x2a8)](_0x36f54b,_0xc56224))continue;const _0x13b714=_0x33c4a3[_0x284f17(0x264)](_0xc56224,0x1)?_0x33c4a3['PiKwP'](_0x33c4a3[_0x284f17(0x2d9)](_0x36f54b,_0x33c4a3[_0x284f17(0x260)](_0xc56224,0x2))+0.5,_0x52f155):0x0,_0x57b6ae=_0x1be3d4>0x1?_0x33c4a3[_0x284f17(0x22a)](_0x33c4a3[_0x284f17(0x20c)](_0x33c4a3[_0x284f17(0x2d9)](_0x336d8d,_0x33c4a3[_0x284f17(0x1c0)](_0x1be3d4,0x2)),0.5),_0x6cb7d3):0x0,_0x5aa874=Math[_0x284f17(0x198)](_0x33c4a3[_0x284f17(0x1f3)](_0x33c4a3[_0x284f17(0x233)](_0x13b714,_0x13b714),_0x57b6ae*_0x57b6ae)),_0xf09b9c=Math[_0x284f17(0x2bd)](_0x57b6ae,_0x13b714);if(_0x33c4a3[_0x284f17(0x276)](_0x3ba4dc,_0x284f17(0x17a))){if(_0x33c4a3['QmBcV'](_0x33c4a3[_0x284f17(0x20b)],_0x33c4a3[_0x284f17(0x20f)]))_0x5ce54c=-_0x1863fe,_0x5a2eb5=-_0x52ce19;else{const _0x253275=_0x33c4a3[_0x284f17(0x256)](_0x36f54b,0.5)-_0xc56224/0x2,_0x1d6aea=_0x336d8d+0.5-_0x1be3d4/0x2,_0x4e2c2a=_0x33c4a3[_0x284f17(0x22a)](_0x253275,_0x4310ab/0x2),_0x521f91=_0x33c4a3[_0x284f17(0x260)](_0x1d6aea,_0x189bf3/0x2),_0x156d11=_0x33c4a3[_0x284f17(0x2dc)](_0x33c4a3[_0x284f17(0x1ec)](_0x4e2c2a,_0x4e2c2a),_0x521f91*_0x521f91);if(_0x156d11>0x1+_0x12b791)continue;}}_0x1ec59c[_0x1da490++]={'ky':_0x33c4a3['oAeBC'](_0x33c4a3[_0x284f17(0x30c)](_0x36f54b,_0x33c4a3[_0x284f17(0x2f6)](_0xc56224,0x2)),0x0),'kz':_0x33c4a3[_0x284f17(0x30c)](_0x336d8d,_0x33c4a3[_0x284f17(0x282)](_0x1be3d4,0x2))|0x0,'r':_0x5aa874,'phi':_0xf09b9c,'y_idx':_0x33c4a3['GtpHR'](_0x36f54b,0x0),'z_idx':_0x33c4a3['pCYyl'](_0x336d8d,0x0),'shot':-0x1,'echo':-0x1,'isCalibration':!![]};}else _0x29899b[_0x4c738d]=_0x2ae549[_0x284f17(0x17e)](_0x2ae549['qJQXN'](_0x2b1622,_0x2ae549[_0x284f17(0x23e)](0x2,_0x19bb31)),0x2);}else{const _0x52770b=_0x5f5109[_0x5add37];_0x10e7c9[_0x52770b][_0x284f17(0x200)]=_0x2ae549[_0x284f17(0x227)](_0x2ae549[_0x284f17(0x2f8)](_0x4cce99,_0x28ccb1),0x0)+0x1;}}return _0x1ec59c[_0x284f17(0x29e)]=_0x1da490,_0x1ec59c;}function _0x51c990(_0x432dfe,_0x3d4b98,_0x2b37eb,_0x3145c1,_0x36ce5d='ky',_0x561bce=null){const _0x75835=_0x5f2c3d,_0x2f6bc5={'EtPYX':function(_0x7ee24,_0x3676c1){return _0x7ee24>_0x3676c1;},'vViJL':function(_0x1a337c,_0x5d1ce5){const _0x4d0d7e=_0x504e;return _0x33c4a3[_0x4d0d7e(0x302)](_0x1a337c,_0x5d1ce5);},'NYaNf':function(_0x368ab8,_0x1f95a5){const _0x34b01f=_0x504e;return _0x33c4a3[_0x34b01f(0x2f9)](_0x368ab8,_0x1f95a5);}};if(_0x33c4a3[_0x75835(0x1e6)](_0x75835(0x19d),_0x33c4a3['QFbVn'])){if(_0x33c4a3['hcHKy'](_0x432dfe[_0x75835(0x29e)],0x0))return _0x432dfe;const _0x48cd5a=_0x561bce||(_0x33c4a3[_0x75835(0x1e6)](_0x36ce5d,'ky')?'kz':'ky');switch(_0x2b37eb){case _0x33c4a3[_0x75835(0x1a9)]:_0x33c4a3['UUNjt'](_0x394cdb,_0x432dfe,_0x3d4b98,_0x3145c1,_0x48cd5a);break;case _0x33c4a3[_0x75835(0x231)]:_0x33c4a3[_0x75835(0x1c5)](_0x50da71,_0x432dfe,_0x3d4b98,_0x3145c1,_0x48cd5a);break;case _0x75835(0x323):_0x33c4a3[_0x75835(0x27b)](_0xc942b2,_0x432dfe,_0x3d4b98,_0x3145c1,_0x48cd5a);break;case'cplo':_0x33c4a3[_0x75835(0x27b)](_0x19e4af,_0x432dfe,_0x3d4b98,_0x3145c1,_0x48cd5a);break;case _0x33c4a3['zdXnJ']:_0x33c4a3['CrPGU'](_0x47cb81,_0x432dfe,_0x3d4b98,_0x3145c1,_0x48cd5a);break;default:_0x33c4a3[_0x75835(0x27b)](_0x394cdb,_0x432dfe,_0x3d4b98,_0x3145c1,_0x48cd5a);}return _0x432dfe;}else{const _0x407f1f=_0xc4da3b[_0x35e9c3][_0x75835(0x273)],_0x853be1=_0x425fcb[_0x388aa4][_0x75835(0x273)];if(_0x2f6bc5[_0x75835(0x202)](_0x2fe457[_0x75835(0x2b7)](_0x2f6bc5[_0x75835(0x2cd)](_0x407f1f,_0x853be1)),0.01))return _0x2f6bc5['NYaNf'](_0x407f1f,_0x853be1);return _0x2f6bc5[_0x75835(0x2cd)](_0x52daa2[_0x12241c]['r'],_0x3505af[_0x28e2df]['r']);}}function _0x2840f4(_0x1ae668,_0x3db4ed){const _0x97cf32=_0x5f2c3d,_0x2b60a8={'whfKR':function(_0x44ab2b,_0x5db3e9){return _0x33c4a3['BkuGU'](_0x44ab2b,_0x5db3e9);}};return _0x1ae668[_0x97cf32(0x1f0)]((_0x3e1149,_0x384049)=>{const _0x301e58=_0x97cf32;return _0x2b60a8[_0x301e58(0x1fc)](_0x3db4ed[_0x3e1149]['r'],_0x3db4ed[_0x384049]['r']);});}function _0x8791c9(_0x18c0ad,_0x2e5759){const _0xa500b=_0x5f2c3d,_0x254919={'MaEsC':function(_0x38ef1d,_0x56f0c8){return _0x33c4a3['BkuGU'](_0x38ef1d,_0x56f0c8);}};return _0x18c0ad[_0xa500b(0x1f0)]((_0x283bf6,_0x43e9e0)=>{const _0x1c0cb1=_0xa500b;return _0x254919[_0x1c0cb1(0x236)](_0x2e5759[_0x283bf6][_0x1c0cb1(0x273)],_0x2e5759[_0x43e9e0][_0x1c0cb1(0x273)]);});}function _0x86443b(_0x2bf1b1,_0x441b0b,_0x3c6895,_0x1bcb2c){const _0xdb5ff6=_0x5f2c3d,_0x438802={'tUPBj':function(_0x2b131e,_0x7dff0d){const _0x342a7a=_0x504e;return _0x33c4a3[_0x342a7a(0x268)](_0x2b131e,_0x7dff0d);},'QTEtx':function(_0x54d100,_0x478741){const _0x14db15=_0x504e;return _0x33c4a3[_0x14db15(0x2d9)](_0x54d100,_0x478741);}};return _0x33c4a3['ceBxO'](_0x33c4a3[_0xdb5ff6(0x182)],_0x33c4a3[_0xdb5ff6(0x182)])?_0x2bf1b1['sort']((_0xcabedf,_0x2ea046)=>{const _0x13292c=_0xdb5ff6;if(_0x1bcb2c)return _0x438802['tUPBj'](Math[_0x13292c(0x2b7)](_0x441b0b[_0xcabedf][_0x3c6895]),Math[_0x13292c(0x2b7)](_0x441b0b[_0x2ea046][_0x3c6895]));return _0x438802['QTEtx'](_0x441b0b[_0xcabedf][_0x3c6895],_0x441b0b[_0x2ea046][_0x3c6895]);}):_0x332a47[_0xdb5ff6(0x1f0)]((_0x13c581,_0x100889)=>{const _0x2548c3=_0xdb5ff6;if(_0x56d212)return _0x273c89[_0x2548c3(0x2b7)](_0x58ae2b[_0x13c581][_0x277eac])-_0x1d3ee8['abs'](_0x1ba408[_0x100889][_0x3480f7]);return _0x438802[_0x2548c3(0x226)](_0x1eafb5[_0x13c581][_0x114728],_0x499cc3[_0x100889][_0x9c21f5]);});}function _0xfd610(_0x5c1d2a,_0x1d78d3,_0x663ff6){const _0x58eebe=_0x5f2c3d,_0x4f2596={'IqbLo':function(_0x33208d,_0x3db822){return _0x33c4a3['pKAHO'](_0x33208d,_0x3db822);},'XuWpC':_0x33c4a3[_0x58eebe(0x309)],'JUfZd':function(_0x38aa5a,_0x21c6e7){const _0x2e12f7=_0x58eebe;return _0x33c4a3[_0x2e12f7(0x19e)](_0x38aa5a,_0x21c6e7);},'xXDpu':function(_0x13803d,_0x10cb85,_0x1117e3){return _0x13803d(_0x10cb85,_0x1117e3);}};return _0x5c1d2a[_0x58eebe(0x1f0)]((_0x5d675f,_0x559fa9)=>{const _0x360373=_0x58eebe;if(_0x4f2596[_0x360373(0x2d0)](_0x360373(0x206),_0x4f2596[_0x360373(0x285)])){const _0x29db6b=_0x1d78d3[_0x5d675f][_0x360373(0x200)],_0x22dcab=_0x1d78d3[_0x559fa9][_0x360373(0x200)];if(_0x4f2596['JUfZd'](_0x29db6b,_0x22dcab))return _0x29db6b-_0x22dcab;return _0x4f2596['xXDpu'](_0x663ff6,_0x5d675f,_0x559fa9);}else _0x5a7048[_0x1d9174][_0x360373(0x200)]=-0x1;});}function _0x55dfa1(_0x389c3c,_0x5cbdc3){const _0x4d8ab8=arguments[0x2],_0x464761=arguments[0x3];return 0x0;}function _0x4a34a2(_0x3d41ff,_0x1fc345,_0x4b448f){const _0x2f6d6c=_0x5f2c3d,_0x5ce61={};for(let _0x28d1d9=0x0;_0x33c4a3[_0x2f6d6c(0x2d4)](_0x28d1d9,_0x1fc345[_0x2f6d6c(0x29e)]);_0x28d1d9++){if(_0x33c4a3[_0x2f6d6c(0x224)](_0x2f6d6c(0x2f2),_0x33c4a3[_0x2f6d6c(0x320)])){const _0x3cac88=_0x1fc345[_0x28d1d9],_0x17d531=_0x3d41ff[_0x3cac88][_0x2f6d6c(0x200)];if(!_0x5ce61[_0x17d531]){if(_0x33c4a3[_0x2f6d6c(0x185)](_0x33c4a3[_0x2f6d6c(0x1e3)],_0x2f6d6c(0x2f7))){const _0x527977=_0x55007a[_0xfb80ad];_0x33c4a3[_0x2f6d6c(0x276)](_0x3af4c1[_0x527977][_0x2f6d6c(0x200)],0x1)&&_0x230a0[_0x2f6d6c(0x318)](_0x527977);}else _0x5ce61[_0x17d531]=[];}_0x5ce61[_0x17d531][_0x2f6d6c(0x318)](_0x3cac88);}else{const _0x2b0ba2=_0x13a946[_0xdb3c95][_0x3e9acc[_0x67dd5b]];_0x4521d6[_0x2b0ba2][_0x2f6d6c(0x1e4)]=_0x4c1a04,_0x14d2d4[_0x2b0ba2][_0x2f6d6c(0x1d8)]=_0xef202f[_0x2b0ba2][_0x2f6d6c(0x200)],_0x16fcf5[_0x189958]++,_0x48069b--;}}const _0x1089b8=Object[_0x2f6d6c(0x1e8)](_0x5ce61)[_0x2f6d6c(0x1c2)](Number);if(_0x1089b8[_0x2f6d6c(0x29e)]===0x0)return;const _0x37eb89=Math[_0x2f6d6c(0x2ff)](..._0x1089b8),_0x91d8f8={};for(let _0x561225=0x1;_0x33c4a3[_0x2f6d6c(0x1d9)](_0x561225,_0x37eb89);_0x561225++){_0x91d8f8[_0x561225]=0x0;}let _0x540fa4=0x0;for(let _0x25275e=0x1;_0x33c4a3[_0x2f6d6c(0x316)](_0x25275e,_0x37eb89);_0x25275e++){if(_0x33c4a3[_0x2f6d6c(0x19b)]!==_0x33c4a3[_0x2f6d6c(0x24e)]){if(_0x5ce61[_0x25275e])_0x540fa4+=_0x5ce61[_0x25275e][_0x2f6d6c(0x29e)];}else _0x547adc=_0x561d02;}let _0x4b9c28=0x0;while(_0x33c4a3[_0x2f6d6c(0x2e1)](_0x540fa4,0x0)){if(_0x33c4a3[_0x2f6d6c(0x1cd)](_0x33c4a3[_0x2f6d6c(0x2d3)],_0x33c4a3[_0x2f6d6c(0x26d)])){for(let _0x7ca6b6=0x1;_0x33c4a3[_0x2f6d6c(0x316)](_0x7ca6b6,_0x37eb89)&&_0x33c4a3['iuvpa'](_0x540fa4,0x0);_0x7ca6b6++){if(_0x33c4a3[_0x2f6d6c(0x185)](_0x33c4a3[_0x2f6d6c(0x1a0)],_0x33c4a3[_0x2f6d6c(0x2a9)])){if(_0x5ce61[_0x7ca6b6]&&_0x91d8f8[_0x7ca6b6]<_0x5ce61[_0x7ca6b6][_0x2f6d6c(0x29e)]){if(_0x33c4a3['ojnAm']!==_0x33c4a3[_0x2f6d6c(0x2ce)]){const _0x5cf590=_0x5ce61[_0x7ca6b6][_0x91d8f8[_0x7ca6b6]];_0x3d41ff[_0x5cf590][_0x2f6d6c(0x1e4)]=_0x4b9c28,_0x3d41ff[_0x5cf590][_0x2f6d6c(0x1d8)]=_0x3d41ff[_0x5cf590][_0x2f6d6c(0x200)],_0x91d8f8[_0x7ca6b6]++,_0x540fa4--;}else _0x2c77ec*=_0x3959e6;}}else return _0x33c4a3[_0x2f6d6c(0x1a5)](_0x4947fd[_0x2736ed][_0x2f6d6c(0x273)],_0x1a71db[_0x3e0d61][_0x2f6d6c(0x273)]);}_0x4b9c28=_0x33c4a3[_0x2f6d6c(0x179)](_0x4b9c28+0x1,Math[_0x2f6d6c(0x2ff)](0x1,_0x4b448f));}else{for(let _0x5fccd7=0x0;_0x33c4a3[_0x2f6d6c(0x271)](_0x5fccd7,_0x22204d);_0x5fccd7++){const _0x2c2b05=_0x33c4a3[_0x2f6d6c(0x30c)](_0x341841[_0x5fccd7]['ky'],_0x51bb1c),_0x6f80fb=_0x33c4a3['bengM'](_0x2de9e8[_0x5fccd7]['kz'],_0x2565d4);let _0x2eb2b5=_0xbc3a82[_0x2f6d6c(0x2bd)](_0x2c2b05,_0x6f80fb);if(_0x2eb2b5<0x0)_0x2eb2b5+=0x2*_0x288fcf['PI'];_0x4d304a[_0x5fccd7][_0x2f6d6c(0x21a)]=_0x2eb2b5;}for(let _0x1783a7=0x0;_0x33c4a3['vujJm'](_0x1783a7,_0x43d79);_0x1783a7++){const _0x19c20c=_0x33c4a3[_0x2f6d6c(0x1a5)](_0x293387[_0x1783a7]['ky'],_0xc6b35),_0x21d060=_0x33c4a3[_0x2f6d6c(0x23f)](_0x2cd903[_0x1783a7]['kz'],_0x1a24c7);_0x20f48d[_0x1783a7]['ellipDist']=_0x33c4a3[_0x2f6d6c(0x20c)](_0x1e4bf2[_0x2f6d6c(0x2b7)](_0x19c20c),_0x33c4a3[_0x2f6d6c(0x2a7)](_0x2ee342[_0x2f6d6c(0x2b7)](_0x21d060),_0x39763e));}}}}function _0x394cdb(_0x39cb6f,_0x4c8e65,_0x251277,_0x41b8e5){const _0x11106c=_0x5f2c3d,_0x2009d5={'mKlIY':function(_0x29e9d1,_0x5f3de6){const _0x209f5c=_0x504e;return _0x33c4a3[_0x209f5c(0x2ed)](_0x29e9d1,_0x5f3de6);},'HDNyO':function(_0x28923f,_0x5cd508){return _0x33c4a3['IIiVL'](_0x28923f,_0x5cd508);},'PKujK':function(_0x119b31,_0x43cef5){return _0x33c4a3['uMgUV'](_0x119b31,_0x43cef5);},'cPrJa':function(_0x1104ca,_0x1fb2dd){const _0x54c1ba=_0x504e;return _0x33c4a3[_0x54c1ba(0x312)](_0x1104ca,_0x1fb2dd);},'FfPsE':function(_0x160e16,_0x4f5b48){const _0x4f0c59=_0x504e;return _0x33c4a3[_0x4f0c59(0x269)](_0x160e16,_0x4f5b48);}},_0x1ba3ad=_0x39cb6f[_0x11106c(0x29e)];if(_0x33c4a3[_0x11106c(0x1e6)](_0x1ba3ad,0x0))return;const _0x4fc091=_0x41b8e5==='ky'?'kz':'ky',_0x5d59fe=Math[_0x11106c(0x192)](_0x1ba3ad/_0x4c8e65),_0x323ea7=Math['ceil'](_0x33c4a3[_0x11106c(0x2c2)](_0x1ba3ad,_0x5d59fe)),_0x58ace1=Array['from']({'length':_0x1ba3ad},(_0x5cbbd2,_0x350e7e)=>_0x350e7e);_0x33c4a3[_0x11106c(0x27b)](_0x86443b,_0x58ace1,_0x39cb6f,_0x4fc091,![]);for(let _0x1df936=0x0;_0x33c4a3[_0x11106c(0x2da)](_0x1df936,_0x1ba3ad);_0x1df936++){if(_0x33c4a3[_0x11106c(0x2cf)](_0x33c4a3['mdvJX'],_0x33c4a3[_0x11106c(0x2bf)])){const _0x4501c9=_0x58ace1[_0x1df936],_0x12df76=_0x33c4a3[_0x11106c(0x189)](_0x1df936/_0x5d59fe,0x0)+0x1;_0x39cb6f[_0x4501c9]['echo']=_0x12df76;}else{if(_0x2009d5[_0x11106c(0x238)](_0x28504a,_0x352b5c/0x2))_0x16b038[_0x551dd7]=_0x2009d5[_0x11106c(0x262)](_0x2009d5['PKujK'](_0x385227,_0x2009d5[_0x11106c(0x229)](0x2,_0x4403c3)),0x2);else _0x2009d5[_0x11106c(0x238)](_0x426f1e,_0x3bab23)?_0x24bd3b[_0x7e1f08]=_0x2009d5['FfPsE'](_0x2009d5[_0x11106c(0x2e4)](_0x2009d5['cPrJa'](0x2,_0x4f51d4),_0x2aa0bd),0x1):_0x2756d5[_0x35312f]=_0x3cb4e1;}}_0x33c4a3[_0x11106c(0x2eb)](_0xfd610,_0x58ace1,_0x39cb6f,(_0x5e564b,_0x1e9178)=>_0x39cb6f[_0x5e564b][_0x41b8e5]-_0x39cb6f[_0x1e9178][_0x41b8e5]),_0x33c4a3[_0x11106c(0x2eb)](_0x4a34a2,_0x39cb6f,_0x58ace1,_0x5d59fe);}function _0x50da71(_0x55f07c,_0x1153a1,_0x27d971,_0x12f4de){const _0xd694ea=_0x5f2c3d,_0x20ef1a={'xVDFL':function(_0x3dc669,_0x14cbc9){const _0x25eaad=_0x504e;return _0x33c4a3[_0x25eaad(0x189)](_0x3dc669,_0x14cbc9);},'kUQeA':function(_0x11e3ba,_0x530284){return _0x11e3ba/_0x530284;},'KLzMi':function(_0x122bc5,_0x2033c9){return _0x122bc5|_0x2033c9;},'OwtAa':function(_0x32390f,_0x4c8ca9){const _0x42a254=_0x504e;return _0x33c4a3[_0x42a254(0x2b3)](_0x32390f,_0x4c8ca9);},'RVpJg':function(_0x26e792,_0x10eb1c){return _0x33c4a3['wFDbk'](_0x26e792,_0x10eb1c);},'cXIOh':function(_0x51c7ef,_0x29e7af){const _0x446f62=_0x504e;return _0x33c4a3[_0x446f62(0x220)](_0x51c7ef,_0x29e7af);},'grJQs':function(_0x4e8fd0,_0xc66505){return _0x4e8fd0*_0xc66505;},'fQcxP':function(_0x355072,_0x448c3a){const _0x5e8dea=_0x504e;return _0x33c4a3[_0x5e8dea(0x1e9)](_0x355072,_0x448c3a);}},_0x22b767=_0x55f07c[_0xd694ea(0x29e)];if(_0x33c4a3['QmBcV'](_0x22b767,0x0))return;const _0x3cf47f=Math[_0xd694ea(0x192)](_0x33c4a3[_0xd694ea(0x246)](_0x22b767,_0x1153a1)),_0x39e365=Math[_0xd694ea(0x192)](_0x33c4a3[_0xd694ea(0x2c2)](_0x22b767,_0x3cf47f)),_0x46170e=Array[_0xd694ea(0x20e)]({'length':_0x22b767},(_0x1ba304,_0x28d8c4)=>_0x28d8c4),_0xa5b764=Math[_0xd694ea(0x2ff)](..._0x55f07c[_0xd694ea(0x1c2)](_0x11cc3b=>Math[_0xd694ea(0x2b7)](_0x11cc3b['ky']))),_0x261d3d=_0xa5b764,_0x353f9b=0x0;function _0x15ed3d(_0x472827){const _0x3e8c68=_0xd694ea,_0x518cfb={'gAYOW':function(_0x500e98,_0x547272){const _0x103da5=_0x504e;return _0x33c4a3[_0x103da5(0x2a2)](_0x500e98,_0x547272);}};if(_0x33c4a3[_0x3e8c68(0x196)]===_0x33c4a3[_0x3e8c68(0x196)]){for(let _0x36b362=0x0;_0x33c4a3['zKSAd'](_0x36b362,_0x22b767);_0x36b362++){const _0x3e89b6=_0x33c4a3[_0x3e8c68(0x30c)](_0x55f07c[_0x36b362]['ky'],_0x261d3d),_0x5a9e3b=_0x33c4a3['nWUbS'](_0x55f07c[_0x36b362]['kz'],_0x353f9b);let _0x45b927=Math[_0x3e8c68(0x2bd)](_0x3e89b6,_0x5a9e3b);if(_0x33c4a3[_0x3e8c68(0x29f)](_0x45b927,0x0))_0x45b927+=_0x33c4a3['LyaFn'](0x2,Math['PI']);_0x55f07c[_0x36b362][_0x3e8c68(0x21a)]=_0x45b927;}for(let _0xc284a1=0x0;_0x33c4a3['qddVn'](_0xc284a1,_0x22b767);_0xc284a1++){if(_0x33c4a3[_0x3e8c68(0x211)](_0x33c4a3[_0x3e8c68(0x29b)],_0x33c4a3['FdvgO'])){const _0x3016f9=_0x3ad6e0[_0x3e79ac];_0x1aba96[_0x3016f9]['echo']=_0x20ef1a[_0x3e8c68(0x1b5)](_0x20ef1a[_0x3e8c68(0x18d)](_0x5a3bca,_0x202319),0x0)+0x1;}else{const _0x4b51ef=_0x55f07c[_0xc284a1]['ky']-_0x261d3d,_0x4dfeca=_0x33c4a3[_0x3e8c68(0x30c)](_0x55f07c[_0xc284a1]['kz'],_0x353f9b);_0x55f07c[_0xc284a1][_0x3e8c68(0x306)]=_0x33c4a3['IIiVL'](Math['abs'](_0x4b51ef),_0x33c4a3['RWlrx'](Math['abs'](_0x4dfeca),_0x472827));}}}else{let _0x257db1=_0x5bc0a7,_0x196fca=-0x1;for(let _0x2651d6=0x0;_0x2651d6<_0x2551ee;_0x2651d6++){const _0x36d7b8=_0x59641c[_0x3e8c68(0x198)](_0x518cfb[_0x3e8c68(0x1ad)](_0x120a2f[_0x2651d6]['ky'],_0x561caa[_0x2651d6]['ky'])+_0x518cfb[_0x3e8c68(0x1ad)](_0x359298[_0x2651d6]['kz'],_0x5d1bd8[_0x2651d6]['kz']));_0x36d7b8<_0x257db1&&(_0x257db1=_0x36d7b8,_0x196fca=_0xcb3a10[_0x2651d6][_0x3e8c68(0x200)]);}return _0x196fca;}}function _0x52c658(){const _0x183c4a=_0xd694ea,_0x48f3d4={'SxAdU':function(_0x44cccb,_0x5b9513){return _0x33c4a3['NQOae'](_0x44cccb,_0x5b9513);},'wiDGE':function(_0x283d13,_0x2ab275){return _0x33c4a3['YJXBl'](_0x283d13,_0x2ab275);}};if(_0x33c4a3['JzUVG'](_0x33c4a3['DERmQ'],_0x33c4a3[_0x183c4a(0x197)])){const _0x15e7da=_0x500b11[_0x5370c9],_0xd24d81=_0x48f3d4[_0x183c4a(0x1cf)](_0x48f3d4['wiDGE'](_0xdbef91,_0x50410d)|0x0,0x1);_0x2887c3[_0x15e7da][_0x183c4a(0x200)]=_0xd24d81;}else{let _0x24467a=Infinity,_0x4c4e5f=-0x1;for(let _0x3d44d6=0x0;_0x33c4a3['eldCx'](_0x3d44d6,_0x22b767);_0x3d44d6++){const _0x1bf78c=Math[_0x183c4a(0x198)](_0x33c4a3[_0x183c4a(0x184)](_0x33c4a3[_0x183c4a(0x297)](_0x55f07c[_0x3d44d6]['ky'],_0x55f07c[_0x3d44d6]['ky']),_0x33c4a3['tCaHF'](_0x55f07c[_0x3d44d6]['kz'],_0x55f07c[_0x3d44d6]['kz'])));_0x33c4a3[_0x183c4a(0x29c)](_0x1bf78c,_0x24467a)&&(_0x24467a=_0x1bf78c,_0x4c4e5f=_0x55f07c[_0x3d44d6]['echo']);}return _0x4c4e5f;}}let _0x1e4c6d=0.005,_0x56ac82=0x64,_0x30ef98=0x1,_0x114459=-0x1,_0x239a8c=![];const _0x29eee6=0x14;console[_0xd694ea(0x253)]('Chevron:\x20Desired\x20center\x20echo\x20'+_0x27d971);for(let _0x342e56=0x0;_0x33c4a3[_0xd694ea(0x2d4)](_0x342e56,_0x29eee6)&&!_0x239a8c;_0x342e56++){if(_0x33c4a3[_0xd694ea(0x1cd)](_0x33c4a3[_0xd694ea(0x177)],_0x33c4a3['ceshG'])){_0x30ef98=_0x33c4a3[_0xd694ea(0x245)](_0x33c4a3[_0xd694ea(0x222)](_0x1e4c6d,_0x56ac82),0x2),_0x33c4a3[_0xd694ea(0x2d6)](_0x15ed3d,_0x30ef98),_0x46170e['sort']((_0x4b75b6,_0x372355)=>_0x55f07c[_0x4b75b6][_0xd694ea(0x306)]-_0x55f07c[_0x372355][_0xd694ea(0x306)]);for(let _0x4d0573=0x0;_0x33c4a3[_0xd694ea(0x2d4)](_0x4d0573,_0x22b767);_0x4d0573++){const _0x3ee2f0=_0x46170e[_0x4d0573];_0x55f07c[_0x3ee2f0][_0xd694ea(0x200)]=_0x33c4a3[_0xd694ea(0x222)](_0x33c4a3[_0xd694ea(0x24c)](_0x4d0573,_0x3cf47f)|0x0,0x1);}_0x114459=_0x33c4a3['mLdhp'](_0x52c658),console['log']('Chevron\x20iter\x20'+_0x342e56+':\x20axisRatio='+_0x30ef98[_0xd694ea(0x1a8)](0x3)+_0xd694ea(0x303)+_0x114459+_0xd694ea(0x2cc)+_0x27d971);if(_0x33c4a3[_0xd694ea(0x211)](_0x114459,_0x27d971))_0x33c4a3['oXVqY'](_0x33c4a3[_0xd694ea(0x2e2)],_0x33c4a3[_0xd694ea(0x2c6)])?_0x239a8c=!![]:_0x33c4a3['uEzzX'](_0x2a4469,_0x376412,_0x445be1,(_0x4bae57,_0x128841)=>_0x163b5f[_0x4bae57]['ky']-_0x5ebb2e[_0x128841]['ky']);else _0x33c4a3[_0xd694ea(0x19f)](_0x114459,_0x27d971)?_0x1e4c6d=_0x30ef98:_0x56ac82=_0x30ef98;}else{const _0x4f5f65=_0x37e7af[_0x49b3a2];_0x961ebf[_0x4f5f65][_0xd694ea(0x200)]=_0x20ef1a[_0xd694ea(0x221)](_0x20ef1a['kUQeA'](_0x7544e6,_0x185963),0x0)+0x1;}}if(_0x239a8c&&_0x33c4a3[_0xd694ea(0x266)](_0x30ef98,0xa)){let _0x325f77=_0x30ef98;for(let _0x27a3ac=0x0;_0x33c4a3[_0xd694ea(0x25d)](_0x27a3ac,0x64);_0x27a3ac++){if(_0x33c4a3[_0xd694ea(0x25b)](_0x33c4a3[_0xd694ea(0x2fa)],'yPWRr')){const _0x8b54d5=_0x1f5b31[_0x3b96e8],_0x248096=_0x20ef1a[_0xd694ea(0x193)](_0x20ef1a[_0xd694ea(0x18d)](_0x17d6c0,_0x448e6c),0x0)+0x1;_0x397126[_0x8b54d5][_0xd694ea(0x200)]=_0x248096;}else{_0x325f77*=1.01,_0x33c4a3['ZXzXS'](_0x15ed3d,_0x325f77),_0x46170e[_0xd694ea(0x1f0)]((_0x54fde3,_0x5e12ed)=>_0x55f07c[_0x54fde3][_0xd694ea(0x306)]-_0x55f07c[_0x5e12ed]['ellipDist']);for(let _0x1f2232=0x0;_0x33c4a3[_0xd694ea(0x1f8)](_0x1f2232,_0x22b767);_0x1f2232++){if(_0x33c4a3[_0xd694ea(0x1d7)]!==_0xd694ea(0x28a)){const _0x5c144f=_0x46170e[_0x1f2232];_0x55f07c[_0x5c144f][_0xd694ea(0x200)]=_0x33c4a3[_0xd694ea(0x184)](_0x33c4a3['sZnJU'](_0x1f2232/_0x3cf47f,0x0),0x1);}else _0x33c4a3['uIpib'](_0x5315ad,_0x49b214,_0x43c4bb,(_0x589283,_0x5cd671)=>{const _0x461107=_0xd694ea,_0x1a0b29=_0x168886[_0x589283][_0x461107(0x273)],_0x32b856=_0x1ff227[_0x5cd671][_0x461107(0x273)];if(_0x3157a8[_0x461107(0x2b7)](_0x1a0b29-_0x32b856)>0.01)return _0x1a0b29-_0x32b856;return _0x44c417[_0x589283]['r']-_0x389798[_0x5cd671]['r'];});}_0x114459=_0x52c658();if(_0x33c4a3[_0xd694ea(0x1c3)](_0x114459,_0x27d971)){if(_0x33c4a3[_0xd694ea(0x1cd)](_0x33c4a3[_0xd694ea(0x24d)],_0xd694ea(0x27d)))_0x30ef98=_0x325f77;else{const _0x4e87a0=_0x5a3b34[_0xd694ea(0x198)](_0x20ef1a[_0xd694ea(0x2ac)](_0x20ef1a['cXIOh'](_0x1288c7[_0x2bc7e3]['ky'],_0x244183[_0x3e6b2d]['ky']),_0x20ef1a[_0xd694ea(0x203)](_0x25b7d9[_0x381403]['kz'],_0x2b08f7[_0x386d17]['kz'])));_0x20ef1a[_0xd694ea(0x2b5)](_0x4e87a0,_0x52f1cc)&&(_0xed35f5=_0x4e87a0,_0x48a744=_0x4f8b1d[_0x3e7b5f][_0xd694ea(0x200)]);}}else break;}}}_0x33c4a3[_0xd694ea(0x2f0)](_0x15ed3d,_0x30ef98),_0x46170e['sort']((_0x47292c,_0x1acf15)=>_0x55f07c[_0x47292c]['ellipDist']-_0x55f07c[_0x1acf15][_0xd694ea(0x306)]);for(let _0x488b90=0x0;_0x33c4a3['wmEEd'](_0x488b90,_0x22b767);_0x488b90++){const _0x56341a=_0x46170e[_0x488b90];_0x55f07c[_0x56341a][_0xd694ea(0x200)]=_0x33c4a3[_0xd694ea(0x24b)](_0x33c4a3[_0xd694ea(0x204)](_0x488b90/_0x3cf47f,0x0),0x1);}_0x114459=_0x33c4a3[_0xd694ea(0x2e9)](_0x52c658),console[_0xd694ea(0x253)](_0xd694ea(0x1ca)+_0x30ef98[_0xd694ea(0x1a8)](0x3)+',\x20centerEcho='+_0x114459);if(!_0x239a8c){const _0x4d8d5a=_0x33c4a3[_0xd694ea(0x1bc)](_0x33c4a3[_0xd694ea(0x328)](_0x1153a1,0x1),_0x27d971);console[_0xd694ea(0x253)](_0xd694ea(0x27c)+_0x4d8d5a);let _0x54d189=0.005,_0x478b41=0x64,_0x364bbe=_0x30ef98,_0x27f279=![],_0x22e238=-0x1;for(let _0x5dbfb6=0x0;_0x33c4a3[_0xd694ea(0x2af)](_0x5dbfb6,_0x29eee6)&&!_0x27f279;_0x5dbfb6++){_0x364bbe=_0x33c4a3[_0xd694ea(0x188)](_0x33c4a3[_0xd694ea(0x1c1)](_0x54d189,_0x478b41),0x2),_0x33c4a3['ZXzXS'](_0x15ed3d,_0x364bbe),_0x46170e[_0xd694ea(0x1f0)]((_0x107718,_0x19c33d)=>_0x55f07c[_0x107718][_0xd694ea(0x306)]-_0x55f07c[_0x19c33d][_0xd694ea(0x306)]);for(let _0x41d0e5=0x0;_0x33c4a3['lzSVp'](_0x41d0e5,_0x22b767);_0x41d0e5++){const _0x284c91=_0x46170e[_0x41d0e5];_0x55f07c[_0x284c91]['echo']=_0x33c4a3[_0xd694ea(0x2e8)](_0x33c4a3[_0xd694ea(0x2b0)](_0x33c4a3[_0xd694ea(0x2ee)](_0x41d0e5,_0x3cf47f),0x0),0x1);}_0x22e238=_0x52c658(),console[_0xd694ea(0x253)]('Chevron\x20rev\x20iter\x20'+_0x5dbfb6+':\x20axisRatio='+_0x364bbe['toFixed'](0x3)+',\x20centerEcho='+_0x22e238+_0xd694ea(0x2cc)+_0x4d8d5a);if(_0x33c4a3['QmBcV'](_0x22e238,_0x4d8d5a)){if(_0x33c4a3['hcHKy'](_0x33c4a3[_0xd694ea(0x2c4)],_0x33c4a3['gcAWT']))_0x27f279=!![];else{if(_0x4850aa[_0x53db1e])_0x3b642f+=_0x4ac82c[_0x5eb3a4]['length'];}}else _0x33c4a3[_0xd694ea(0x23d)](_0x22e238,_0x4d8d5a)?_0x33c4a3['lbSMN'](_0xd694ea(0x319),_0x33c4a3['jpbMK'])?(_0xee16a0=_0xdb52bf,_0x424e08=_0x3be067):_0x54d189=_0x364bbe:_0x33c4a3[_0xd694ea(0x1c3)](_0x33c4a3['eVTiB'],_0xd694ea(0x1ab))?_0x635576[_0xe06f89]=_0x33c4a3[_0xd694ea(0x269)](_0x33c4a3[_0xd694ea(0x2a2)](0x2,_0x181786)-_0x2f9185,0x1):_0x478b41=_0x364bbe;}if(_0x27f279){console[_0xd694ea(0x253)](_0xd694ea(0x237)+_0x4d8d5a);for(let _0x21debb=0x0;_0x21debb<_0x22b767;_0x21debb++){if(_0x33c4a3[_0xd694ea(0x21e)](_0x33c4a3[_0xd694ea(0x2e6)],_0x33c4a3[_0xd694ea(0x2e6)]))_0x55f07c[_0x21debb][_0xd694ea(0x200)]=_0x33c4a3[_0xd694ea(0x1dc)](_0x1153a1,0x1)-_0x55f07c[_0x21debb]['echo'];else return _0x33c4a3[_0xd694ea(0x1bc)](_0x2a786a[_0x44af43]['r'],_0x3abc24[_0x52e59f]['r']);}_0x239a8c=!![];}}_0x33c4a3[_0xd694ea(0x1b6)](_0xfd610,_0x46170e,_0x55f07c,(_0x47e16a,_0x54761a)=>_0x55f07c[_0x47e16a]['theta']-_0x55f07c[_0x54761a][_0xd694ea(0x21a)]),_0x33c4a3['reZPL'](_0x4a34a2,_0x55f07c,_0x46170e,_0x3cf47f);}function _0xc942b2(_0x5cf114,_0x5ba97f,_0x68e2a3,_0x50a015){const _0x3bce57=_0x5f2c3d,_0x1b96dd={'PnFXf':function(_0x35b4e9,_0x47b203){const _0x373f4e=_0x504e;return _0x33c4a3[_0x373f4e(0x314)](_0x35b4e9,_0x47b203);},'WQGsy':function(_0x37a0e5,_0x1cab4e){const _0x3186cb=_0x504e;return _0x33c4a3[_0x3186cb(0x268)](_0x37a0e5,_0x1cab4e);},'LeisR':function(_0x16d571,_0x129ee7,_0x701f9c){const _0x1a5b08=_0x504e;return _0x33c4a3[_0x1a5b08(0x210)](_0x16d571,_0x129ee7,_0x701f9c);},'pPPUn':function(_0x2db852,_0x32b678){return _0x2db852===_0x32b678;},'RSESh':function(_0x34c564,_0xf3989b){return _0x34c564===_0xf3989b;},'WltQY':function(_0x3dcf6c,_0x5bd283){const _0x58dd2e=_0x504e;return _0x33c4a3[_0x58dd2e(0x246)](_0x3dcf6c,_0x5bd283);},'BiUgc':function(_0x333723,_0x520975,_0x3e5450,_0x44da0b,_0x4c2f54){return _0x333723(_0x520975,_0x3e5450,_0x44da0b,_0x4c2f54);},'REplH':function(_0x2076f0,_0x159bc3){return _0x2076f0<_0x159bc3;},'VmLvs':function(_0x424b7b,_0x3eb367){const _0x40f9de=_0x504e;return _0x33c4a3[_0x40f9de(0x317)](_0x424b7b,_0x3eb367);},'XWlhr':function(_0xf88bfe,_0x389d1e){const _0x3f0492=_0x504e;return _0x33c4a3[_0x3f0492(0x245)](_0xf88bfe,_0x389d1e);},'UDpgM':function(_0x38045a,_0x22ac18,_0x40bdd0,_0x43618d){const _0x33cf9e=_0x504e;return _0x33c4a3[_0x33cf9e(0x2d1)](_0x38045a,_0x22ac18,_0x40bdd0,_0x43618d);}};if(_0x33c4a3['uCMKy'](_0x33c4a3[_0x3bce57(0x1fe)],'gnnjN'))_0x468cfc=_0x484040,_0x29c6d8=_0x5da9c2[_0x2367da][_0x3bce57(0x200)];else{const _0x22ad1b=_0x5cf114['length'];if(_0x33c4a3[_0x3bce57(0x257)](_0x22ad1b,0x0))return;const _0x3316fc=_0x33c4a3[_0x3bce57(0x21e)](_0x50a015,'ky')?'kz':'ky',_0x404e19=Math[_0x3bce57(0x192)](_0x33c4a3[_0x3bce57(0x2ee)](_0x22ad1b,_0x5ba97f)),_0xe0b777=Math[_0x3bce57(0x192)](_0x33c4a3[_0x3bce57(0x2c2)](_0x22ad1b,_0x404e19));let _0xcd192b;_0x33c4a3['DepRC'](_0x68e2a3,_0x33c4a3['JTBBo'](_0xe0b777,0x2))?_0xcd192b=_0x33c4a3[_0x3bce57(0x269)](_0x33c4a3[_0x3bce57(0x297)](0x2,_0x68e2a3),_0xe0b777%0x2):_0xcd192b=_0x33c4a3[_0x3bce57(0x2a2)](0x2,_0x33c4a3[_0x3bce57(0x1ff)](_0xe0b777,_0x68e2a3))+_0x33c4a3[_0x3bce57(0x18b)](_0xe0b777,0x2);_0xcd192b=Math['max'](0x1,Math[_0x3bce57(0x2fe)](_0xcd192b,_0xe0b777));const _0x245dd4=Array[_0x3bce57(0x20e)]({'length':_0x22ad1b},(_0x3a9c93,_0x97fd39)=>_0x97fd39);for(let _0x5ef51e=0x0;_0x33c4a3[_0x3bce57(0x1e9)](_0x5ef51e,_0x22ad1b);_0x5ef51e++){_0x5cf114[_0x5ef51e]['echo']=-0x1;}_0x86443b(_0x245dd4,_0x5cf114,_0x3316fc,!![]);const _0x40ad6d=Math[_0x3bce57(0x2fe)](_0x22ad1b,_0x33c4a3[_0x3bce57(0x307)](_0x404e19,_0xcd192b)),_0x3152ac=_0x245dd4['slice'](0x0,_0x40ad6d);_0x3152ac[_0x3bce57(0x1f0)]((_0xa56c91,_0x175b3f)=>_0x5cf114[_0xa56c91][_0x3316fc]-_0x5cf114[_0x175b3f][_0x3316fc]);for(let _0x5476c1=0x0;_0x5476c1<_0x3152ac[_0x3bce57(0x29e)];_0x5476c1++){if(_0x33c4a3[_0x3bce57(0x314)](_0x33c4a3[_0x3bce57(0x298)],_0x33c4a3[_0x3bce57(0x298)])){const _0x375b46={'XVecv':function(_0x3b7cb2,_0xe9d73f){const _0x1ba6fe=_0x3bce57;return _0x1b96dd[_0x1ba6fe(0x248)](_0x3b7cb2,_0xe9d73f);},'OipAQ':function(_0x5bd1e2,_0x3e5658){const _0xe0bf8c=_0x3bce57;return _0x1b96dd[_0xe0bf8c(0x2db)](_0x5bd1e2,_0x3e5658);},'pHnPx':function(_0x235456,_0x33a656,_0x558991){const _0x13f9e0=_0x3bce57;return _0x1b96dd[_0x13f9e0(0x19a)](_0x235456,_0x33a656,_0x558991);}};return _0x14c236[_0x3bce57(0x1f0)]((_0x3261d5,_0x17edf5)=>{const _0x44097e=_0x3bce57,_0x1d85f0=_0x117cd8[_0x3261d5][_0x44097e(0x200)],_0x179453=_0x271016[_0x17edf5][_0x44097e(0x200)];if(_0x375b46[_0x44097e(0x2ae)](_0x1d85f0,_0x179453))return _0x375b46[_0x44097e(0x301)](_0x1d85f0,_0x179453);return _0x375b46['pHnPx'](_0x3157c2,_0x3261d5,_0x17edf5);});}else{const _0x3315a5=_0x3152ac[_0x5476c1],_0x317434=_0x33c4a3['oAeBC'](_0x33c4a3[_0x3bce57(0x245)](_0x5476c1,_0x404e19),0x0)+0x1;_0x5cf114[_0x3315a5][_0x3bce57(0x200)]=_0x317434;}}_0x86443b(_0x245dd4,_0x5cf114,_0x3316fc,!![]);let _0x460417=0x0;for(let _0x3323c4=0x0;_0x33c4a3[_0x3bce57(0x1a3)](_0x3323c4,_0x22ad1b);_0x3323c4++){if(_0x33c4a3[_0x3bce57(0x2e0)]!==_0x33c4a3['lceiQ'])_0x567d54[_0xca3d89]=0x0;else{const _0x2fda4f=_0x245dd4[_0x3323c4];if(_0x33c4a3['hcHKy'](_0x5cf114[_0x2fda4f][_0x3bce57(0x200)],-0x1)){const _0x3498f4=_0x33c4a3[_0x3bce57(0x199)](_0x33c4a3[_0x3bce57(0x254)](_0xcd192b,_0x33c4a3[_0x3bce57(0x204)](_0x33c4a3[_0x3bce57(0x329)](_0x460417,_0x404e19),0x0)),0x1);_0x5cf114[_0x2fda4f][_0x3bce57(0x200)]=_0x3498f4,_0x460417++;}}}if(_0x33c4a3['hcHKy'](_0x50a015,'ky')||_0x33c4a3[_0x3bce57(0x21e)](_0x50a015,'kz'))_0x33c4a3[_0x3bce57(0x1df)](_0xfd610,_0x245dd4,_0x5cf114,(_0x152817,_0x4dd3ef)=>_0x5cf114[_0x152817][_0x50a015]-_0x5cf114[_0x4dd3ef][_0x50a015]);else{if(_0x33c4a3[_0x3bce57(0x26b)]!==_0x33c4a3[_0x3bce57(0x1bd)])_0x33c4a3[_0x3bce57(0x1df)](_0xfd610,_0x245dd4,_0x5cf114,(_0x35cdbf,_0x480f47)=>_0x5cf114[_0x35cdbf]['ky']-_0x5cf114[_0x480f47]['ky']);else{const _0xbba485=_0x331f6e[_0x3bce57(0x29e)];if(_0x1b96dd[_0x3bce57(0x2ec)](_0xbba485,0x0))return;const _0x515519=_0x1b96dd[_0x3bce57(0x280)](_0x36dda8,'ky')?'kz':'ky',_0x33c378=_0x24d284['ceil'](_0xbba485/_0xa808a9),_0x4e46ab=_0x3e6a4b[_0x3bce57(0x192)](_0x1b96dd['WltQY'](_0xbba485,_0x33c378)),_0x53cc86=_0x2d4138[_0x3bce57(0x20e)]({'length':_0xbba485},(_0x3b8389,_0xe7086a)=>_0xe7086a);_0x1b96dd[_0x3bce57(0x1f9)](_0x453c1c,_0x53cc86,_0x241183,_0x515519,![]);for(let _0x83aeb9=0x0;_0x1b96dd['REplH'](_0x83aeb9,_0xbba485);_0x83aeb9++){const _0x4bc805=_0x53cc86[_0x83aeb9],_0x23c74e=_0x1b96dd[_0x3bce57(0x19c)](_0x1b96dd[_0x3bce57(0x2b4)](_0x83aeb9,_0x33c378)|0x0,0x1);_0x500591[_0x4bc805][_0x3bce57(0x200)]=_0x23c74e;}_0x1b96dd['UDpgM'](_0xb08649,_0x53cc86,_0x2f224c,(_0xb0f038,_0x2a906e)=>_0x31440c[_0xb0f038][_0x2d5775]-_0x49b6ca[_0x2a906e][_0x24d4fe]),_0x1b96dd[_0x3bce57(0x296)](_0x21b8bd,_0x20f287,_0x53cc86,_0x33c378);}}_0x33c4a3[_0x3bce57(0x22e)](_0x4a34a2,_0x5cf114,_0x245dd4,_0x404e19);}}function _0x19e4af(_0x527181,_0x1db7a3,_0x32cb1b,_0x11cccf){const _0x229a96=_0x5f2c3d,_0x1cd738={'rZAfK':function(_0x28336d,_0x4913c9){const _0x1b747=_0x504e;return _0x33c4a3[_0x1b747(0x240)](_0x28336d,_0x4913c9);},'MUuJT':function(_0x472872,_0x6f9150){const _0x2cae09=_0x504e;return _0x33c4a3[_0x2cae09(0x2fc)](_0x472872,_0x6f9150);},'kQdsz':function(_0x3b0a1c,_0x537c8a){const _0x425d2e=_0x504e;return _0x33c4a3[_0x425d2e(0x2ad)](_0x3b0a1c,_0x537c8a);}},_0x54e6ca=_0x527181[_0x229a96(0x29e)];if(_0x33c4a3[_0x229a96(0x21e)](_0x54e6ca,0x0))return;const _0x2da751=Math[_0x229a96(0x192)](_0x33c4a3['HbWzn'](_0x54e6ca,_0x1db7a3)),_0xb0d933=Math[_0x229a96(0x192)](_0x33c4a3[_0x229a96(0x2ee)](_0x54e6ca,_0x2da751)),_0x399b01=Array[_0x229a96(0x20e)]({'length':_0x54e6ca},(_0x59e201,_0x2c7207)=>_0x2c7207);_0x2840f4(_0x399b01,_0x527181);let _0x2ba63b=_0x33c4a3[_0x229a96(0x1b9)](_0x32cb1b,_0x33c4a3[_0x229a96(0x2cb)](_0x32cb1b,0x2));_0x32cb1b>_0x33c4a3[_0x229a96(0x282)](_0xb0d933,0x2)&&(_0x2ba63b=_0x33c4a3[_0x229a96(0x1a6)](_0x33c4a3[_0x229a96(0x28c)](_0xb0d933,_0x33c4a3[_0x229a96(0x2c1)](_0xb0d933,_0x32cb1b)),_0x33c4a3[_0x229a96(0x17b)](_0x33c4a3[_0x229a96(0x235)](_0xb0d933,_0x32cb1b),0x2)));_0x2ba63b=Math['max'](0x1,Math[_0x229a96(0x2fe)](_0x2ba63b,_0xb0d933));const _0x1d1024=new Array(_0x33c4a3[_0x229a96(0x281)](_0xb0d933,0x1));for(let _0x207da9=0x1;_0x33c4a3[_0x229a96(0x322)](_0x207da9,_0xb0d933);_0x207da9++){if(_0x33c4a3[_0x229a96(0x1d9)](_0x207da9,_0x33c4a3['iBdSB'](_0x2ba63b,0x2))){if(_0x33c4a3[_0x229a96(0x274)](_0x33c4a3['fXrxt'],_0x33c4a3[_0x229a96(0x223)]))_0x1d1024[_0x207da9]=_0x33c4a3[_0x229a96(0x2c7)](_0x32cb1b-_0x33c4a3['JxKUe'](0x2,_0x207da9),0x2);else{if(_0x31a7e4[_0x2a4a1b]&&_0x33c4a3[_0x229a96(0x1bf)](_0x2e72ae[_0x9c2bde],_0x33553f[_0x397963]['length'])){const _0x1793c8=_0x48ddd4[_0x522221][_0x3a7493[_0x218106]];_0x34a307[_0x1793c8][_0x229a96(0x1e4)]=_0x4b6379,_0x571736[_0x1793c8][_0x229a96(0x1d8)]=_0x2e8b23[_0x1793c8][_0x229a96(0x200)],_0x438d95[_0x498548]++,_0x49e6a4--;}}}else _0x33c4a3[_0x229a96(0x2ed)](_0x207da9,_0x2ba63b)?_0x1d1024[_0x207da9]=_0x33c4a3[_0x229a96(0x269)](_0x33c4a3['HgCtV'](_0x33c4a3[_0x229a96(0x1b3)](0x2,_0x207da9),_0x32cb1b),0x1):_0x1d1024[_0x207da9]=_0x207da9;}for(let _0x5d19a8=0x0;_0x33c4a3[_0x229a96(0x218)](_0x5d19a8,_0x54e6ca);_0x5d19a8++){const _0x217124=_0x399b01[_0x5d19a8],_0x190f3b=_0x33c4a3[_0x229a96(0x261)](_0x33c4a3[_0x229a96(0x284)](_0x5d19a8,_0x2da751),0x0)+0x1;_0x527181[_0x217124][_0x229a96(0x200)]=Math['max'](0x1,Math[_0x229a96(0x2fe)](_0x1d1024[_0x190f3b],_0xb0d933));}if(_0x33c4a3[_0x229a96(0x2c3)](_0x11cccf,_0x229a96(0x255))){if(_0x33c4a3[_0x229a96(0x257)](_0x33c4a3[_0x229a96(0x2c0)],_0x229a96(0x21d)))_0x33c4a3[_0x229a96(0x22e)](_0xfd610,_0x399b01,_0x527181,(_0x13557f,_0x29b96c)=>{const _0x7358dd=_0x229a96;if(_0x33c4a3[_0x7358dd(0x239)](_0x33c4a3[_0x7358dd(0x1e7)],_0x33c4a3[_0x7358dd(0x30b)]))_0x40be7d['push'](_0x46e76a);else{const _0xb527c0=_0x527181[_0x13557f][_0x7358dd(0x273)],_0x3a74d2=_0x527181[_0x29b96c][_0x7358dd(0x273)];if(_0x33c4a3[_0x7358dd(0x240)](Math[_0x7358dd(0x2b7)](_0x33c4a3[_0x7358dd(0x2d9)](_0xb527c0,_0x3a74d2)),0.01))return _0x33c4a3[_0x7358dd(0x205)](_0xb527c0,_0x3a74d2);return _0x33c4a3[_0x7358dd(0x1bc)](_0x527181[_0x13557f]['r'],_0x527181[_0x29b96c]['r']);}});else{_0x37d3ce[_0x229a96(0x253)](_0x229a96(0x237)+_0x413cb5);for(let _0x2cd77b=0x0;_0x33c4a3[_0x229a96(0x1bf)](_0x2cd77b,_0x45be2a);_0x2cd77b++){_0x238684[_0x2cd77b][_0x229a96(0x200)]=_0x33c4a3['uMgUV'](_0x33c4a3['JJpFk'](_0x4d5048,0x1),_0x1b33b7[_0x2cd77b][_0x229a96(0x200)]);}_0x340292=!![];}}else _0x33c4a3[_0x229a96(0x18f)](_0x11cccf,'ky')||_0x33c4a3[_0x229a96(0x1e6)](_0x11cccf,'kz')?_0x33c4a3[_0x229a96(0x2a1)](_0xfd610,_0x399b01,_0x527181,(_0x8c7a54,_0x93592f)=>_0x527181[_0x8c7a54][_0x11cccf]-_0x527181[_0x93592f][_0x11cccf]):_0xfd610(_0x399b01,_0x527181,(_0x1d1d94,_0x22b404)=>{const _0x2e1778=_0x229a96,_0x256271=_0x527181[_0x1d1d94]['phi'],_0x229e6e=_0x527181[_0x22b404][_0x2e1778(0x273)];if(_0x1cd738[_0x2e1778(0x2c9)](Math['abs'](_0x1cd738['MUuJT'](_0x256271,_0x229e6e)),0.01))return _0x1cd738['kQdsz'](_0x256271,_0x229e6e);return _0x527181[_0x1d1d94]['r']-_0x527181[_0x22b404]['r'];});_0x33c4a3[_0x229a96(0x1e1)](_0x4a34a2,_0x527181,_0x399b01,_0x2da751);}function _0x47cb81(_0x26c531,_0x3fad8a,_0x50dc50,_0x568c61){const _0x555c9b=_0x5f2c3d,_0x3d6cb9={'NwFok':function(_0x17c146,_0x233666){const _0x5207e1=_0x504e;return _0x33c4a3[_0x5207e1(0x1af)](_0x17c146,_0x233666);},'lDAbi':function(_0x16cf04,_0x453b96){return _0x33c4a3['UUKJh'](_0x16cf04,_0x453b96);},'AZheP':function(_0x3cccce,_0x5740cc,_0x2fc1dc,_0x20c5bc){const _0x58cd93=_0x504e;return _0x33c4a3[_0x58cd93(0x270)](_0x3cccce,_0x5740cc,_0x2fc1dc,_0x20c5bc);},'rmXmV':function(_0x171298,_0x527f45){const _0x43759c=_0x504e;return _0x33c4a3[_0x43759c(0x2cb)](_0x171298,_0x527f45);},'ZjPun':function(_0x3ee7dc,_0x226efe){return _0x33c4a3['CbHIj'](_0x3ee7dc,_0x226efe);},'eXJgn':function(_0xe3b8a5,_0x1f1827){return _0xe3b8a5-_0x1f1827;},'noeMn':function(_0x5ab1f6,_0xc93f19){const _0x3a016a=_0x504e;return _0x33c4a3[_0x3a016a(0x1eb)](_0x5ab1f6,_0xc93f19);},'uycxI':function(_0x392962,_0x55dd5b){const _0x2bfd09=_0x504e;return _0x33c4a3[_0x2bfd09(0x25f)](_0x392962,_0x55dd5b);},'cfCFq':function(_0x2177d1,_0x257d32){return _0x33c4a3['geeDH'](_0x2177d1,_0x257d32);},'xzMpj':function(_0xb1ead6,_0x32b432){const _0x2c426b=_0x504e;return _0x33c4a3[_0x2c426b(0x2a6)](_0xb1ead6,_0x32b432);},'dBUUu':function(_0x388a1e,_0x57ae20){return _0x33c4a3['WYWeT'](_0x388a1e,_0x57ae20);},'doHMH':_0x33c4a3[_0x555c9b(0x1c7)],'gCBFU':function(_0x40e02f,_0x58a3fd){const _0x52f43b=_0x555c9b;return _0x33c4a3[_0x52f43b(0x31c)](_0x40e02f,_0x58a3fd);},'kJhSG':_0x33c4a3[_0x555c9b(0x23c)],'wiiVC':function(_0x4b707f,_0x55b029){const _0x75a982=_0x555c9b;return _0x33c4a3[_0x75a982(0x28b)](_0x4b707f,_0x55b029);},'OXhHt':function(_0x5bd635,_0x52f0be){const _0x2ca1a0=_0x555c9b;return _0x33c4a3[_0x2ca1a0(0x2ad)](_0x5bd635,_0x52f0be);}},_0x8b5be8=_0x26c531[_0x555c9b(0x29e)];if(_0x33c4a3['RIYds'](_0x8b5be8,0x0))return;const _0x5b6c7b=Math[_0x555c9b(0x192)](_0x33c4a3['zxCPv'](_0x8b5be8,_0x3fad8a)),_0x832dcf=Math[_0x555c9b(0x192)](_0x8b5be8/_0x5b6c7b),_0x38bd2b=Array[_0x555c9b(0x20e)]({'length':_0x8b5be8},(_0x3e4678,_0xd9e45f)=>_0xd9e45f),_0x3fa10c=_0x33c4a3[_0x555c9b(0x224)](_0x568c61,'ky')?'kz':'ky';for(let _0x4f9dae=0x0;_0x33c4a3[_0x555c9b(0x25d)](_0x4f9dae,_0x8b5be8);_0x4f9dae++){_0x26c531[_0x4f9dae][_0x555c9b(0x21a)]=Math[_0x555c9b(0x2bd)](_0x33c4a3[_0x555c9b(0x214)](_0x26c531[_0x4f9dae]['ky'],0.5),_0x26c531[_0x4f9dae]['kz']+0.5);}const _0x5ef773=[0x0,0x0,0x0,0x0],_0x1098d1=0x0,_0x1a4448=0x1,_0x39d7a0=0x2,_0x37ad78=0x3;for(let _0x45af20=0x0;_0x33c4a3[_0x555c9b(0x1e9)](_0x45af20,_0x8b5be8);_0x45af20++){const _0x2cf0ae=_0x26c531[_0x45af20]['ky']+0.5,_0x1d6b58=_0x33c4a3[_0x555c9b(0x214)](_0x26c531[_0x45af20]['kz'],0.5),_0x505ff5=Math[_0x555c9b(0x2b7)](_0x2cf0ae),_0xa2071b=Math[_0x555c9b(0x2b7)](_0x1d6b58);if(_0x33c4a3[_0x555c9b(0x1ee)](_0x505ff5,_0xa2071b)){if(_0x33c4a3['ZaTGg'](_0x33c4a3['SkoZg'],_0x33c4a3[_0x555c9b(0x1d2)]))_0x5ef773[_0x33c4a3[_0x555c9b(0x250)](_0x2cf0ae,0x0)?_0x1098d1:_0x39d7a0]++;else return _0x3d6cb9['NwFok'](_0x553b02,_0x2c1cf1*_0x1fb429)['toFixed'](0x2);}else _0x5ef773[_0x33c4a3['nuDbp'](_0x1d6b58,0x0)?_0x1a4448:_0x37ad78]++;}console['log'](_0x555c9b(0x230)+_0x5ef773[_0x555c9b(0x1f6)](',\x20')+']');let _0x3cca11=0x0;for(let _0x47fc8f=0x1;_0x33c4a3['qddVn'](_0x47fc8f,0x4);_0x47fc8f++){_0x33c4a3[_0x555c9b(0x1b4)](_0x5ef773[_0x47fc8f],_0x5ef773[_0x3cca11])&&(_0x33c4a3['mJjVs'](_0x33c4a3[_0x555c9b(0x25e)],_0x555c9b(0x1cc))?_0x3cca11=_0x47fc8f:(_0x3ed923=_0x38962a,_0x161cf5=_0x282d8a));}console['log'](_0x555c9b(0x187)+[_0x33c4a3['tdMBQ'],_0x33c4a3[_0x555c9b(0x22f)],_0x33c4a3[_0x555c9b(0x1dd)],'WEST'][_0x3cca11]+_0x555c9b(0x1d3)+_0x5ef773[_0x3cca11]+_0x555c9b(0x176));let _0x30f16c=0x0,_0x59c6b7=0x0,_0x5b232c=0x0,_0x5eecb5=0x0;const _0xc4cb76=Math[_0x555c9b(0x2ff)](..._0x26c531[_0x555c9b(0x1c2)](_0x4b9a3e=>Math['abs'](_0x4b9a3e['ky']))),_0x3d60f2=Math[_0x555c9b(0x2ff)](..._0x26c531[_0x555c9b(0x1c2)](_0x1f008a=>Math[_0x555c9b(0x2b7)](_0x1f008a['kz'])));if(_0x3cca11===_0x1098d1)_0x5b232c=_0xc4cb76;else{if(_0x33c4a3[_0x555c9b(0x2c3)](_0x3cca11,_0x1a4448))_0x5eecb5=_0x3d60f2;else{if(_0x3cca11===_0x39d7a0)_0x5b232c=-_0xc4cb76;else{if(_0x33c4a3[_0x555c9b(0x31f)](_0x3cca11,_0x37ad78))_0x5eecb5=-_0x3d60f2;}}}const _0x307bfd=_0x33c4a3[_0x555c9b(0x1a4)](_0xc4cb76,0x1),_0xa6f25f=_0x33c4a3[_0x555c9b(0x1b0)](_0x3d60f2,0x1);function _0x3458f3(_0x35a657,_0x1f6319,_0x5981b4,_0x1cff00){const _0x2f3b6c=_0x555c9b,_0x39e4e1={'bWGJV':function(_0x1423cb,_0x2ea969){const _0x144254=_0x504e;return _0x33c4a3[_0x144254(0x199)](_0x1423cb,_0x2ea969);},'YzBZm':function(_0x461c01,_0x3928da){return _0x461c01+_0x3928da;},'JndEb':function(_0xbf8861,_0x1da52c){return _0x33c4a3['THapb'](_0xbf8861,_0x1da52c);},'vAKxN':function(_0x1286b6,_0x14978a){return _0x33c4a3['neCYg'](_0x1286b6,_0x14978a);},'ikCSt':function(_0x48b3ea,_0x1d6ef8){const _0x4b998f=_0x504e;return _0x33c4a3[_0x4b998f(0x2e1)](_0x48b3ea,_0x1d6ef8);}};if(_0x33c4a3[_0x2f3b6c(0x19e)](_0x33c4a3[_0x2f3b6c(0x215)],_0x33c4a3[_0x2f3b6c(0x20a)])){for(let _0x1e37a0=0x0;_0x1e37a0<_0x8b5be8;_0x1e37a0++){if(_0x33c4a3[_0x2f3b6c(0x2b8)](_0x33c4a3[_0x2f3b6c(0x1d4)],_0x2f3b6c(0x18a))){const _0x1e396a=_0x33c4a3[_0x2f3b6c(0x1c9)](Math['abs'](_0x33c4a3[_0x2f3b6c(0x1f5)](_0x26c531[_0x1e37a0]['ky'],_0x35a657)),_0x307bfd),_0x2e1679=_0x33c4a3[_0x2f3b6c(0x1a1)](Math[_0x2f3b6c(0x2b7)](_0x33c4a3['sXPVD'](_0x26c531[_0x1e37a0]['kz'],_0x1f6319)),_0xa6f25f);_0x26c531[_0x1e37a0]['ellipDist']=Math[_0x2f3b6c(0x198)](_0x33c4a3[_0x2f3b6c(0x222)](_0x33c4a3['RWlrx'](_0x33c4a3[_0x2f3b6c(0x275)](_0x1e396a,_0x1e396a),_0x5981b4)*_0x5981b4,_0x33c4a3[_0x2f3b6c(0x23a)](_0x33c4a3['jZInW'](_0x33c4a3[_0x2f3b6c(0x2b9)](_0x2e1679,_0x2e1679),_0x1cff00),_0x1cff00)));}else{const _0xbf9817={'CmpOo':function(_0x1017be,_0x1363e8){return _0x3d6cb9['lDAbi'](_0x1017be,_0x1363e8);},'nFECg':function(_0x1a5119,_0x5148a5){return _0x1a5119-_0x5148a5;}};_0x3d6cb9['AZheP'](_0x35e075,_0x20bf58,_0x18f310,(_0x5ce282,_0x3cf8de)=>{const _0xf0359d=_0x2f3b6c,_0x5bd1df=_0xb3f04f[_0x5ce282][_0xf0359d(0x273)],_0xcf7775=_0x354ac7[_0x3cf8de][_0xf0359d(0x273)];if(_0x50591a[_0xf0359d(0x2b7)](_0xbf9817[_0xf0359d(0x17d)](_0x5bd1df,_0xcf7775))>0.01)return _0xbf9817[_0xf0359d(0x22d)](_0x5bd1df,_0xcf7775);return _0x485877[_0x5ce282]['r']-_0x4b2559[_0x3cf8de]['r'];});}}_0x38bd2b[_0x2f3b6c(0x1f0)]((_0x20bc9b,_0x211e3f)=>_0x26c531[_0x20bc9b][_0x2f3b6c(0x306)]-_0x26c531[_0x211e3f][_0x2f3b6c(0x306)]);for(let _0xbf0a30=0x0;_0xbf0a30<_0x8b5be8;_0xbf0a30++){const _0x3b082c=_0x38bd2b[_0xbf0a30];_0x26c531[_0x3b082c][_0x2f3b6c(0x200)]=_0x33c4a3['IoFXp'](_0x33c4a3[_0x2f3b6c(0x2b0)](_0xbf0a30/_0x5b6c7b,0x0),0x1);}let _0x34675b=Infinity,_0x4825fc=-0x1;for(let _0x3b6e5a=0x0;_0x33c4a3[_0x2f3b6c(0x2ef)](_0x3b6e5a,_0x8b5be8);_0x3b6e5a++){const _0x2132e5=Math[_0x2f3b6c(0x198)](_0x33c4a3[_0x2f3b6c(0x254)](_0x26c531[_0x3b6e5a]['ky']*_0x26c531[_0x3b6e5a]['ky'],_0x26c531[_0x3b6e5a]['kz']*_0x26c531[_0x3b6e5a]['kz']));if(_0x33c4a3[_0x2f3b6c(0x1a3)](_0x2132e5,_0x34675b)){if(_0x33c4a3[_0x2f3b6c(0x1f7)](_0x2f3b6c(0x1fd),_0x2f3b6c(0x1fd))){const _0x45d5ae=_0x39e4e1[_0x2f3b6c(0x207)](_0x9789aa[_0x20011b]['ky'],0.5),_0x3cd87d=_0x39e4e1[_0x2f3b6c(0x30a)](_0x458939[_0x56255a]['kz'],0.5),_0x5943a4=_0x2b110b[_0x2f3b6c(0x2b7)](_0x45d5ae),_0x492730=_0x22830b[_0x2f3b6c(0x2b7)](_0x3cd87d);_0x39e4e1[_0x2f3b6c(0x2ca)](_0x5943a4,_0x492730)?_0x3c6e95[_0x39e4e1[_0x2f3b6c(0x24f)](_0x45d5ae,0x0)?_0x5a264d:_0x192287]++:_0x3cd143[_0x39e4e1[_0x2f3b6c(0x1f4)](_0x3cd87d,0x0)?_0x238b1b:_0x18d94d]++;}else _0x34675b=_0x2132e5,_0x4825fc=_0x26c531[_0x3b6e5a][_0x2f3b6c(0x200)];}}return _0x4825fc;}else _0x3a26f3+=_0x269a89,_0x9b84a7=_0x3d6cb9['rmXmV'](_0x20602c,_0x3d6cb9[_0x2f3b6c(0x1ba)](_0x5470ba,0x1));}let _0x223053=0x0,_0x315977=0x0,_0x2926ec=0x1,_0x3c0af7=0x1,_0x3b5158=![],_0x279793=-0x1;const _0x290f87=0xa;for(let _0x18a42a=0x0;_0x33c4a3['WOpyv'](_0x18a42a,_0x290f87);_0x18a42a++){_0x223053=_0x33c4a3[_0x555c9b(0x22a)](_0x33c4a3[_0x555c9b(0x281)](_0x30f16c,_0x5b232c),0x2),_0x315977=_0x33c4a3[_0x555c9b(0x219)](_0x59c6b7,_0x5eecb5)/0x2,_0x279793=_0x33c4a3[_0x555c9b(0x1c5)](_0x3458f3,_0x223053,_0x315977,_0x2926ec,_0x3c0af7),console[_0x555c9b(0x253)](_0x555c9b(0x2ab)+_0x18a42a+_0x555c9b(0x213)+_0x223053[_0x555c9b(0x1a8)](0x1)+',\x20'+_0x315977[_0x555c9b(0x1a8)](0x1)+_0x555c9b(0x2f3)+_0x279793+_0x555c9b(0x2cc)+_0x50dc50);if(_0x33c4a3[_0x555c9b(0x276)](_0x279793,_0x50dc50)){_0x3b5158=!![];break;}else _0x33c4a3[_0x555c9b(0x2de)](_0x279793,_0x50dc50)?_0x33c4a3[_0x555c9b(0x195)]===_0x33c4a3[_0x555c9b(0x26f)]?_0x3179af=_0x3abb8d%_0x1e6941:(_0x5b232c=_0x223053,_0x5eecb5=_0x315977):(_0x30f16c=_0x223053,_0x59c6b7=_0x315977);}if(!_0x3b5158){console[_0x555c9b(0x253)](_0x555c9b(0x1e2)+_0x279793);let _0x4d0894=_0x33c4a3[_0x555c9b(0x251)](_0x279793,_0x50dc50)?0.8:1.2;for(let _0x58250f=0x0;_0x33c4a3['BwrFH'](_0x58250f,0x14)&&!_0x3b5158;_0x58250f++){if(_0x3cca11===_0x39d7a0||_0x33c4a3[_0x555c9b(0x2c5)](_0x3cca11,_0x1098d1))_0x33c4a3[_0x555c9b(0x19e)](_0x33c4a3[_0x555c9b(0x1be)],_0x33c4a3['gJMsj'])?_0x3c0af7*=_0x4d0894:_0x41b5b4[_0x564cd1][_0x555c9b(0x21a)]=_0x12de1f[_0x555c9b(0x2bd)](_0x7f902a[_0xc048ef]['ky']+0.5,_0x3d6cb9[_0x555c9b(0x1ba)](_0x2d394c[_0x1e6c42]['kz'],0.5));else{if(_0x33c4a3[_0x555c9b(0x1fb)](_0x33c4a3[_0x555c9b(0x321)],_0x33c4a3[_0x555c9b(0x2a0)]))_0x2926ec*=_0x4d0894;else{const _0x3b79ec=_0x33c4a3['YISst'](_0x19eda6[_0xd4dabd]['ky'],_0x5a63f4),_0x4a21d9=_0x584cb2[_0xfb653d]['kz']-_0x6cb96c;let _0x5595d8=_0x288ba6[_0x555c9b(0x2bd)](_0x3b79ec,_0x4a21d9);if(_0x33c4a3[_0x555c9b(0x1e5)](_0x5595d8,0x0))_0x5595d8+=_0x33c4a3[_0x555c9b(0x265)](0x2,_0x5689d4['PI']);_0x2e511b[_0x41ee89][_0x555c9b(0x21a)]=_0x5595d8;}}if(_0x33c4a3['mvInV'](_0x2926ec,0.1)||_0x33c4a3[_0x555c9b(0x2d5)](_0x2926ec,0xa)||_0x33c4a3[_0x555c9b(0x1e5)](_0x3c0af7,0.1)||_0x33c4a3[_0x555c9b(0x19f)](_0x3c0af7,0xa))break;_0x279793=_0x33c4a3[_0x555c9b(0x2f5)](_0x3458f3,_0x223053,_0x315977,_0x2926ec,_0x3c0af7),console[_0x555c9b(0x253)]('CROC\x20ellipse\x20iter\x20'+_0x58250f+':\x20kyRatio='+_0x2926ec[_0x555c9b(0x1a8)](0x2)+',\x20kzRatio='+_0x3c0af7[_0x555c9b(0x1a8)](0x2)+',\x20found\x20echo='+_0x279793);if(_0x279793===_0x50dc50){_0x3b5158=!![];break;}}}if(!_0x3b5158){console[_0x555c9b(0x253)](_0x555c9b(0x27e)+_0x33c4a3['sGTeU'](_0x33c4a3[_0x555c9b(0x212)](_0x3fad8a,0x1),_0x50dc50));const _0x508ac4=_0x33c4a3['xzqkp'](_0x33c4a3[_0x555c9b(0x1b2)](_0x3fad8a,0x1),_0x50dc50);_0x2926ec=0x1,_0x3c0af7=0x1;let _0x2e4db5=![];_0x30f16c=0x0,_0x59c6b7=0x0,_0x5b232c=0x0,_0x5eecb5=0x0;if(_0x3cca11===_0x1098d1)_0x5b232c=_0xc4cb76;else{if(_0x33c4a3[_0x555c9b(0x287)](_0x3cca11,_0x1a4448))_0x5eecb5=_0x3d60f2;else{if(_0x33c4a3[_0x555c9b(0x276)](_0x3cca11,_0x39d7a0))_0x5b232c=-_0xc4cb76;else{if(_0x33c4a3[_0x555c9b(0x241)](_0x3cca11,_0x37ad78))_0x5eecb5=-_0x3d60f2;}}}for(let _0x2ccbcc=0x0;_0x33c4a3[_0x555c9b(0x2d8)](_0x2ccbcc,_0x290f87);_0x2ccbcc++){_0x223053=_0x33c4a3['meGTp'](_0x30f16c+_0x5b232c,0x2),_0x315977=_0x33c4a3[_0x555c9b(0x1c4)](_0x33c4a3[_0x555c9b(0x2dc)](_0x59c6b7,_0x5eecb5),0x2),_0x279793=_0x33c4a3[_0x555c9b(0x1d1)](_0x3458f3,_0x223053,_0x315977,_0x2926ec,_0x3c0af7),console[_0x555c9b(0x253)]('CROC\x20reversed\x20iter\x20'+_0x2ccbcc+_0x555c9b(0x213)+_0x223053[_0x555c9b(0x1a8)](0x1)+',\x20'+_0x315977[_0x555c9b(0x1a8)](0x1)+_0x555c9b(0x2f3)+_0x279793+_0x555c9b(0x2cc)+_0x508ac4);if(_0x33c4a3[_0x555c9b(0x1e6)](_0x279793,_0x508ac4)){_0x2e4db5=!![],console[_0x555c9b(0x253)]('CROC:\x20Found\x20solution\x20for\x20reversed\x20center\x20echo\x20'+_0x508ac4);break;}else _0x33c4a3[_0x555c9b(0x1b8)](_0x279793,_0x508ac4)?(_0x5b232c=_0x223053,_0x5eecb5=_0x315977):(_0x30f16c=_0x223053,_0x59c6b7=_0x315977);}if(_0x2e4db5){if(_0x33c4a3[_0x555c9b(0x225)](_0x555c9b(0x22b),_0x33c4a3['QAOtx']))_0x1cedab=-_0x426014,_0x261e2b=-_0x45bfe8;else{console[_0x555c9b(0x253)](_0x555c9b(0x1bb));for(let _0x575cd9=0x0;_0x33c4a3[_0x555c9b(0x218)](_0x575cd9,_0x8b5be8);_0x575cd9++){_0x26c531[_0x575cd9][_0x555c9b(0x200)]=_0x33c4a3[_0x555c9b(0x21c)](_0x3fad8a,0x1)-_0x26c531[_0x575cd9]['echo'];}let _0x3221fc=Infinity,_0x5a141e=-0x1;for(let _0x540d60=0x0;_0x33c4a3[_0x555c9b(0x263)](_0x540d60,_0x8b5be8);_0x540d60++){const _0x1964a4=Math['sqrt'](_0x33c4a3[_0x555c9b(0x219)](_0x33c4a3[_0x555c9b(0x2a7)](_0x26c531[_0x540d60]['ky'],_0x26c531[_0x540d60]['ky']),_0x33c4a3[_0x555c9b(0x2ba)](_0x26c531[_0x540d60]['kz'],_0x26c531[_0x540d60]['kz'])));_0x33c4a3[_0x555c9b(0x2f1)](_0x1964a4,_0x3221fc)&&(_0x3221fc=_0x1964a4,_0x5a141e=_0x26c531[_0x540d60]['echo']);}console['log'](_0x555c9b(0x1d0)+_0x5a141e),_0x3b5158=!![];}}else{if('AwxGX'!==_0x33c4a3[_0x555c9b(0x2a5)]){const _0x483639=_0x14438a[_0x216b42],_0x1521f4=_0x4c0934[_0x483639]['echo'];!_0x37021a[_0x1521f4]&&(_0x51d86f[_0x1521f4]=[]),_0x14b212[_0x1521f4]['push'](_0x483639);}else console['log']('CROC:\x20Could\x20not\x20find\x20a\x20reversed\x20solution');}}console[_0x555c9b(0x253)](_0x555c9b(0x1ef)+_0x223053[_0x555c9b(0x1a8)](0x1)+',\x20'+_0x315977[_0x555c9b(0x1a8)](0x1)+_0x555c9b(0x31b)+_0x2926ec[_0x555c9b(0x1a8)](0x2)+',\x20'+_0x3c0af7[_0x555c9b(0x1a8)](0x2)+'],\x20wanted='+_0x50dc50);(!_0x3b5158||_0x33c4a3['AfIWt'](_0x3b5158,![]))&&_0x33c4a3[_0x555c9b(0x1b7)](_0x3458f3,_0x223053,_0x315977,_0x2926ec,_0x3c0af7);for(let _0x55a11f=0x0;_0x33c4a3[_0x555c9b(0x252)](_0x55a11f,_0x8b5be8);_0x55a11f++){if(_0x33c4a3[_0x555c9b(0x1fb)](_0x33c4a3[_0x555c9b(0x305)],_0x33c4a3[_0x555c9b(0x305)]))_0x49479d[_0x33c4a3['iuvpa'](_0x4643e9,0x0)?_0x4d8670:_0xe58146]++;else{let _0x4866c1=0x0,_0x45e45c=0x0;const _0x431f47=_0x33c4a3['nWUbS'](_0x26c531[_0x55a11f]['ky'],_0x223053),_0x10ae41=_0x26c531[_0x55a11f]['kz']-_0x315977;if(_0x33c4a3[_0x555c9b(0x190)](_0x3cca11,0x3))_0x4866c1=-_0x10ae41,_0x45e45c=-_0x431f47;else{if(_0x33c4a3[_0x555c9b(0x1c3)](_0x3cca11,0x2))_0x4866c1=-_0x431f47,_0x45e45c=_0x10ae41;else _0x33c4a3[_0x555c9b(0x1d6)](_0x3cca11,0x1)?'GFXwg'===_0x33c4a3[_0x555c9b(0x28d)]?(_0x4866c1=_0x10ae41,_0x45e45c=_0x431f47):_0x45413e=_0x33c4a3[_0x555c9b(0x183)](0x2,_0x33c4a3['CGitT'](_0x177263,_0x309da3))+_0x59256e%0x2:(_0x4866c1=_0x431f47,_0x45e45c=-_0x10ae41);}let _0x31194a=Math['atan2'](_0x45e45c,_0x4866c1);if(_0x31194a<0x0)_0x31194a+=_0x33c4a3[_0x555c9b(0x2d2)](0x2,Math['PI']);_0x26c531[_0x55a11f][_0x555c9b(0x299)]=_0x31194a;}}_0xfd610(_0x38bd2b,_0x26c531,(_0x1df3a9,_0x501741)=>_0x26c531[_0x1df3a9][_0x555c9b(0x299)]-_0x26c531[_0x501741][_0x555c9b(0x299)]);const _0x2353f5=[];for(let _0x9024=0x0;_0x33c4a3['wmEEd'](_0x9024,_0x8b5be8);_0x9024++){if(_0x33c4a3['HtBQP'](_0x555c9b(0x1ed),_0x555c9b(0x1ed)))_0x4dbaee=_0x275e81;else{const _0x17920d=_0x38bd2b[_0x9024];_0x26c531[_0x17920d][_0x555c9b(0x200)]===0x1&&(_0x33c4a3[_0x555c9b(0x228)](_0x33c4a3[_0x555c9b(0x18c)],_0x33c4a3[_0x555c9b(0x2b2)])?_0x2353f5['push'](_0x17920d):_0x4e935e[_0x555c9b(0x318)](_0x25c82a));}}_0x2353f5[_0x555c9b(0x1f0)]((_0x2c6157,_0x5e2eda)=>{const _0x179a16=_0x555c9b;let _0x2c2b51=0x0,_0x418f01=0x0;const _0x5dc96c=_0x3d6cb9['uycxI'](_0x26c531[_0x2c6157]['ky'],_0x223053),_0x3faa4b=_0x26c531[_0x2c6157]['kz']-_0x315977,_0x41937c=_0x26c531[_0x5e2eda]['ky']-_0x223053,_0x2d4ebb=_0x26c531[_0x5e2eda]['kz']-_0x315977;if(_0x3d6cb9[_0x179a16(0x295)](_0x3cca11,0x3))_0x2c2b51=_0x5dc96c,_0x418f01=_0x41937c;else{if(_0x3d6cb9['xzMpj'](_0x3cca11,0x1))_0x3d6cb9[_0x179a16(0x294)](_0x3d6cb9[_0x179a16(0x2fd)],_0x3d6cb9[_0x179a16(0x2fd)])?(_0x2c2b51=-_0x5dc96c,_0x418f01=-_0x41937c):(_0x1f7f7f=_0x29226f,_0x36ee47=_0x880348[_0x16a27b][_0x179a16(0x200)]);else _0x3cca11===0x2?_0x3d6cb9['gCBFU'](_0x3d6cb9[_0x179a16(0x20d)],_0x179a16(0x279))?_0x2a7b5c=_0x3d6cb9[_0x179a16(0x272)](0x2*_0x37ad21,_0x3d6cb9[_0x179a16(0x28f)](_0x5cb963,0x2)):(_0x2c2b51=-_0x3faa4b,_0x418f01=-_0x2d4ebb):(_0x2c2b51=_0x3faa4b,_0x418f01=_0x2d4ebb);}return _0x3d6cb9[_0x179a16(0x310)](_0x2c2b51,_0x418f01);});const _0x3a0b82=[..._0x2353f5];for(let _0x588863=0x0;_0x33c4a3[_0x555c9b(0x271)](_0x588863,_0x8b5be8);_0x588863++){if(_0x33c4a3[_0x555c9b(0x31f)](_0x33c4a3[_0x555c9b(0x2b1)],_0x33c4a3['VpWsZ']))_0x54fa36=_0x402d12,_0x29847c=_0x5a0f98;else{const _0x2bfae2=_0x38bd2b[_0x588863];if(_0x33c4a3[_0x555c9b(0x1ea)](_0x26c531[_0x2bfae2][_0x555c9b(0x200)],0x1)){if(_0x33c4a3[_0x555c9b(0x308)](_0x33c4a3['dCDZY'],_0x33c4a3[_0x555c9b(0x25c)]))_0x3a0b82[_0x555c9b(0x318)](_0x2bfae2);else return _0x53655c[_0x555c9b(0x1f0)]((_0x2a86fe,_0x266408)=>{const _0x291575=_0x555c9b;return _0x3d6cb9[_0x291575(0x25a)](_0x34776c[_0x2a86fe][_0x291575(0x273)],_0x51abf8[_0x266408][_0x291575(0x273)]);});}}}_0x33c4a3[_0x555c9b(0x1fa)](_0x4a34a2,_0x26c531,_0x3a0b82,_0x5b6c7b);}function _0x301340(_0x513429,_0x142ec3,_0x522f8f){const _0x177216=_0x5f2c3d,_0x966851={'SDdMi':function(_0x966fb0,_0x7e5a3e){return _0x966fb0>_0x7e5a3e;}};if(_0x33c4a3[_0x177216(0x26a)](_0x33c4a3[_0x177216(0x30f)],_0x33c4a3[_0x177216(0x30f)]))_0x26485a[_0x966851['SDdMi'](_0x13242d,0x0)?_0x15da49:_0x5e578b]++;else return(_0x513429/_0x33c4a3['tCaHF'](_0x142ec3,_0x522f8f))[_0x177216(0x1a8)](0x2);}return{'generateCoordinates':_0xc85dc1,'assignViewOrdering':_0x51c990,'calculateAcceleration':_0x301340};})());
+/**
+ * K-Space Utilities Module
+ * Handles coordinate generation and view ordering logic
+ */
+
+const KSpaceUtils = (() => {
+    /**
+     * Generate 3D k-space coordinates with acceleration and coverage options
+     * @param {number} Ny - y matrix size
+     * @param {number} Nz - z matrix size
+     * @param {number} R - acceleration factor (Ry = Rz = R)
+     * @param {boolean} useCaipirinha - whether to apply CAIPIRINHA shifts
+     * @param {string} coverage - 'rectangular' or 'elliptical'
+     * @param {number} calSize - calibration region size (default: 128)
+     * @returns {Array} Array of {ky, kz, r, phi} coordinates
+     */
+    function generateCoordinates(Ny, Nz, Ry = 1, Rz = 1, useCaipirinha = true, coverage = 'rectangular', calSize = 128, kzPF = 1.0) {
+        // Pre-allocate array with estimated maximum size
+        const maxCoords = Math.ceil((Ny * Nz) / (Ry * Rz)) + (calSize * calSize);
+        const coords = new Array(maxCoords);
+        let coordIndex = 0;
+        
+        const center_y = Ny / 2.0;
+        const center_z = Nz / 2.0;
+        const y_max = Ny / 2.0;
+        const z_max = Nz / 2.0;
+        const epsilon = 1e-6;
+        
+        // Calibration region (same in y and z)
+        const cal_y = Math.min(calSize, Ny);
+        const cal_z = Math.min(calSize, Nz);
+        const y_cal_low = Math.floor(center_y - cal_y / 2.0);
+        const y_cal_hi = y_cal_low + cal_y;
+        const z_cal_low = Math.floor(center_z - cal_z / 2.0);
+        const z_cal_hi = z_cal_low + cal_z;
+        
+        // Partial Fourier: kzPF ranges from 0.5 (keep 50% centered) to 1.0 (full)
+        // Mapping (matching C logic): kept_fraction = 0.5 + nover_z / Nz
+        // => nover_z = (kzPF - 0.5) * Nz
+        let nover_z = Math.round((kzPF - 0.5) * Nz);
+        if (nover_z < 0) nover_z = 0;
+        if (nover_z > Math.floor(Nz / 2)) nover_z = Math.floor(Nz / 2);
+        const pf_zmode = kzPF < 1.0 ? 'LATE' : 'NO';  // Default to removing high kz (LATE)
+        
+        // CAIPIRINHA shift (if enabled)
+        const dy = useCaipirinha ? 1 : 0;
+        const step_y = Ny - 1;
+        
+        // Generate accelerated coordinates
+        let offset = 0;
+        for (let row = 0; row < Nz; row += Rz) {
+            const z = row;
+            
+            // Apply partial Fourier filtering
+            if (pf_zmode === 'LATE' && z >= (Nz / 2 + nover_z)) {
+                // Skip high kz lines
+                offset += dy;
+                offset = offset % (step_y + 1);
+                continue;
+            }
+            
+            for (let col = 0; col < Ny; col += Ry) {
+                let y = col + offset;
+                
+                // Apply modulo for CAIPIRINHA wrapping
+                if (y >= Ny) {
+                    y = y % Ny;
+                }
+                
+                // Normalize to [-1, 1]
+                const y1 = Ny > 1 ? (y - Ny / 2 + 0.5) / y_max : 0.0;
+                const z1 = Nz > 1 ? (z - Nz / 2 + 0.5) / z_max : 0.0;
+                
+                // Calculate radial and angular coordinates
+                const r = Math.sqrt(y1 * y1 + z1 * z1);
+                const phi = Math.atan2(z1, y1);
+                
+                // Check elliptical coverage
+                if (coverage === 'elliptical' && r > 1.0 + epsilon) {
+                    continue;
+                }
+                
+                // Skip if in calibration region when accelerated (match C code logic)
+                if ((Ry > 1 || Rz > 1) && 
+                    (y >= y_cal_low && y < y_cal_hi) &&
+                    (z >= z_cal_low && z < z_cal_hi)) {
+                    // For elliptical cal coverage, skip points inside the ellipse
+                    if (coverage === 'elliptical') {
+                        const y_dist = (y + 0.5 - Ny / 2.0);
+                        const z_dist = (z + 0.5 - Nz / 2.0);
+                        const l_y = y_dist / (cal_y / 2.0);
+                        const l_z = z_dist / (cal_z / 2.0);
+                        const l_r = l_y * l_y + l_z * l_z;
+                        if (l_r < 1.0 + epsilon) continue;  // Skip if inside ellipse
+                    } else {
+                        // For rectangular cal coverage, skip all points in cal region
+                        continue;
+                    }
+                }
+                
+                coords[coordIndex++] = {
+                    ky: (y - Ny / 2) | 0,
+                    kz: (z - Nz / 2) | 0,
+                    r: r,
+                    phi: phi,
+                    y_idx: y | 0,
+                    z_idx: z | 0,
+                    shot: -1,
+                    echo: -1,
+                    isCalibration: false
+                };
+            }
+            
+            // Update offset for CAIPIRINHA pattern
+            if (dy > 0) {
+                offset += dy;
+                offset = offset % (step_y + 1);
+            }
+        }
+        
+        // Add calibration region
+        if (Ry > 1 || Rz > 1) {
+            for (let y = y_cal_low; y < y_cal_hi; y++) {
+                for (let z = z_cal_low; z < z_cal_hi; z++) {
+                    if (z < 0 || z >= Nz || y < 0 || y >= Ny) continue;
+                    
+                    // Normalize to [-1, 1]
+                    const y1 = Ny > 1 ? (y - Ny / 2 + 0.5) / y_max : 0.0;
+                    const z1 = Nz > 1 ? (z - Nz / 2 + 0.5) / z_max : 0.0;
+                    
+                    const r = Math.sqrt(y1 * y1 + z1 * z1);
+                    const phi = Math.atan2(z1, y1);
+                    
+                    // Check elliptical coverage for cal region
+                    if (coverage === 'elliptical') {
+                        const y_dist = (y + 0.5 - Ny / 2.0);
+                        const z_dist = (z + 0.5 - Nz / 2.0);
+                        const l_y = y_dist / (cal_y / 2.0);
+                        const l_z = z_dist / (cal_z / 2.0);
+                        const l_r = l_y * l_y + l_z * l_z;
+                        if (l_r > 1.0 + epsilon) continue;
+                    }
+                    
+                    coords[coordIndex++] = {
+                        ky: (y - Ny / 2) | 0,
+                        kz: (z - Nz / 2) | 0,
+                        r: r,
+                        phi: phi,
+                        y_idx: y | 0,
+                        z_idx: z | 0,
+                        shot: -1,
+                        echo: -1,
+                        isCalibration: true
+                    };
+                }
+            }
+        }
+        
+        // Trim array to actual size
+        coords.length = coordIndex;
+        return coords;
+    }
+    
+    /**
+     * Assign view ordering to phase encodes
+     * @param {Array} coords - Array of coordinate objects
+     * @param {number} etl - Echo Train Length
+     * @param {string} ordering - Ordering type: 'sequential', 'chevron', 'lcpo', 'cplo', 'croc'
+     * @param {number} centerEcho - Center echo position (1 to etl)
+     * @param {string} mtfDirection - MTF direction: 'ky' or 'kz'
+     * @param {string} shotOrderParam - Shot ordering: 'ky', 'kz', or 'azimuthal' (for CPLO/LCPO)
+     * @returns {Array} Coordinates with shot and echo assignments
+     */
+    function assignViewOrdering(coords, etl, ordering, centerEcho, mtfDirection = 'ky', shotOrderParam = null, macroOptions = null) {
+        if (coords.length === 0) return coords;
+        
+        const shotOrder = resolveShotOrder(ordering, mtfDirection, shotOrderParam);
+        
+        switch(ordering) {
+            case 'sequential':
+                sequentialOrdering(coords, etl, centerEcho, shotOrder);
+                break;
+            case 'chevron':
+                chevronOrdering(coords, etl, centerEcho, shotOrder);
+                break;
+            case 'lcpo':
+                lcpoOrdering(coords, etl, centerEcho, mtfDirection, shotOrder);
+                break;
+            case 'cplo':
+                cploOrdering(coords, etl, centerEcho, shotOrder);
+                break;
+            case 'croc':
+                crocOrdering(coords, etl, centerEcho, shotOrder);
+                break;
+            default:
+                sequentialOrdering(coords, etl, centerEcho, shotOrder);
+        }
+
+        preserveBaseEcho(coords);
+        const macroWidth = Math.max(1, Math.floor(Number(macroOptions && macroOptions.macroWidth) || 2));
+        applyMacroCoarseFineAssignment(coords, etl, centerEcho, macroWidth, ordering, mtfDirection, shotOrder);
+        coords.jumpMetrics = calculateJumpMetrics(coords);
+        
+        return coords;
+    }
+
+    function resolveShotOrder(ordering, mtfDirection, shotOrderParam) {
+        if (ordering === 'sequential') {
+            return mtfDirection === 'ky' ? 'kz' : 'ky';
+        }
+        if (ordering === 'lcpo') {
+            return (shotOrderParam === 'ky' || shotOrderParam === 'kz')
+                ? shotOrderParam
+                : (mtfDirection === 'ky' ? 'kz' : 'ky');
+        }
+        if (ordering === 'cplo') {
+            return ['ky', 'kz', 'azimuthal'].includes(shotOrderParam) ? shotOrderParam : 'azimuthal';
+        }
+        return (shotOrderParam === 'ky' || shotOrderParam === 'kz' || shotOrderParam === 'azimuthal')
+            ? shotOrderParam
+            : (mtfDirection === 'ky' ? 'kz' : 'ky');
+    }
+
+    function findBestMacroWidthByRms(generateCoords, etl, ordering, centerEcho, mtfDirection = 'ky', shotOrderParam = null, minWidth = 2, maxWidth = 40) {
+        const start = Math.max(1, Math.floor(Number(minWidth) || 2));
+        const stop = Math.max(start, Math.floor(Number(maxWidth) || start));
+        let bestWidth = start;
+        let bestRmsJump = Infinity;
+        let previousRmsJump = Infinity;
+        const evaluatedWidths = [];
+
+        for (let width = start; width <= stop; width++) {
+            const candidate = generateCoords();
+            assignViewOrdering(candidate, etl, ordering, centerEcho, mtfDirection, shotOrderParam, { macroWidth: width });
+            const rmsJump = candidate.jumpMetrics ? candidate.jumpMetrics.rmsJump : calculateJumpMetrics(candidate).rmsJump;
+            evaluatedWidths.push(width);
+            if (rmsJump < bestRmsJump) {
+                bestWidth = width;
+                bestRmsJump = rmsJump;
+            }
+            if (width > start && rmsJump > previousRmsJump + 1e-12) break;
+            previousRmsJump = rmsJump;
+        }
+
+        return {
+            bestWidth,
+            bestRmsJump,
+            searchMin: start,
+            searchMax: stop,
+            evaluatedWidths
+        };
+    }
+    
+    /**
+     * Helper sort functions to reduce code duplication
+     */
+    
+    // Sort indices by coordinate radius (low to high)
+    function sortIndicesByRadius(indices, coords) {
+        return indices.sort((a, b) => {
+            return coords[a].r - coords[b].r;
+        });
+    }
+    
+    // Sort indices by azimuthal angle (phi)
+    function sortIndicesByPhi(indices, coords) {
+        return indices.sort((a, b) => {
+            return coords[a].phi - coords[b].phi;
+        });
+    }
+    
+    // Sort indices by a specific coordinate axis (ky or kz), respecting sign
+    function sortIndicesByAxis(indices, coords, axis, abs) {
+        return indices.sort((a, b) => {
+            if (abs) {
+                return Math.abs(coords[a][axis]) - Math.abs(coords[b][axis]);
+            }
+            return coords[a][axis] - coords[b][axis];
+        });
+    }
+    
+    // Sort indices by echo, then by secondary sort function
+    function sortIndicesByEchoThen(indices, coords, secondarySort) {
+        return indices.sort((a, b) => {
+            const echoA = coords[a].echo;
+            const echoB = coords[b].echo;
+            if (echoA !== echoB) return echoA - echoB;
+            return secondarySort(a, b);
+        });
+    }
+    
+    // Secondary sort by theta (angle) then radius
+    function sortByThetaThenRadius(a, b) {
+        // This is the T_R order used in C code
+        const coords_a = arguments[2]; // We'll pass coords as third arg when used
+        const coords_b = arguments[3];
+        // Note: This needs coords passed, will be used differently
+        return 0; // Placeholder
+    }
+    
+    // Assign shots where each shot gets one coordinate from each echo
+    function assignShotsPerEcho(coords, indices, numShots) {
+        // First pass: find maxEcho without spread operator
+        let maxEcho = 0;
+        for (let i = 0; i < indices.length; i++) {
+            const echo = coords[indices[i]].echo;
+            if (echo > maxEcho) maxEcho = echo;
+        }
+        if (maxEcho === 0) return; // Safety check
+
+        // Use plain arrays instead of plain objects for faster indexed access
+        const echoGroups = new Array(maxEcho + 1).fill(null);
+        for (let i = 0; i < indices.length; i++) {
+            const idx = indices[i];
+            const echo = coords[idx].echo;
+            if (!echoGroups[echo]) echoGroups[echo] = [];
+            echoGroups[echo].push(idx);
+        }
+
+        const echoPointers = new Int32Array(maxEcho + 1); // zero-initialised
+        // Cycle through shots and echoes repeatedly until all coords are assigned.
+        // This handles uneven echo-group sizes and ensures no coordinate remains unassigned.
+        let remaining = 0;
+        for (let e = 1; e <= maxEcho; e++) {
+            if (echoGroups[e]) remaining += echoGroups[e].length;
+        }
+
+        let pos = 0;
+        while (remaining > 0) {
+            for (let echo = 1; echo <= maxEcho && remaining > 0; echo++) {
+                if (echoGroups[echo] && echoPointers[echo] < echoGroups[echo].length) {
+                    const idx = echoGroups[echo][echoPointers[echo]];
+                    coords[idx].shot = pos;
+                    coords[idx].adjustedEcho = coords[idx].echo;
+                    echoPointers[echo]++;
+                    remaining--;
+                }
+            }
+            pos = (pos + 1) % Math.max(1, numShots);
+        }
+    }
+
+    function preserveBaseEcho(coords) {
+        for (let i = 0; i < coords.length; i++) {
+            coords[i].baseEcho = coords[i].echo;
+            coords[i].baseShot = coords[i].shot;
+            coords[i].baseRadarAngle = getRadarAngle(coords[i]);
+            coords[i].adjustedEcho = coords[i].echo;
+        }
+    }
+
+    function applyMacroCoarseFineAssignment(coords, etl, centerEcho, macroWidth, ordering, mtfDirection, shotOrder) {
+        const numShots = getNumShots(coords);
+        if (macroWidth <= 0) macroWidth = 1;
+        if (macroWidth <= 1) return;
+
+        if (ordering === 'chevron') {
+            assignChevronCoarseMacroEchoes(coords, etl, centerEcho, macroWidth, numShots);
+        } else if (ordering === 'croc') {
+            assignCrocCoarseMacroEchoes(coords, etl, centerEcho, macroWidth, numShots);
+        } else {
+            assignFallbackCoarseMacroEchoes(coords, etl, macroWidth, numShots, ordering, mtfDirection, shotOrder);
+        }
+
+        for (let i = 0; i < coords.length; i++) {
+            coords[i].macroOrderKey = getMacroOrderKey(coords[i], ordering, shotOrder);
+        }
+
+        const macroCount = Math.ceil(etl / macroWidth);
+        for (let macroEcho = 1; macroEcho <= macroCount; macroEcho++) {
+            assignMacroSegmentPaths(coords, macroEcho, macroWidth, etl, numShots);
+        }
+    }
+
+    function macroSegmentWidth(macroEcho, macroWidth, etl) {
+        const startEcho = (macroEcho - 1) * macroWidth + 1;
+        return Math.max(0, Math.min(etl, startEcho + macroWidth - 1) - startEcho + 1);
+    }
+
+    function macroEchoFromRank(rank, etl, macroWidth, numShots) {
+        const macroCount = Math.ceil(etl / macroWidth);
+        let remaining = Math.max(0, rank);
+        for (let macroEcho = 1; macroEcho <= macroCount; macroEcho++) {
+            const capacity = numShots * macroSegmentWidth(macroEcho, macroWidth, etl);
+            if (remaining < capacity) return macroEcho;
+            remaining -= capacity;
+        }
+        return macroCount;
+    }
+
+    function assignMacroEchoesBySortedIndices(coords, indices, etl, macroWidth, numShots) {
+        for (let rank = 0; rank < indices.length; rank++) {
+            coords[indices[rank]].macroEcho = macroEchoFromRank(rank, etl, macroWidth, numShots);
+        }
+    }
+
+    function coarseCenterEcho(centerEcho, etl, macroWidth) {
+        return Math.max(1, Math.min(Math.ceil(etl / macroWidth), Math.floor((centerEcho - 1) / macroWidth) + 1));
+    }
+
+    function nearestOriginIndex(coords) {
+        let nearestIdx = 0;
+        let minOriginSq = coords[0].ky * coords[0].ky + coords[0].kz * coords[0].kz;
+        for (let i = 1; i < coords.length; i++) {
+            const sq = coords[i].ky * coords[i].ky + coords[i].kz * coords[i].kz;
+            if (sq < minOriginSq) {
+                minOriginSq = sq;
+                nearestIdx = i;
+            }
+        }
+        return nearestIdx;
+    }
+
+    function assignChevronCoarseMacroEchoes(coords, etl, centerEcho, macroWidth, numShots) {
+        const numCoords = coords.length;
+        const indices = Array.from({ length: numCoords }, (_, i) => i);
+        let maxKy = 0;
+        for (let i = 0; i < numCoords; i++) {
+            const a = Math.abs(coords[i].ky);
+            if (a > maxKy) maxKy = a;
+        }
+        const y0 = maxKy;
+        const z0 = 0;
+        for (let i = 0; i < numCoords; i++) {
+            let theta = Math.atan2(coords[i].ky - y0, coords[i].kz - z0);
+            if (theta < 0) theta += 2 * Math.PI;
+            coords[i].theta = theta;
+        }
+
+        const nearestIdx = nearestOriginIndex(coords);
+        const kyDistFromY0 = new Float64Array(numCoords);
+        const absKzArr = new Float64Array(numCoords);
+        for (let i = 0; i < numCoords; i++) {
+            kyDistFromY0[i] = Math.abs(coords[i].ky - y0);
+            absKzArr[i] = Math.abs(coords[i].kz);
+        }
+
+        function setRadius(axisRatio) {
+            for (let i = 0; i < numCoords; i++) {
+                coords[i].ellipDist = kyDistFromY0[i] + absKzArr[i] * axisRatio;
+            }
+        }
+
+        function macroEchoOfNearest() {
+            const nearestDist = coords[nearestIdx].ellipDist;
+            let rank = 0;
+            for (let i = 0; i < numCoords; i++) {
+                if (coords[i].ellipDist < nearestDist) rank++;
+            }
+            return macroEchoFromRank(rank, etl, macroWidth, numShots);
+        }
+
+        const targetMacroCenter = coarseCenterEcho(centerEcho, etl, macroWidth);
+        const macroCount = Math.ceil(etl / macroWidth);
+        let leftRatio = 0.005;
+        let rightRatio = 100;
+        let axisRatio = Math.max(0.005, 2 * Math.PI * targetMacroCenter / Math.max(1, macroCount));
+        let foundCenter = false;
+
+        setRadius(axisRatio);
+        let currentMacroCenter = macroEchoOfNearest();
+        if (currentMacroCenter === targetMacroCenter) {
+            foundCenter = true;
+        } else if (currentMacroCenter > targetMacroCenter) {
+            leftRatio = axisRatio;
+        } else {
+            rightRatio = axisRatio;
+        }
+
+        for (let iter = 0; iter < 60 && !foundCenter; iter++) {
+            axisRatio = (leftRatio + rightRatio) / 2;
+            setRadius(axisRatio);
+            currentMacroCenter = macroEchoOfNearest();
+            if (currentMacroCenter === targetMacroCenter) {
+                foundCenter = true;
+            } else if (currentMacroCenter > targetMacroCenter) {
+                leftRatio = axisRatio;
+            } else {
+                rightRatio = axisRatio;
+            }
+        }
+
+        setRadius(axisRatio);
+        indices.sort((a, b) => coords[a].ellipDist - coords[b].ellipDist);
+        assignMacroEchoesBySortedIndices(coords, indices, etl, macroWidth, numShots);
+    }
+
+    function assignCrocCoarseMacroEchoes(coords, etl, centerEcho, macroWidth, numShots) {
+        const numCoords = coords.length;
+        const indices = Array.from({ length: numCoords }, (_, i) => i);
+        const NORTH = 0, EAST = 1, SOUTH = 2, WEST = 3;
+
+        const numCoordsPerSector = [0, 0, 0, 0];
+        for (let i = 0; i < numCoords; i++) {
+            coords[i].theta = Math.atan2(coords[i].ky + 0.5, coords[i].kz + 0.5);
+            const ky = coords[i].ky + 0.5;
+            const kz = coords[i].kz + 0.5;
+            const absKy = Math.abs(ky);
+            const absKz = Math.abs(kz);
+            if (absKy >= absKz) {
+                numCoordsPerSector[ky > 0 ? NORTH : SOUTH]++;
+            } else {
+                numCoordsPerSector[kz > 0 ? EAST : WEST]++;
+            }
+        }
+
+        let largestSector = 0;
+        for (let i = 1; i < 4; i++) {
+            if (numCoordsPerSector[i] >= numCoordsPerSector[largestSector]) largestSector = i;
+        }
+
+        let maxKy = 0;
+        let maxKz = 0;
+        for (let i = 0; i < numCoords; i++) {
+            const ak = Math.abs(coords[i].ky);
+            const az = Math.abs(coords[i].kz);
+            if (ak > maxKy) maxKy = ak;
+            if (az > maxKz) maxKz = az;
+        }
+        maxKy = maxKy || 1;
+        maxKz = maxKz || 1;
+
+        let startKy = 0;
+        let startKz = 0;
+        let endKy = 0;
+        let endKz = 0;
+        if (largestSector === NORTH) endKy = maxKy;
+        else if (largestSector === EAST) endKz = maxKz;
+        else if (largestSector === SOUTH) endKy = -maxKy;
+        else if (largestSector === WEST) endKz = -maxKz;
+
+        const nearestIdx = nearestOriginIndex(coords);
+        const kyN = new Float64Array(numCoords);
+        const kzN = new Float64Array(numCoords);
+        for (let i = 0; i < numCoords; i++) {
+            kyN[i] = coords[i].ky / maxKy;
+            kzN[i] = coords[i].kz / maxKz;
+        }
+        const nearestKyN = kyN[nearestIdx];
+        const nearestKzN = kzN[nearestIdx];
+
+        function macroEchoOfNearest(offsetKyN, offsetKzN, kyRatio, kzRatio) {
+            const dky = nearestKyN - offsetKyN;
+            const dkz = nearestKzN - offsetKzN;
+            const nearestSq = dky * dky * kyRatio * kyRatio + dkz * dkz * kzRatio * kzRatio;
+            let rank = 0;
+            for (let i = 0; i < numCoords; i++) {
+                const dk = kyN[i] - offsetKyN;
+                const dz = kzN[i] - offsetKzN;
+                if (dk * dk * kyRatio * kyRatio + dz * dz * kzRatio * kzRatio < nearestSq) rank++;
+            }
+            return macroEchoFromRank(rank, etl, macroWidth, numShots);
+        }
+
+        function setDistances(offsetKy, offsetKz, kyRatio, kzRatio) {
+            const offsetKyN = offsetKy / maxKy;
+            const offsetKzN = offsetKz / maxKz;
+            for (let i = 0; i < numCoords; i++) {
+                const dk = kyN[i] - offsetKyN;
+                const dz = kzN[i] - offsetKzN;
+                coords[i].ellipDist = dk * dk * kyRatio * kyRatio + dz * dz * kzRatio * kzRatio;
+            }
+        }
+
+        const targetMacroCenter = coarseCenterEcho(centerEcho, etl, macroWidth);
+        let centerKy = 0;
+        let centerKz = 0;
+        let kyRatio = 1.0;
+        let kzRatio = 1.0;
+        let foundCenter = false;
+        let currentMacroCenter = -1;
+
+        for (let iter = 0; iter < 30; iter++) {
+            centerKy = (startKy + endKy) / 2;
+            centerKz = (startKz + endKz) / 2;
+            currentMacroCenter = macroEchoOfNearest(centerKy / maxKy, centerKz / maxKz, kyRatio, kzRatio);
+            if (currentMacroCenter === targetMacroCenter) {
+                foundCenter = true;
+                break;
+            } else if (currentMacroCenter > targetMacroCenter) {
+                endKy = centerKy;
+                endKz = centerKz;
+            } else {
+                startKy = centerKy;
+                startKz = centerKz;
+            }
+        }
+
+        if (!foundCenter) {
+            let ratioStep = currentMacroCenter < targetMacroCenter ? 0.8 : 1.2;
+            const offsetKyN = centerKy / maxKy;
+            const offsetKzN = centerKz / maxKz;
+            for (let iter = 0; iter < 40 && !foundCenter; iter++) {
+                if (largestSector === SOUTH || largestSector === NORTH) {
+                    kzRatio *= ratioStep;
+                } else {
+                    kyRatio *= ratioStep;
+                }
+                if (kyRatio < 0.05 || kyRatio > 20.0 || kzRatio < 0.05 || kzRatio > 20.0) break;
+                currentMacroCenter = macroEchoOfNearest(offsetKyN, offsetKzN, kyRatio, kzRatio);
+                if (currentMacroCenter === targetMacroCenter) {
+                    foundCenter = true;
+                } else if ((currentMacroCenter < targetMacroCenter) !== (ratioStep < 1)) {
+                    ratioStep = 1 + (1 - ratioStep) * 0.5;
+                }
+            }
+        }
+
+        setDistances(centerKy, centerKz, kyRatio, kzRatio);
+        indices.sort((a, b) => coords[a].ellipDist - coords[b].ellipDist);
+        assignMacroEchoesBySortedIndices(coords, indices, etl, macroWidth, numShots);
+
+        for (let i = 0; i < numCoords; i++) {
+            let atan_x = 0;
+            let atan_y = 0;
+            const y = coords[i].ky - centerKy;
+            const z = coords[i].kz - centerKz;
+            if (largestSector === WEST) {
+                atan_x = -z;
+                atan_y = -y;
+            } else if (largestSector === SOUTH) {
+                atan_x = -y;
+                atan_y = z;
+            } else if (largestSector === EAST) {
+                atan_x = z;
+                atan_y = y;
+            } else {
+                atan_x = y;
+                atan_y = -z;
+            }
+            let angle = Math.atan2(atan_y, atan_x);
+            if (angle < 0) angle += 2 * Math.PI;
+            coords[i].crocAngle = angle;
+        }
+    }
+
+    function assignFallbackCoarseMacroEchoes(coords, etl, macroWidth, numShots, ordering, mtfDirection, shotOrder) {
+        const indices = Array.from({ length: coords.length }, (_, i) => i);
+        for (let i = 0; i < coords.length; i++) {
+            coords[i].macroOrderKey = getMacroOrderKey(coords[i], ordering, shotOrder);
+            coords[i].macroEchoKey = getMacroEchoAssignmentKey(coords[i], ordering, mtfDirection, shotOrder);
+        }
+        indices.sort((a, b) => {
+            if (coords[a].macroEchoKey !== coords[b].macroEchoKey) return coords[a].macroEchoKey - coords[b].macroEchoKey;
+            if (coords[a].baseEcho !== coords[b].baseEcho) return coords[a].baseEcho - coords[b].baseEcho;
+            return (coords[a].baseShot || 0) - (coords[b].baseShot || 0);
+        });
+        assignMacroEchoesBySortedIndices(coords, indices, etl, macroWidth, numShots);
+    }
+
+    function assignMacroSegmentPaths(coords, macroEcho, macroWidth, etl, numShots) {
+        const startEcho = (macroEcho - 1) * macroWidth + 1;
+        const endEcho = Math.min(etl, startEcho + macroWidth - 1);
+        const segment = [];
+        for (let i = 0; i < coords.length; i++) {
+            if (coords[i].macroEcho === macroEcho) segment.push(coords[i]);
+        }
+        segment.sort((a, b) => {
+            if (a.macroOrderKey !== b.macroOrderKey) return a.macroOrderKey - b.macroOrderKey;
+            if (a.baseEcho !== b.baseEcho) return a.baseEcho - b.baseEcho;
+            return (a.baseShot || 0) - (b.baseShot || 0);
+        });
+
+        const lanes = new Array(numShots);
+        let pos = 0;
+        for (let lane = 0; lane < numShots; lane++) {
+            lanes[lane] = [];
+            for (let echo = startEcho; echo <= endEcho && pos < segment.length; echo++, pos++) {
+                lanes[lane].push(segment[pos]);
+            }
+        }
+
+        for (let lane = 0; lane < numShots; lane++) {
+            const shot = lane;
+            const laneCoords = lanes[lane];
+            for (let i = 0; i < laneCoords.length; i++) {
+                const coord = laneCoords[i];
+                coord.shot = shot;
+                coord.echo = startEcho + i;
+                coord.adjustedEcho = coord.echo;
+            }
+        }
+    }
+
+    function getMacroOrderKey(coord, ordering, shotOrder) {
+        if (ordering === 'chevron' && Number.isFinite(coord.theta)) return normalizeAngle(coord.theta);
+        if (ordering === 'croc' && Number.isFinite(coord.crocAngle)) return normalizeAngle(coord.crocAngle);
+        if ((shotOrder === 'ky' || shotOrder === 'kz') && Number.isFinite(coord[shotOrder])) return coord[shotOrder];
+        if (Number.isFinite(coord.crocAngle)) return normalizeAngle(coord.crocAngle);
+        if (Number.isFinite(coord.theta)) return normalizeAngle(coord.theta);
+        if (Number.isFinite(coord.phi)) return normalizeAngle(coord.phi);
+        return 0;
+    }
+
+    function getMacroEchoAssignmentKey(coord, ordering, mtfDirection, shotOrder) {
+        if (ordering === 'sequential') {
+            const mtfAxis = shotOrder === 'ky' ? 'kz' : 'ky';
+            return Number.isFinite(coord[mtfAxis]) ? coord[mtfAxis] : coord.baseEcho || coord.echo || 0;
+        }
+        if (ordering === 'lcpo') {
+            const mtfAxis = mtfDirection === 'kz' ? 'kz' : 'ky';
+            return Number.isFinite(coord[mtfAxis]) ? coord[mtfAxis] : coord.baseEcho || coord.echo || 0;
+        }
+        if (ordering === 'cplo') {
+            return Number.isFinite(coord.r) ? coord.r : coord.baseEcho || coord.echo || 0;
+        }
+        return coord.baseEcho || coord.echo || 0;
+    }
+
+    function getNumShots(coords) {
+        let maxShot = -1;
+        for (let i = 0; i < coords.length; i++) {
+            if (coords[i].shot > maxShot) maxShot = coords[i].shot;
+        }
+        return Math.max(1, maxShot + 1);
+    }
+
+    function getRadarAngle(coord) {
+        const angle = Number.isFinite(coord.crocAngle) ? coord.crocAngle :
+            Number.isFinite(coord.theta) ? coord.theta :
+            Number.isFinite(coord.phi) ? coord.phi : 0;
+        return normalizeAngle(angle);
+    }
+
+    function normalizeAngle(angle) {
+        const twoPi = 2 * Math.PI;
+        let a = angle % twoPi;
+        if (a < 0) a += twoPi;
+        return a;
+    }
+
+    function calculateJumpMetrics(coords) {
+        const byShot = new Map();
+        for (let i = 0; i < coords.length; i++) {
+            const coord = coords[i];
+            if (!byShot.has(coord.shot)) byShot.set(coord.shot, []);
+            byShot.get(coord.shot).push(coord);
+        }
+
+        let totalSquaredJump = 0;
+        let transitionCount = 0;
+
+        for (const shotCoords of byShot.values()) {
+            shotCoords.sort((a, b) => {
+                if (a.echo !== b.echo) return a.echo - b.echo;
+                return (a.baseEcho || 0) - (b.baseEcho || 0);
+            });
+
+            for (let i = 1; i < shotCoords.length; i++) {
+                const prev = shotCoords[i - 1];
+                const cur = shotCoords[i];
+                const dy = cur.ky - prev.ky;
+                const dz = cur.kz - prev.kz;
+                const d2 = dy * dy + dz * dz;
+                totalSquaredJump += d2;
+                transitionCount++;
+            }
+        }
+
+        return {
+            transitionCount,
+            rmsJump: transitionCount > 0 ? Math.sqrt(totalSquaredJump / transitionCount) : 0
+        };
+    }
+    
+    /**
+     * Sequential ordering (line-by-line)
+     * Matches C code ks_generate_peplan_from_kcoords with LINEAR_SWEEP:
+     * 1) Sort by mtfDirection (considering sign)
+     * 2) Assign echo 1-ETL sequentially along MTF direction
+     * 3) Reorganize into (readout, shot) loops - each readout gets all shots
+     * 4) Assign shots and echo based on cycle position
+     */
+    function sequentialOrdering(coords, etl, centerEcho, shotOrder) {
+        const numCoords = coords.length;
+        if (numCoords === 0) return;
+        
+        // Determine mtfDirection (opposite of shotOrder)
+        const mtfDirection = shotOrder === 'ky' ? 'kz' : 'ky';
+        
+        // Calculate shots and encodes per shot
+        const numShots = Math.ceil(numCoords / etl);
+        const encodesPerShot = Math.ceil(numCoords / numShots);
+        
+        // Step 1: Sort by mtfDirection (orthogonal to shotOrder)
+        const indices = Array.from({length: numCoords}, (_, i) => i);
+        sortIndicesByAxis(indices, coords, mtfDirection, false);
+            
+        // Step 2: Assign echo values sequentially - each echo gets numShots coords
+        for (let i = 0; i < numCoords; i++) {
+            const idx = indices[i];
+            const echoNum = ((i / numShots) | 0) + 1;
+            coords[idx].echo = echoNum;
+        }
+        sortIndicesByEchoThen(indices, coords, (a, b) => coords[a][shotOrder] - coords[b][shotOrder]);
+        
+        // Step 4: Assign shots - each shot gets one coord from each echo
+        assignShotsPerEcho(coords, indices, numShots);
+    }
+    
+    /**
+     * Chevron ordering (alternating up-down from center)
+     */
+    function chevronOrdering(coords, etl, centerEcho, shotOrder) {
+        const numCoords = coords.length;
+        if (numCoords === 0) return;
+        
+        // Calculate shots and encodes per shot
+        const numShots = Math.ceil(numCoords / etl);
+        const encodesPerShot = Math.ceil(numCoords / numShots);
+        
+        const indices = Array.from({length: numCoords}, (_, i) => i);
+        
+        // Ellipse origin parameters - at the edge of k-space in ky direction
+        let maxKy = 0;
+        for (let i = 0; i < numCoords; i++) {
+            const a = Math.abs(coords[i].ky);
+            if (a > maxKy) maxKy = a;
+        }
+        const y0 = maxKy;  // Edge of k-space in ky direction
+        const z0 = 0;      // Center in kz direction
+
+        // Pre-compute theta once — depends only on static ky/kz, not on axisRatio
+        for (let i = 0; i < numCoords; i++) {
+            let theta = Math.atan2(coords[i].ky - y0, coords[i].kz - z0);
+            if (theta < 0) theta += 2 * Math.PI;
+            coords[i].theta = theta;
+        }
+
+        // Pre-compute nearest-to-origin index — invariant across binary search
+        let nearestIdx = 0;
+        let minOriginSq = coords[0].ky * coords[0].ky + coords[0].kz * coords[0].kz;
+        for (let i = 1; i < numCoords; i++) {
+            const sq = coords[i].ky * coords[i].ky + coords[i].kz * coords[i].kz;
+            if (sq < minOriginSq) { minOriginSq = sq; nearestIdx = i; }
+        }
+
+        // Pre-compute per-coord constants for setChevronRadius (avoids repeated Math.abs + property access)
+        const kyDistFromY0 = new Float64Array(numCoords);
+        const absKzArr     = new Float64Array(numCoords);
+        for (let i = 0; i < numCoords; i++) {
+            kyDistFromY0[i] = Math.abs(coords[i].ky - y0);
+            absKzArr[i]     = Math.abs(coords[i].kz); // z0 = 0
+        }
+
+        // Only update ellipDist per iteration (theta is precomputed above)
+        function setChevronRadius(axisRatio) {
+            for (let i = 0; i < numCoords; i++) {
+                coords[i].ellipDist = kyDistFromY0[i] + absKzArr[i] * axisRatio;
+            }
+        }
+
+        // O(n) rank pass -- no sort needed during binary search.
+        // Returns the echo that nearestIdx would be assigned at the current ellipDist values.
+        function echoOfNearestNoSort() {
+            const nearestDist = coords[nearestIdx].ellipDist;
+            let rank = 0;
+            for (let i = 0; i < numCoords; i++) {
+                if (coords[i].ellipDist < nearestDist) rank++;
+            }
+            return (rank / numShots | 0) + 1;
+        }
+
+        // Binary search for axis ratio — O(n) per iteration instead of O(n log n)
+        let leftRatio = 0.005;
+        let rightRatio = 100;
+        let axisRatio = 1.0;
+        let curCenterEcho = -1;
+        let foundCenter = false;
+        const maxIter = 60; // cheap to run more iterations now
+
+        console.log(`Chevron: Desired center echo ${centerEcho}`);
+
+        // Better first candidate: axisRatio ≈ 2π * centerEcho / etl
+        axisRatio = 2 * Math.PI * centerEcho / etl;
+        setChevronRadius(axisRatio);
+        curCenterEcho = echoOfNearestNoSort();
+        console.log(`Chevron first candidate: axisRatio=${axisRatio.toFixed(3)}, centerEcho=${curCenterEcho}, want=${centerEcho}`);
+        if (curCenterEcho === centerEcho) {
+            foundCenter = true;
+        } else if (curCenterEcho > centerEcho) {
+            leftRatio = axisRatio;
+        } else {
+            rightRatio = axisRatio;
+        }
+
+        for (let iter = 0; iter < maxIter && !foundCenter; iter++) {
+            axisRatio = (leftRatio + rightRatio) / 2;
+            setChevronRadius(axisRatio);
+            curCenterEcho = echoOfNearestNoSort();
+
+            console.log(`Chevron iter ${iter}: axisRatio=${axisRatio.toFixed(3)}, centerEcho=${curCenterEcho}, want=${centerEcho}`);
+
+            if (curCenterEcho === centerEcho) {
+                foundCenter = true;
+            } else if (curCenterEcho > centerEcho) {
+                leftRatio = axisRatio;
+            } else {
+                rightRatio = axisRatio;
+            }
+        }
+
+        // If we couldn't find an exact center, try reversed center
+        if (!foundCenter) {
+            const reversedCenterEcho = etl + 1 - centerEcho;
+            console.log(`Chevron: trying reversed center echo ${reversedCenterEcho}`);
+            let leftR = 0.005;
+            let rightR = 100;
+            let axisR = axisRatio;
+            let reversedFound = false;
+            for (let iter = 0; iter < maxIter && !reversedFound; iter++) {
+                axisR = (leftR + rightR) / 2;
+                setChevronRadius(axisR);
+                const curRevCenter = echoOfNearestNoSort();
+                console.log(`Chevron rev iter ${iter}: axisRatio=${axisR.toFixed(3)}, centerEcho=${curRevCenter}, want=${reversedCenterEcho}`);
+                if (curRevCenter === reversedCenterEcho) {
+                    reversedFound = true;
+                    axisRatio = axisR;
+                } else if (curRevCenter > reversedCenterEcho) {
+                    leftR = axisR;
+                } else {
+                    rightR = axisR;
+                }
+            }
+
+            if (reversedFound) {
+                // Do the single final sort + echo assignment, then reverse
+                setChevronRadius(axisRatio);
+                indices.sort((a, b) => coords[a].ellipDist - coords[b].ellipDist);
+                for (let i = 0; i < numCoords; i++) {
+                    coords[indices[i]].echo = ((i / numShots) | 0) + 1;
+                }
+                for (let i = 0; i < numCoords; i++) {
+                    coords[i].echo = etl + 1 - coords[i].echo;
+                }
+                console.log(`Chevron: reversed echo assignments for center ${reversedCenterEcho}`);
+                foundCenter = true;
+            }
+        }
+
+        // Final sort + echo assignment (skipped above only when reversedFound handled it)
+        if (!foundCenter || coords[nearestIdx].echo === -1) {
+            setChevronRadius(axisRatio);
+            indices.sort((a, b) => coords[a].ellipDist - coords[b].ellipDist);
+            for (let i = 0; i < numCoords; i++) {
+                coords[indices[i]].echo = ((i / numShots) | 0) + 1;
+            }
+        }
+
+        console.log(`Chevron final: axisRatio=${axisRatio.toFixed(3)}, centerEcho=${coords[nearestIdx].echo}`);
+
+        // Step 3: Sort by echo first, then theta (azimuthal angle) for radar sweep
+        sortIndicesByEchoThen(indices, coords, (a, b) => coords[a].theta - coords[b].theta);
+        
+        // Step 4: Assign shots - each shot gets one coord from each echo
+        assignShotsPerEcho(coords, indices, numShots);
+    }
+    
+    /**
+     * Low-to-High Peripheral Ordering (LCPO)
+     * Linear center, pivot outer
+     */
+    function lcpoOrdering(coords, etl, centerEcho, mtfDirection, shotOrder) {
+        const numCoords = coords.length;
+        if (numCoords === 0) return;
+        
+        // Calculate shots and encodes per shot
+        const numShots = Math.ceil(numCoords / etl);
+        const encodesPerShot = Math.ceil(numCoords / numShots);
+        
+        // Calculate number of linear center segments
+        let numLinearCenter;
+        if (centerEcho <= encodesPerShot / 2) {
+            numLinearCenter = 2 * centerEcho - (encodesPerShot % 2);
+        } else {
+            numLinearCenter = 2 * (encodesPerShot - centerEcho) + (encodesPerShot % 2);
+        }
+        numLinearCenter = Math.max(1, Math.min(numLinearCenter, encodesPerShot));
+        
+        const indices = Array.from({length: numCoords}, (_, i) => i);
+        
+        // Initialize echo as -1 (unassigned) for all coords
+        for (let i = 0; i < numCoords; i++) {
+            coords[i].echo = -1;
+        }
+        
+        // Step 1: Sort by abs(mtfDirection) to get center-most coords first
+        sortIndicesByAxis(indices, coords, mtfDirection, true);
+        
+        // Take only the center-most numShots * numLinearCenter coords
+        const coordsToProcess = Math.min(numCoords, numShots * numLinearCenter);
+        const centerIndices = indices.slice(0, coordsToProcess);
+        
+        // Step 1a: Sort these center coords linearly along mtfDirection (signed)
+        centerIndices.sort((a, b) => coords[a][mtfDirection] - coords[b][mtfDirection]);
+        
+        // Step 1b: Assign echoes [1, numLinearCenter] linearly
+        for (let i = 0; i < centerIndices.length; i++) {
+            const idx = centerIndices[i];
+            const echoNum = ((i / numShots) | 0) + 1;
+            coords[idx].echo = echoNum;
+        }
+        
+        // Step 2: Sort ALL coords by abs(mtfDirection)
+        sortIndicesByAxis(indices, coords, mtfDirection, true);
+        
+        // Step 3: Assign remaining echoes using integer division
+        // Collect unassigned peripheral coords and assign echoes numLinearCenter+1 through encodesPerShot
+        let peripheralPos = 0;
+        for (let i = 0; i < numCoords; i++) {
+            const idx = indices[i];
+            if (coords[idx].echo === -1) {
+                const echoNum = numLinearCenter + ((peripheralPos / numShots) | 0) + 1;
+                coords[idx].echo = echoNum;
+                peripheralPos++;
+            }
+        }
+        
+        // Step 4: Sort by echo, then shotOrder, and assign shots
+        if (shotOrder === 'ky' || shotOrder === 'kz') {
+            sortIndicesByEchoThen(indices, coords, (a, b) => coords[a][shotOrder] - coords[b][shotOrder]);
+        } else {
+            // Default fallback to ky if invalid
+            sortIndicesByEchoThen(indices, coords, (a, b) => coords[a].ky - coords[b].ky);
+        }
+        assignShotsPerEcho(coords, indices, numShots);
+    }
+    
+    /**
+     * Pivot Center, Linear Outer (PCLO/CPLO)
+     * Uses permutation formula to achieve arbitrary center echo
+     */
+    function cploOrdering(coords, etl, centerEcho, shotOrder) {
+        const numCoords = coords.length;
+        if (numCoords === 0) return;
+        
+        // Calculate shots and encodes per shot
+        const numShots = Math.ceil(numCoords / etl);
+        const encodesPerShot = Math.ceil(numCoords / numShots);
+        
+        // Create indices array
+        const indices = Array.from({length: numCoords}, (_, i) => i);
+        
+        // Step 1: Sort by radius (center to periphery) using helper
+        sortIndicesByRadius(indices, coords);
+        
+        // Step 2: Build PCLO permutation table
+        // N_cp = c + (c mod 2) - number of central rings
+        let numCentral = centerEcho + (centerEcho % 2);
+        if (centerEcho > encodesPerShot / 2) {
+            numCentral = encodesPerShot - (encodesPerShot - centerEcho) - ((encodesPerShot - centerEcho) % 2);
+        }
+        numCentral = Math.max(1, Math.min(numCentral, encodesPerShot));
+        
+        // Build permutation table based on PCLO formula
+        const permutation = new Array(encodesPerShot + 1);
+        for (let i = 1; i <= encodesPerShot; i++) {
+            if (i <= numCentral / 2) {
+                permutation[i] = centerEcho - 2 * i + 2;
+            } else if (i <= numCentral) {
+                permutation[i] = 2 * i - centerEcho - 1;
+            } else {
+                permutation[i] = i;
+            }
+        }
+        
+        // Step 3: Apply permutation - assign echo based on position in radius-sorted order
+        // Each echo gets numShots coordinates
+        for (let i = 0; i < numCoords; i++) {
+            const idx = indices[i];
+            const echoPosition = ((i / numShots) | 0) + 1;  // Which echo slot (1-indexed)
+            coords[idx].echo = Math.max(1, Math.min(permutation[echoPosition], encodesPerShot));
+        }
+        
+        // Step 4: Sort by echo, then by shotOrder (azimuthal/ky/kz)
+        if (shotOrder === 'azimuthal') {
+            // Sort by phi (azimuthal), then radius for T_R spoke pattern
+            sortIndicesByEchoThen(indices, coords, (a, b) => {
+                const phiA = coords[a].phi;
+                const phiB = coords[b].phi;
+                if (Math.abs(phiA - phiB) > 0.01) return phiA - phiB;
+                return coords[a].r - coords[b].r;
+            });
+        } else if (shotOrder === 'ky' || shotOrder === 'kz') {
+            // Sort by specified axis
+            sortIndicesByEchoThen(indices, coords, (a, b) => coords[a][shotOrder] - coords[b][shotOrder]);
+        } else {
+            // Default to azimuthal if invalid
+            sortIndicesByEchoThen(indices, coords, (a, b) => {
+                const phiA = coords[a].phi;
+                const phiB = coords[b].phi;
+                if (Math.abs(phiA - phiB) > 0.01) return phiA - phiB;
+                return coords[a].r - coords[b].r;
+            });
+        }
+        
+        // Step 5: Assign shots - each shot gets one coord from each echo
+        assignShotsPerEcho(coords, indices, numShots);
+    }
+    
+    /**
+     * Concentric Rings with Offset Center (CROC)
+     * Uses elliptical distances from an offset center to achieve arbitrary center echo
+     */
+    function crocOrdering(coords, etl, centerEcho, shotOrder) {
+        const numCoords = coords.length;
+        if (numCoords === 0) return;
+        
+        // Calculate shots and encodes per shot
+        const numShots = Math.ceil(numCoords / etl);
+        const encodesPerShot = Math.ceil(numCoords / numShots);
+        
+        const indices = Array.from({length: numCoords}, (_, i) => i);
+        
+        // Determine mtfDirection
+        const mtfDirection = shotOrder === 'ky' ? 'kz' : 'ky';
+        
+        // Step 1: Find the largest sector (quadrant with most coordinates)
+        // Calculate theta for each coord: atan2(ky, kz) like in C code
+        for (let i = 0; i < numCoords; i++) {
+            coords[i].theta = Math.atan2(coords[i].ky + 0.5, coords[i].kz + 0.5);
+        }
+        
+        // Count coordinates directly in each of 4 quadrants without sorting
+        // to avoid wrap-around issues
+        const numCoordsPerSector = [0, 0, 0, 0];
+        const NORTH = 0, EAST = 1, SOUTH = 2, WEST = 3;
+        
+        for (let i = 0; i < numCoords; i++) {
+            const ky = coords[i].ky + 0.5;
+            const kz = coords[i].kz + 0.5;
+            
+            // Determine quadrant based on signs
+            // NORTH: ky > 0 (regardless of kz)
+            // SOUTH: ky < 0 (regardless of kz)
+            // EAST: kz > 0 (regardless of ky)
+            // WEST: kz < 0 (regardless of ky)
+            // For priority: if both signs differ, prioritize by which is larger in magnitude
+            
+            const absKy = Math.abs(ky);
+            const absKz = Math.abs(kz);
+            
+            if (absKy >= absKz) {
+                // ky-dominated
+                numCoordsPerSector[ky > 0 ? NORTH : SOUTH]++;
+            } else {
+                // kz-dominated
+                numCoordsPerSector[kz > 0 ? EAST : WEST]++;
+            }
+        }
+        
+        console.log(`CROC sectors [NORTH, EAST, SOUTH, WEST]: [${numCoordsPerSector.join(', ')}]`);
+        
+        // Find largest sector
+        let largestSector = 0;
+        for (let i = 1; i < 4; i++) {
+            if (numCoordsPerSector[i] >= numCoordsPerSector[largestSector]) {
+                largestSector = i;
+            }
+        }
+        
+        console.log(`CROC largest sector: ${['NORTH','EAST','SOUTH','WEST'][largestSector]} with ${numCoordsPerSector[largestSector]} coords`);
+        
+        // Step 2: Binary search for offset center position along sector midline
+        // Start at origin (k-space center), end at edge in the direction of largest sector
+        let startKy = 0, startKz = 0;
+        let endKy = 0, endKz = 0;
+        
+        // Set end point at edge based on sector direction
+        let maxKy = 0;
+        let maxKz = 0;
+        for (let i = 0; i < numCoords; i++) {
+            const ak = Math.abs(coords[i].ky);
+            const az = Math.abs(coords[i].kz);
+            if (ak > maxKy) maxKy = ak;
+            if (az > maxKz) maxKz = az;
+        }
+        
+        if (largestSector === NORTH) endKy = maxKy;       // NORTH: positive ky
+        else if (largestSector === EAST) endKz = maxKz;   // EAST: positive kz
+        else if (largestSector === SOUTH) endKy = -maxKy; // SOUTH: negative ky
+        else if (largestSector === WEST) endKz = -maxKz;  // WEST: negative kz
+        
+        // Normalization constants
+        const normKy = maxKy || 1;
+        const normKz = maxKz || 1;
+
+        // Pre-compute nearest-to-origin index — invariant across all search calls
+        let nearestCrocIdx = 0;
+        let minCrocSq = coords[0].ky * coords[0].ky + coords[0].kz * coords[0].kz;
+        for (let i = 1; i < numCoords; i++) {
+            const sq = coords[i].ky * coords[i].ky + coords[i].kz * coords[i].kz;
+            if (sq < minCrocSq) { minCrocSq = sq; nearestCrocIdx = i; }
+        }
+
+        // Pre-compute normalised coords as typed arrays — avoids repeated division + property lookup
+        const kyN = new Float64Array(numCoords);
+        const kzN = new Float64Array(numCoords);
+        for (let i = 0; i < numCoords; i++) {
+            kyN[i] = coords[i].ky / normKy;
+            kzN[i] = coords[i].kz / normKz;
+        }
+        // Pre-compute nearest-to-origin normalised values for the rank pass.
+        const nearestKyN = kyN[nearestCrocIdx];
+        const nearestKzN = kzN[nearestCrocIdx];
+
+        // O(n) rank pass -- no sort needed during search.
+        // Uses squared distance (monotone w.r.t. sqrt) to avoid Math.sqrt.
+        function rankOfNearest(offsetKyN, offsetKzN, kyRatio, kzRatio) {
+            const dky = nearestKyN - offsetKyN;
+            const dkz = nearestKzN - offsetKzN;
+            const nearestSq = dky * dky * kyRatio * kyRatio + dkz * dkz * kzRatio * kzRatio;
+            let rank = 0;
+            for (let i = 0; i < numCoords; i++) {
+                const dk = kyN[i] - offsetKyN;
+                const dz = kzN[i] - offsetKzN;
+                if (dk * dk * kyRatio * kyRatio + dz * dz * kzRatio * kzRatio < nearestSq) rank++;
+            }
+            return (rank / numShots | 0) + 1;
+        }
+
+        // Called once at the end: writes ellipDist, sorts, assigns echo
+        function finalize(offsetKy, offsetKz, kyRatio, kzRatio) {
+            const offsetKyN = offsetKy / normKy;
+            const offsetKzN = offsetKz / normKz;
+            for (let i = 0; i < numCoords; i++) {
+                const dk = kyN[i] - offsetKyN;
+                const dz = kzN[i] - offsetKzN;
+                coords[i].ellipDist = dk * dk * kyRatio * kyRatio + dz * dz * kzRatio * kzRatio;
+            }
+            indices.sort((a, b) => coords[a].ellipDist - coords[b].ellipDist);
+            for (let i = 0; i < numCoords; i++) {
+                coords[indices[i]].echo = ((i / numShots) | 0) + 1;
+            }
+        }
+
+        // Helper: normalised offset from world coords
+        const toN = (ky, kz) => [ky / normKy, kz / normKz];
+
+        // Binary search along the line from origin to edge — O(n) per iteration
+        let centerKy = 0, centerKz = 0;
+        let kyRatio = 1.0, kzRatio = 1.0;
+        let foundCenter = false;
+        let curCenterEcho = -1;
+        const maxIter = 30;
+
+        for (let iter = 0; iter < maxIter; iter++) {
+            centerKy = (startKy + endKy) / 2;
+            centerKz = (startKz + endKz) / 2;
+            const [oKyN, oKzN] = toN(centerKy, centerKz);
+
+            curCenterEcho = rankOfNearest(oKyN, oKzN, kyRatio, kzRatio);
+
+            console.log(`CROC iter ${iter}: offset=[${centerKy.toFixed(1)}, ${centerKz.toFixed(1)}], found echo=${curCenterEcho}, want=${centerEcho}`);
+
+            if (curCenterEcho === centerEcho) {
+                foundCenter = true;
+                break;
+            } else if (curCenterEcho > centerEcho) {
+                endKy = centerKy; endKz = centerKz;
+            } else {
+                startKy = centerKy; startKz = centerKz;
+            }
+        }
+
+        // If binary search failed, adjust ellipse eccentricity — O(n) per step
+        if (!foundCenter) {
+            console.log(`CROC: Binary search failed, trying ellipse adjustment. Final echo was ${curCenterEcho}`);
+            let ratioStep = curCenterEcho < centerEcho ? 0.8 : 1.2;
+            const [oKyN, oKzN] = toN(centerKy, centerKz);
+
+            for (let iter = 0; iter < 40 && !foundCenter; iter++) {
+                if (largestSector === SOUTH || largestSector === NORTH) {
+                    kzRatio *= ratioStep;
+                } else {
+                    kyRatio *= ratioStep;
+                }
+                if (kyRatio < 0.05 || kyRatio > 20.0 || kzRatio < 0.05 || kzRatio > 20.0) break;
+
+                curCenterEcho = rankOfNearest(oKyN, oKzN, kyRatio, kzRatio);
+                console.log(`CROC ellipse iter ${iter}: kyRatio=${kyRatio.toFixed(2)}, kzRatio=${kzRatio.toFixed(2)}, found echo=${curCenterEcho}`);
+
+                if (curCenterEcho === centerEcho) {
+                    foundCenter = true;
+                } else if ((curCenterEcho < centerEcho) !== (ratioStep < 1)) {
+                    // Overshot — flip step direction and halve it
+                    ratioStep = 1 + (1 - ratioStep) * 0.5;
+                }
+            }
+        }
+
+        // If still not found, try reversed center echo — O(n) per iteration
+        if (!foundCenter) {
+            const reversedCenterEcho = etl - 1 - centerEcho;
+            console.log(`CROC: Ellipse adjustment failed, trying reversed center echo ${reversedCenterEcho}`);
+            kyRatio = 1.0; kzRatio = 1.0;
+            let reversedFound = false;
+            startKy = 0; startKz = 0; endKy = 0; endKz = 0;
+            if (largestSector === NORTH) endKy = maxKy;
+            else if (largestSector === EAST) endKz = maxKz;
+            else if (largestSector === SOUTH) endKy = -maxKy;
+            else endKz = -maxKz;
+
+            for (let iter = 0; iter < maxIter; iter++) {
+                centerKy = (startKy + endKy) / 2;
+                centerKz = (startKz + endKz) / 2;
+                const [oKyN, oKzN] = toN(centerKy, centerKz);
+                curCenterEcho = rankOfNearest(oKyN, oKzN, kyRatio, kzRatio);
+                console.log(`CROC reversed iter ${iter}: offset=[${centerKy.toFixed(1)}, ${centerKz.toFixed(1)}], found echo=${curCenterEcho}, want=${reversedCenterEcho}`);
+                if (curCenterEcho === reversedCenterEcho) {
+                    reversedFound = true;
+                    break;
+                } else if (curCenterEcho > reversedCenterEcho) {
+                    endKy = centerKy; endKz = centerKz;
+                } else {
+                    startKy = centerKy; startKz = centerKz;
+                }
+            }
+
+            if (reversedFound) {
+                finalize(centerKy, centerKz, kyRatio, kzRatio);
+                for (let i = 0; i < numCoords; i++) {
+                    coords[i].echo = etl + 1 - coords[i].echo;
+                }
+                console.log(`CROC: After reversal, center echo is ${coords[nearestCrocIdx].echo}`);
+                foundCenter = true;
+            } else {
+                console.log(`CROC: Could not find a reversed solution`);
+            }
+        }
+
+        console.log(`CROC final: center=[${centerKy.toFixed(1)}, ${centerKz.toFixed(1)}], ratios=[${kyRatio.toFixed(2)}, ${kzRatio.toFixed(2)}], wanted=${centerEcho}`);
+
+        // Single final sort + echo assignment (skipped when reversal already did it)
+        if (!foundCenter || coords[nearestCrocIdx].echo === -1) {
+            finalize(centerKy, centerKz, kyRatio, kzRatio);
+        }
+        
+        // Step 3: Calculate angle from offset center for shot ordering
+        for (let i = 0; i < numCoords; i++) {
+            let atan_x = 0, atan_y = 0;
+            const y = coords[i].ky - centerKy;
+            const z = coords[i].kz - centerKz;
+            
+            if (largestSector === 3) {        // WEST
+                atan_x = -z;
+                atan_y = -y;
+            } else if (largestSector === 2) {  // SOUTH
+                atan_x = -y;
+                atan_y = z;
+            } else if (largestSector === 1) {  // EAST
+                atan_x = z;
+                atan_y = y;
+            } else {                           // NORTH (0)
+                atan_x = y;
+                atan_y = -z;
+            }
+            
+            let angle = Math.atan2(atan_y, atan_x);
+            if (angle < 0) angle += 2 * Math.PI;
+            coords[i].crocAngle = angle;
+        }
+        
+        // Step 4: Sort by echo, then angle for radar sweep
+        sortIndicesByEchoThen(indices, coords, (a, b) => coords[a].crocAngle - coords[b].crocAngle);
+        
+        // Step 5: Special handling for first echo to avoid singularity
+        const firstEchoIndices = [];
+        for (let i = 0; i < numCoords; i++) {
+            const idx = indices[i];
+            if (coords[idx].echo === 1) {
+                firstEchoIndices.push(idx);
+            }
+        }
+        
+        // Sort first echo by perpendicular direction from offset center
+        firstEchoIndices.sort((a, b) => {
+            let sortVal_a = 0, sortVal_b = 0;
+            const y_a = coords[a].ky - centerKy;
+            const z_a = coords[a].kz - centerKz;
+            const y_b = coords[b].ky - centerKy;
+            const z_b = coords[b].kz - centerKz;
+            
+            if (largestSector === 3) {        // WEST
+                sortVal_a = y_a;
+                sortVal_b = y_b;
+            } else if (largestSector === 1) { // EAST
+                sortVal_a = -y_a;
+                sortVal_b = -y_b;
+            } else if (largestSector === 2) { // SOUTH
+                sortVal_a = -z_a;
+                sortVal_b = -z_b;
+            } else {                          // NORTH
+                sortVal_a = z_a;
+                sortVal_b = z_b;
+            }
+            return sortVal_a - sortVal_b;
+        });
+        
+        // Rebuild indices array with sorted first echo
+        const newIndices = [...firstEchoIndices];
+        for (let i = 0; i < numCoords; i++) {
+            const idx = indices[i];
+            if (coords[idx].echo !== 1) {
+                newIndices.push(idx);
+            }
+        }
+        
+        // Step 5: Assign shots
+        assignShotsPerEcho(coords, newIndices, numShots);
+    }
+    
+    /**
+     * Calculate acceleration factor (simplified)
+     */
+    function calculateAcceleration(totalCoords, etl, numShots) {
+        return (totalCoords / (etl * numShots)).toFixed(2);
+    }
+    
+    return {
+        generateCoordinates,
+        assignViewOrdering,
+        findBestMacroWidthByRms,
+        calculateJumpMetrics,
+        calculateAcceleration
+    };
+})();
