@@ -198,40 +198,63 @@ const KSpaceUtils = (() => {
         }
 
         preserveBaseEcho(coords);
-        const macroWidth = Math.max(1, Math.floor(Number(macroOptions && macroOptions.macroWidth) || 2));
-        applyMacroCoarseFineAssignment(coords, etl, centerEcho, macroWidth, ordering, shotOrder);
-        coords.jumpMetrics = calculateJumpMetrics(coords);
+        const macroWidth = parseMacroWidth(macroOptions);
+        if (macroWidth === -1) {
+            const search = assignBestMacroWidthByRms(coords, etl, centerEcho, ordering, shotOrder, 1, 5);
+            coords.jumpMetrics = search.bestRmsJumpMetrics;
+            coords.macroSearch = search;
+        } else {
+            const maxMacroWidth = Math.max(1, macroWidth);
+            applyMacroCoarseFineAssignment(coords, etl, centerEcho, maxMacroWidth, ordering, shotOrder);
+            coords.jumpMetrics = calculateJumpMetrics(coords);
+            coords.macroSearch = null;
+        }
         
         return coords;
     }
 
-    function findBestMacroWidthByRms(generateCoords, etl, ordering, centerEcho, mtfDirection = 'ky', shotOrderParam = null, minWidth = 2, maxWidth = 40) {
-        const start = Math.max(1, Math.floor(Number(minWidth) || 2));
+    function parseMacroWidth(macroOptions) {
+        if (!macroOptions || macroOptions.macroWidth === undefined || macroOptions.macroWidth === null) return 2;
+        const value = Math.floor(Number(macroOptions.macroWidth));
+        if (!Number.isFinite(value)) return 2;
+        return value;
+    }
+
+    function findBestMacroWidthByRms(generateCoords, etl, ordering, centerEcho, mtfDirection = 'ky', shotOrderParam = null, minWidth = 1, maxWidth = 5) {
+        const start = Math.max(1, Math.floor(Number(minWidth) || 1));
         const stop = Math.max(start, Math.floor(Number(maxWidth) || start));
         let bestWidth = start;
         let bestRmsJump = Infinity;
-        let previousRmsJump = Infinity;
+        let worstWidth = start;
+        let worstRmsJump = -Infinity;
         const evaluatedWidths = [];
+        const rmsByWidth = [];
 
         for (let width = start; width <= stop; width++) {
             const candidate = generateCoords();
             assignViewOrdering(candidate, etl, ordering, centerEcho, mtfDirection, shotOrderParam, { macroWidth: width });
             const rmsJump = candidate.jumpMetrics ? candidate.jumpMetrics.rmsJump : calculateJumpMetrics(candidate).rmsJump;
             evaluatedWidths.push(width);
+            rmsByWidth.push({ width, rmsJump });
             if (rmsJump < bestRmsJump) {
                 bestWidth = width;
                 bestRmsJump = rmsJump;
             }
-            if (width > start && rmsJump > previousRmsJump + 1e-12) break;
-            previousRmsJump = rmsJump;
+            if (rmsJump > worstRmsJump) {
+                worstWidth = width;
+                worstRmsJump = rmsJump;
+            }
         }
 
         return {
             bestWidth,
             bestRmsJump,
+            worstWidth,
+            worstRmsJump,
             searchMin: start,
             searchMax: stop,
-            evaluatedWidths
+            evaluatedWidths,
+            rmsByWidth
         };
     }
     
@@ -335,51 +358,138 @@ const KSpaceUtils = (() => {
 
     function applyMacroCoarseFineAssignment(coords, etl, centerEcho, macroWidth, ordering, shotOrder) {
         const numShots = getNumShots(coords);
-        if (macroWidth <= 0) macroWidth = 1;
         if (macroWidth <= 1) return;
+        const macroSegments = buildMacroSegments(etl, macroWidth);
 
         if (ordering === 'chevron') {
-            assignChevronCoarseMacroEchoes(coords, etl, centerEcho, macroWidth, numShots);
+            assignChevronCoarseMacroEchoes(coords, centerEcho, macroSegments, numShots);
         } else if (ordering === 'croc') {
-            assignCrocCoarseMacroEchoes(coords, etl, centerEcho, macroWidth, numShots);
+            assignCrocCoarseMacroEchoes(coords, centerEcho, macroSegments, numShots);
         } else {
-            assignFallbackCoarseMacroEchoes(coords, etl, macroWidth, numShots, ordering, shotOrder);
+            assignFallbackCoarseMacroEchoes(coords, macroSegments, numShots, ordering, shotOrder);
         }
 
         for (let i = 0; i < coords.length; i++) {
             coords[i].macroOrderKey = getMacroOrderKey(coords[i], ordering, shotOrder);
         }
 
-        const macroCount = Math.ceil(etl / macroWidth);
-        for (let macroEcho = 1; macroEcho <= macroCount; macroEcho++) {
-            assignMacroSegmentPaths(coords, macroEcho, macroWidth, etl, numShots);
+        for (let i = 0; i < macroSegments.length; i++) {
+            assignMacroSegmentPaths(coords, macroSegments[i], numShots);
         }
     }
 
-    function macroSegmentWidth(macroEcho, macroWidth, etl) {
-        const startEcho = (macroEcho - 1) * macroWidth + 1;
-        return Math.max(0, Math.min(etl, startEcho + macroWidth - 1) - startEcho + 1);
+    function assignBestMacroWidthByRms(coords, etl, centerEcho, ordering, shotOrder, minWidth, maxWidth) {
+        const start = Math.max(1, Math.floor(Number(minWidth) || 1));
+        const stop = Math.max(start, Math.floor(Number(maxWidth) || start));
+        let bestCandidate = null;
+        let bestWidth = start;
+        let bestRmsJump = Infinity;
+        let bestRmsJumpMetrics = null;
+        let worstWidth = start;
+        let worstRmsJump = -Infinity;
+        const evaluatedWidths = [];
+        const rmsByWidth = [];
+
+        for (let width = start; width <= stop; width++) {
+            const candidate = coords.map((coord) => ({ ...coord }));
+            applyMacroCoarseFineAssignment(candidate, etl, centerEcho, width, ordering, shotOrder);
+            const metrics = calculateJumpMetrics(candidate);
+            evaluatedWidths.push(width);
+            rmsByWidth.push({ width, rmsJump: metrics.rmsJump });
+            if (metrics.rmsJump < bestRmsJump) {
+                bestCandidate = candidate;
+                bestWidth = width;
+                bestRmsJump = metrics.rmsJump;
+                bestRmsJumpMetrics = metrics;
+            }
+            if (metrics.rmsJump > worstRmsJump) {
+                worstWidth = width;
+                worstRmsJump = metrics.rmsJump;
+            }
+        }
+
+        if (bestCandidate) {
+            for (let i = 0; i < coords.length; i++) {
+                Object.assign(coords[i], bestCandidate[i]);
+            }
+        }
+
+        return {
+            bestWidth,
+            bestRmsJump,
+            bestRmsJumpMetrics,
+            worstWidth,
+            worstRmsJump,
+            searchMin: start,
+            searchMax: stop,
+            evaluatedWidths,
+            rmsByWidth
+        };
     }
 
-    function macroEchoFromRank(rank, etl, macroWidth, numShots) {
-        const macroCount = Math.ceil(etl / macroWidth);
+    function buildMacroSegments(etl, maxMacroWidth) {
+        const maxWidth = Math.max(1, Math.floor(Number(maxMacroWidth) || 1));
+        const segments = [];
+        let startEcho = 1;
+        if (maxWidth <= 1) {
+            while (startEcho <= etl) {
+                segments.push({
+                    macroEcho: startEcho,
+                    startEcho,
+                    endEcho: startEcho,
+                    width: 1,
+                    maxMacroWidth: 1
+                });
+                startEcho++;
+            }
+            return segments;
+        }
+
+        while (startEcho <= etl) {
+            const progress = (startEcho - 1) / Math.max(1, etl - 1);
+            let width = Math.round(2 + progress * (maxWidth - 2));
+            width = Math.max(2, Math.min(maxWidth, width));
+            const endEcho = Math.min(etl, startEcho + width - 1);
+            segments.push({
+                macroEcho: segments.length + 1,
+                startEcho,
+                endEcho,
+                width: endEcho - startEcho + 1,
+                maxMacroWidth: maxWidth
+            });
+            startEcho = endEcho + 1;
+        }
+        return segments;
+    }
+
+    function macroEchoFromRank(rank, macroSegments, numShots) {
         let remaining = Math.max(0, rank);
-        for (let macroEcho = 1; macroEcho <= macroCount; macroEcho++) {
-            const capacity = numShots * macroSegmentWidth(macroEcho, macroWidth, etl);
-            if (remaining < capacity) return macroEcho;
+        for (let i = 0; i < macroSegments.length; i++) {
+            const capacity = numShots * macroSegments[i].width;
+            if (remaining < capacity) return macroSegments[i].macroEcho;
             remaining -= capacity;
         }
-        return macroCount;
+        return macroSegments.length > 0 ? macroSegments[macroSegments.length - 1].macroEcho : 1;
     }
 
-    function assignMacroEchoesBySortedIndices(coords, indices, etl, macroWidth, numShots) {
+    function assignMacroEchoesBySortedIndices(coords, indices, macroSegments, numShots) {
         for (let rank = 0; rank < indices.length; rank++) {
-            coords[indices[rank]].macroEcho = macroEchoFromRank(rank, etl, macroWidth, numShots);
+            const coord = coords[indices[rank]];
+            const segment = macroSegments[macroEchoFromRank(rank, macroSegments, numShots) - 1];
+            coord.macroEcho = segment.macroEcho;
+            coord.macroStartEcho = segment.startEcho;
+            coord.macroEndEcho = segment.endEcho;
+            coord.macroWidth = segment.width;
+            coord.macroMaxWidth = segment.maxMacroWidth;
         }
     }
 
-    function coarseCenterEcho(centerEcho, etl, macroWidth) {
-        return Math.max(1, Math.min(Math.ceil(etl / macroWidth), Math.floor((centerEcho - 1) / macroWidth) + 1));
+    function coarseCenterEcho(centerEcho, macroSegments) {
+        for (let i = 0; i < macroSegments.length; i++) {
+            const segment = macroSegments[i];
+            if (centerEcho >= segment.startEcho && centerEcho <= segment.endEcho) return segment.macroEcho;
+        }
+        return macroSegments.length > 0 ? macroSegments[macroSegments.length - 1].macroEcho : 1;
     }
 
     function nearestOriginIndex(coords) {
@@ -395,7 +505,7 @@ const KSpaceUtils = (() => {
         return nearestIdx;
     }
 
-    function assignChevronCoarseMacroEchoes(coords, etl, centerEcho, macroWidth, numShots) {
+    function assignChevronCoarseMacroEchoes(coords, centerEcho, macroSegments, numShots) {
         const numCoords = coords.length;
         const indices = Array.from({ length: numCoords }, (_, i) => i);
         let maxKy = 0;
@@ -431,11 +541,11 @@ const KSpaceUtils = (() => {
             for (let i = 0; i < numCoords; i++) {
                 if (coords[i].ellipDist < nearestDist) rank++;
             }
-            return macroEchoFromRank(rank, etl, macroWidth, numShots);
+            return macroEchoFromRank(rank, macroSegments, numShots);
         }
 
-        const targetMacroCenter = coarseCenterEcho(centerEcho, etl, macroWidth);
-        const macroCount = Math.ceil(etl / macroWidth);
+        const targetMacroCenter = coarseCenterEcho(centerEcho, macroSegments);
+        const macroCount = macroSegments.length;
         let leftRatio = 0.005;
         let rightRatio = 100;
         let axisRatio = Math.max(0.005, 2 * Math.PI * targetMacroCenter / Math.max(1, macroCount));
@@ -466,10 +576,10 @@ const KSpaceUtils = (() => {
 
         setRadius(axisRatio);
         indices.sort((a, b) => coords[a].ellipDist - coords[b].ellipDist);
-        assignMacroEchoesBySortedIndices(coords, indices, etl, macroWidth, numShots);
+        assignMacroEchoesBySortedIndices(coords, indices, macroSegments, numShots);
     }
 
-    function assignCrocCoarseMacroEchoes(coords, etl, centerEcho, macroWidth, numShots) {
+    function assignCrocCoarseMacroEchoes(coords, centerEcho, macroSegments, numShots) {
         const numCoords = coords.length;
         const indices = Array.from({ length: numCoords }, (_, i) => i);
         const NORTH = 0, EAST = 1, SOUTH = 2, WEST = 3;
@@ -533,7 +643,7 @@ const KSpaceUtils = (() => {
                 const dz = kzN[i] - offsetKzN;
                 if (dk * dk * kyRatio * kyRatio + dz * dz * kzRatio * kzRatio < nearestSq) rank++;
             }
-            return macroEchoFromRank(rank, etl, macroWidth, numShots);
+            return macroEchoFromRank(rank, macroSegments, numShots);
         }
 
         function setDistances(offsetKy, offsetKz, kyRatio, kzRatio) {
@@ -546,7 +656,7 @@ const KSpaceUtils = (() => {
             }
         }
 
-        const targetMacroCenter = coarseCenterEcho(centerEcho, etl, macroWidth);
+        const targetMacroCenter = coarseCenterEcho(centerEcho, macroSegments);
         let centerKy = 0;
         let centerKz = 0;
         let kyRatio = 1.0;
@@ -592,7 +702,7 @@ const KSpaceUtils = (() => {
 
         setDistances(centerKy, centerKz, kyRatio, kzRatio);
         indices.sort((a, b) => coords[a].ellipDist - coords[b].ellipDist);
-        assignMacroEchoesBySortedIndices(coords, indices, etl, macroWidth, numShots);
+        assignMacroEchoesBySortedIndices(coords, indices, macroSegments, numShots);
 
         for (let i = 0; i < numCoords; i++) {
             let atan_x = 0;
@@ -618,7 +728,7 @@ const KSpaceUtils = (() => {
         }
     }
 
-    function assignFallbackCoarseMacroEchoes(coords, etl, macroWidth, numShots, ordering, shotOrder) {
+    function assignFallbackCoarseMacroEchoes(coords, macroSegments, numShots, ordering, shotOrder) {
         const indices = Array.from({ length: coords.length }, (_, i) => i);
         for (let i = 0; i < coords.length; i++) {
             coords[i].macroOrderKey = getMacroOrderKey(coords[i], ordering, shotOrder);
@@ -628,15 +738,15 @@ const KSpaceUtils = (() => {
             if (coords[a].baseEcho !== coords[b].baseEcho) return coords[a].baseEcho - coords[b].baseEcho;
             return (coords[a].baseShot || 0) - (coords[b].baseShot || 0);
         });
-        assignMacroEchoesBySortedIndices(coords, indices, etl, macroWidth, numShots);
+        assignMacroEchoesBySortedIndices(coords, indices, macroSegments, numShots);
     }
 
-    function assignMacroSegmentPaths(coords, macroEcho, macroWidth, etl, numShots) {
-        const startEcho = (macroEcho - 1) * macroWidth + 1;
-        const endEcho = Math.min(etl, startEcho + macroWidth - 1);
+    function assignMacroSegmentPaths(coords, macroSegment, numShots) {
+        const startEcho = macroSegment.startEcho;
+        const endEcho = macroSegment.endEcho;
         const segment = [];
         for (let i = 0; i < coords.length; i++) {
-            if (coords[i].macroEcho === macroEcho) segment.push(coords[i]);
+            if (coords[i].macroEcho === macroSegment.macroEcho) segment.push(coords[i]);
         }
         segment.sort((a, b) => {
             if (a.macroOrderKey !== b.macroOrderKey) return a.macroOrderKey - b.macroOrderKey;

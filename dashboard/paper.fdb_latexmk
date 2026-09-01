@@ -1,0 +1,15 @@
+# Fdb version 4
+["pdflatex"] 1770036478.71879 "/home/henric/kod/vieworderdash/dashboard/paper.tex" "paper.pdf" "paper" 1770036478.86206 2
+  "/etc/texmf/web2c/texmf.cnf" 1764850007.8612 475 c0e671620eb5563b2130f56340a5fde8 ""
+  "/home/henric/kod/vieworderdash/dashboard/paper.tex" 1770036478.20544 21820 5fdc584659063b168b90d3e39d2bbaf4 ""
+  "/usr/share/texlive/texmf-dist/web2c/texmf.cnf" 1707919699 40399 f2c302f7d2af602abb742093540a5834 ""
+  "/usr/share/texmf/web2c/texmf.cnf" 1707919699 40399 f2c302f7d2af602abb742093540a5834 ""
+  "/var/lib/texmf/web2c/pdftex/pdflatex.fmt" 1764850059 8214541 9e322472171a79ebef37a48014408adc ""
+  "MRM.cls" 0 -1 0 ""
+  "paper.aux" 1770036478.71844 32 3985256e7290058c681f74d7a3565a19 "pdflatex"
+  "paper.tex" 1770036478.20544 21820 5fdc584659063b168b90d3e39d2bbaf4 ""
+  (generated)
+  "paper.aux"
+  "paper.log"
+  "paper.pdf"
+  (rewritten before read)

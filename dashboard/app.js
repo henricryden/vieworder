@@ -39,7 +39,7 @@ const App = (() => {
         centerEcho: { key: 'center', type: 'int', min: 1, max: 256 },
         mtfDirection: { key: 'mtf', type: 'enum', values: ['ky', 'kz', 'kr'] },
         shotOrder: { key: 'shotOrder', type: 'enum', values: ['ky', 'kz', 'azimuthal'] },
-        macroWidth: { key: 'macro', type: 'int', min: 1, max: 10 }
+        macroWidth: { key: 'macro', type: 'int', min: -1, max: 10 }
     };
     
     /**
@@ -95,6 +95,10 @@ const App = (() => {
         return Math.max(min, Math.min(max, value));
     }
 
+    function formatMacroWidth(value) {
+        return value === -1 ? 'auto' : String(value);
+    }
+
     function updateViewOrderUrl() {
         if (!window.history || !window.location) return;
         const url = new URL(window.location.href);
@@ -147,8 +151,8 @@ const App = (() => {
         syncOrderingControls();
         setValue('mtf-direction-select', currentParams.mtfDirection);
         setValue('shot-order-select', currentParams.shotOrder);
-        setValue('macro-width-slider', currentParams.macroWidth);
-        setText('macro-width-value', currentParams.macroWidth);
+        setValue('macro-width-slider', currentParams.macroWidth === -1 ? 1 : currentParams.macroWidth);
+        setText('macro-width-value', formatMacroWidth(currentParams.macroWidth));
         updateMacroWidthBestLabel();
     }
 
@@ -508,12 +512,12 @@ const App = (() => {
         if (macroWidthSlider) {
             macroWidthSlider.addEventListener('input', (e) => {
                 currentParams.macroWidth = parseInt(e.target.value);
-                document.getElementById('macro-width-value').textContent = currentParams.macroWidth;
+                document.getElementById('macro-width-value').textContent = formatMacroWidth(currentParams.macroWidth);
                 updatePlots(250);
             });
             macroWidthSlider.addEventListener('change', (e) => {
                 currentParams.macroWidth = parseInt(e.target.value);
-                document.getElementById('macro-width-value').textContent = currentParams.macroWidth;
+                document.getElementById('macro-width-value').textContent = formatMacroWidth(currentParams.macroWidth);
                 updatePlots();
             });
         }
@@ -772,7 +776,7 @@ const App = (() => {
                     updateViewOrderUrl();
                 }
             }
-            currentMacroSearch = findBestMacroWidth();
+            currentMacroSearch = currentCoords.macroSearch || findBestMacroWidth();
 
             // Render plots
             D3Plots.plotByShotNumber(currentCoords);
@@ -814,7 +818,7 @@ const App = (() => {
 
     function findBestMacroWidth() {
         const macroSlider = document.getElementById('macro-width-slider');
-        const maxWidth = macroSlider ? parseInt(macroSlider.max, 10) : 40;
+        const maxWidth = 5;
         return KSpaceUtils.findBestMacroWidthByRms(
             makeCurrentCoordinates,
             currentParams.etl,
@@ -830,7 +834,7 @@ const App = (() => {
     function updateMacroWidthBestLabel() {
         const best = document.getElementById('macro-width-best');
         if (!best) return;
-        best.textContent = currentMacroSearch ? `(best ${currentMacroSearch.bestWidth})` : '';
+        best.textContent = currentMacroSearch ? `(best max ${currentMacroSearch.bestWidth})` : '';
     }
 
     /**
@@ -964,7 +968,7 @@ const App = (() => {
             "Center Echo": currentParams.centerEcho,
             "MTF Direction": currentParams.mtfDirection,
             "Shot Order": currentParams.shotOrder,
-            "Macro Width": currentParams.macroWidth,
+            "Macro Max Width": currentParams.macroWidth,
             "RMS jump": metrics.rmsJump
         };
         

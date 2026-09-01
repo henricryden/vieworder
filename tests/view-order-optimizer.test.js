@@ -40,12 +40,28 @@ function assertFiniteRms(metrics) {
     assert.ok(metrics.rmsJump >= 0, 'RMS jump is non-negative');
 }
 
-function assertDirectMacroConstraints(coords, macroWidth, etl) {
+function assertDirectMacroConstraints(coords, maxMacroWidth, etl) {
+    const widthsByMacro = new Map();
     for (const coord of coords) {
         assert.ok(Number.isInteger(coord.macroEcho) && coord.macroEcho >= 1, 'macro echo is assigned');
-        const startEcho = (coord.macroEcho - 1) * macroWidth + 1;
-        const endEcho = Math.min(etl, startEcho + macroWidth - 1);
+        assert.ok(Number.isInteger(coord.macroStartEcho) && coord.macroStartEcho >= 1, 'macro start is assigned');
+        assert.ok(Number.isInteger(coord.macroEndEcho) && coord.macroEndEcho <= etl, 'macro end is assigned');
+        const startEcho = coord.macroStartEcho;
+        const endEcho = coord.macroEndEcho;
         assert.ok(coord.echo >= startEcho && coord.echo <= endEcho, 'echo stays inside direct macro segment');
+        assert.ok(coord.macroWidth >= 1 && coord.macroWidth <= maxMacroWidth, 'macro segment width is bounded');
+        widthsByMacro.set(coord.macroEcho, coord.macroWidth);
+    }
+
+    if (maxMacroWidth > 2) {
+        let previousWidth = 0;
+        for (const macroEcho of [...widthsByMacro.keys()].sort((a, b) => a - b)) {
+            const width = widthsByMacro.get(macroEcho);
+            if (width < previousWidth) {
+                assert.equal(macroEcho, Math.max(...widthsByMacro.keys()), 'only the final clipped segment may shrink');
+            }
+            previousWidth = width;
+        }
     }
 }
 
@@ -75,7 +91,7 @@ test('macro width 1 preserves the original view-order assignment', () => {
     }
 });
 
-test('coarse-to-fine macro echoes assign unique slots inside macro segments', () => {
+test('ramped coarse-to-fine macro echoes assign unique slots inside macro segments', () => {
     const KSpaceUtils = loadKSpaceUtils();
     const coords = makeCoords(KSpaceUtils);
     KSpaceUtils.assignViewOrdering(coords, 220, 'croc', 105, 'ky', null, { macroWidth: 10 });
@@ -110,7 +126,7 @@ test('large Chevron and CROC smoke cases have finite RMS jump', () => {
     }
 });
 
-test('macro width RMS search starts at 1 and stops on first worsening step', () => {
+test('macro width RMS search exhaustively evaluates consecutive candidates', () => {
     const KSpaceUtils = loadKSpaceUtils();
     const result = KSpaceUtils.findBestMacroWidthByRms(
         () => makeCoords(KSpaceUtils),
@@ -124,8 +140,12 @@ test('macro width RMS search starts at 1 and stops on first worsening step', () 
     );
 
     assert.equal(result.evaluatedWidths[0], 1);
+    assert.equal(result.evaluatedWidths[result.evaluatedWidths.length - 1], 10);
     assert.ok(result.bestWidth >= 1 && result.bestWidth <= 10);
     assert.ok(Number.isFinite(result.bestRmsJump));
+    assert.ok(result.worstWidth >= 1 && result.worstWidth <= 10);
+    assert.ok(Number.isFinite(result.worstRmsJump));
+    assert.equal(result.rmsByWidth.length, result.evaluatedWidths.length);
     for (let i = 1; i < result.evaluatedWidths.length; i++) {
         assert.equal(
             result.evaluatedWidths[i],
@@ -133,4 +153,17 @@ test('macro width RMS search starts at 1 and stops on first worsening step', () 
             'search evaluates consecutive widths'
         );
     }
+});
+
+test('macro width -1 auto mode selects the best candidate from 1 through 5', () => {
+    const KSpaceUtils = loadKSpaceUtils();
+    const coords = makeCoords(KSpaceUtils);
+    KSpaceUtils.assignViewOrdering(coords, 220, 'croc', 105, 'ky', null, { macroWidth: -1 });
+
+    assertUniqueShotEcho(coords);
+    assertFiniteRms(coords.jumpMetrics);
+    assert.ok(coords.macroSearch, 'auto macro search metadata is attached');
+    assert.deepEqual(Array.from(coords.macroSearch.evaluatedWidths), [1, 2, 3, 4, 5]);
+    assert.ok(coords.macroSearch.bestWidth >= 1 && coords.macroSearch.bestWidth <= 5);
+    assert.ok(coords.macroSearch.worstWidth >= 1 && coords.macroSearch.worstWidth <= 5);
 });
